@@ -20,35 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package main
+package commands
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/mkloubert/go-package-manager/commands"
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "gpm",
-	Short: "A package manager for Go",
-	Long:  `A package manager for Go projects which simplifies the way of installing dependencies.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		// TODO
-	},
-}
-
-func main() {
-	var Verbose bool
-
-	// use "verbose flag" everywhere
-	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
-
-	commands.Init_Install_Command(rootCmd)
-
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+func Init_Install_Command(parentCmd *cobra.Command) {
+	var installCmd = &cobra.Command{
+		Use:   "install [module name or url]",
+		Short: "Installs one or more modules",
+		Long:  `Gets and installs one or more modules by a short name or an URL to a git repository.`,
+		Args:  cobra.MinimumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			// verbose := utils.GetBoolFlag(cmd, "verbose", false)
+		},
 	}
+
+	parentCmd.AddCommand(
+		installCmd,
+	)
 }
