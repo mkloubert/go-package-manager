@@ -34,7 +34,7 @@ import (
 )
 
 func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var update bool
+	var noUpdate bool
 
 	var installCmd = &cobra.Command{
 		Use:     "install [module name or url]",
@@ -49,7 +49,14 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					continue
 				}
 
-				p := exec.Command("go", "get", "-u", moduleName)
+				var p *exec.Cmd
+				if noUpdate {
+					app.Debug("Running 'go get " + moduleName + "' ...")
+					p = exec.Command("go", "get", moduleName)
+				} else {
+					app.Debug("Running 'go get -u " + moduleName + "' ...")
+					p = exec.Command("go", "get", "-u", moduleName)
+				}
 
 				p.Stdout = os.Stdout
 
@@ -60,7 +67,7 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
-	parentCmd.Flags().BoolVarP(&update, "update", "u", false, "update modules")
+	installCmd.Flags().BoolVarP(&noUpdate, "no-update", "n", false, "do not update modules")
 
 	parentCmd.AddCommand(
 		installCmd,

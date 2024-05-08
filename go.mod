@@ -2,11 +2,13 @@ module github.com/mkloubert/go-package-manager
 
 go 1.22.0
 
-require github.com/spf13/cobra v1.8.0
+require (
+	github.com/goccy/go-yaml v1.11.3
+	github.com/spf13/cobra v1.8.0
+)
 
 require (
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/goccy/go-yaml v1.11.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

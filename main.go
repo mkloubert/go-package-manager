@@ -23,7 +23,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/spf13/cobra"
 
@@ -44,13 +44,12 @@ var rootCmd = &cobra.Command{
 
 func main() {
 	var app types.AppContext
+	app.L = log.Default()
 
 	// use "verbose flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
 
 	types.LoadPackagesFileIfExist(&app)
-
-	fmt.Println(app.PackagesFile)
 
 	// initialize commands
 	commands.Init_Install_Command(rootCmd, &app)

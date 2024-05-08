@@ -39,6 +39,7 @@ func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short:   "Add missing and remove unused modules",
 		Long:    `Cleans up the project from unused modules and add missing ones depending on the current source code.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			app.Debug("Running 'go mod tidy' ...")
 			p := exec.Command("go", "mod", "tidy")
 
 			p.Stdout = os.Stdout

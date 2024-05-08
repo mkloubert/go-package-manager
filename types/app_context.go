@@ -22,8 +22,22 @@
 
 package types
 
+import (
+	"fmt"
+	"log"
+)
+
 // An AppContext contains all information for running this app
 type AppContext struct {
+	L            *log.Logger  // the logger to use
 	PackagesFile PackagesFile // the packages.y(a)ml file
 	Verbose      bool         // output verbose information
+}
+
+func (app *AppContext) Debug(v ...any) *AppContext {
+	if app.Verbose {
+		app.L.Printf("[VERBOSE] %v", fmt.Sprintln(v...))
+	}
+
+	return app
 }
