@@ -1,0 +1,49 @@
+name: Build binaries for release
+
+on: 
+  release:
+    types: [created]
+
+permissions:
+    contents: write
+    packages: write
+
+jobs:
+  releases-matrix:
+    name: Release Go binaries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [darwin, freebsd, linux, openbsd, windows]
+        goarch: ["386", amd64, arm, arm64]
+        exclude:
+          - goarch: "386"
+            goos: darwin
+          - goarch: arm
+            goos: darwin
+          - goarch: arm64
+            goos: windows
+    steps:
+    - uses: actions/checkout@v4
+    - name: "Update build.go"
+      run: |
+        echo "package main" > ./build.go &&
+        echo "" >> ./build.go &&
+        echo "import \"runtime\"" >> ./build.go &&
+        echo "" >> ./build.go &&
+        echo "const AppVersion = \"$(echo ${GITHUB_REF#refs/tags/} | cut -c 2-)\"" >> ./build.go &&
+        echo "const BuildArch = runtime.GOARCH" >> ./build.go &&
+        echo "const BuildOS = runtime.GOOS" >> ./build.go
+    - uses: wangyoucao577/go-release-action@v1
+      with:
+        retry: 10
+        overwrite: true
+        github_token: ${{ secrets.GH_PAT }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        goversion: "1.22"
+        md5sum: false
+        sha256sum: true
+        project_path: "./"
+        binary_name: "gpm"
+        extra_files: LICENSE
