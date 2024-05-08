@@ -1,0 +1,8 @@
+
+packages:
+  cobra:
+    sources:
+      - https://github.com/spf13/cobra
+  yaml:
+    sources:
+      - https://github.com/go-yaml/yaml
