@@ -20,49 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package commands
+package types
 
-import (
-	"log"
-	"os"
-	"os/exec"
-
-	"github.com/spf13/cobra"
-
-	"github.com/mkloubert/go-package-manager/types"
-	"github.com/mkloubert/go-package-manager/utils"
-)
-
-func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var update bool
-
-	var installCmd = &cobra.Command{
-		Use:     "install [module name or url]",
-		Aliases: []string{"i"},
-		Short:   "Installs one or more modules",
-		Long:    `Gets and installs one or more modules by a short name or a valid URL to a git repository.`,
-		Args:    cobra.MinimumNArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			for _, moduleName := range args {
-				moduleName := utils.CleanupModuleName(moduleName)
-				if moduleName == "" {
-					continue
-				}
-
-				p := exec.Command("go", "get", "-u", moduleName)
-
-				p.Stdout = os.Stdout
-
-				if err := p.Run(); err != nil {
-					log.Fatalln(err)
-				}
-			}
-		},
-	}
-
-	parentCmd.Flags().BoolVarP(&update, "update", "u", false, "update modules")
-
-	parentCmd.AddCommand(
-		installCmd,
-	)
+// An AppContext contains all information for running this app
+type AppContext struct {
+	PackagesFile PackagesFile // the packages.y(a)ml file
+	Verbose      bool         // output verbose information
 }

@@ -28,14 +28,16 @@ import (
 	"os/exec"
 
 	"github.com/spf13/cobra"
+
+	"github.com/mkloubert/go-package-manager/types"
 )
 
-func Init_Tidy_Command(parentCmd *cobra.Command) {
+func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var tidyCmd = &cobra.Command{
 		Use:     "tidy",
 		Aliases: []string{"t"},
-		Short:   "Installs one or more modules",
-		Long:    `Gets and installs one or more modules by a short name or an URL to a git repository.`,
+		Short:   "Add missing and remove unused modules",
+		Long:    `Cleans up the project from unused modules and add missing ones depending on the current source code.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			p := exec.Command("go", "mod", "tidy")
 

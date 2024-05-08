@@ -20,49 +20,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package commands
+package types
 
 import (
-	"log"
 	"os"
-	"os/exec"
+	"path"
 
-	"github.com/spf13/cobra"
-
-	"github.com/mkloubert/go-package-manager/types"
+	"github.com/goccy/go-yaml"
 	"github.com/mkloubert/go-package-manager/utils"
 )
 
-func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var update bool
+// A PackagesFile stores all data of a packages.y(a)ml file.
+type PackagesFile struct {
+	Packages map[string]PackagesFilePackageItem `yaml:"packages"` // the package mappings
+}
 
-	var installCmd = &cobra.Command{
-		Use:     "install [module name or url]",
-		Aliases: []string{"i"},
-		Short:   "Installs one or more modules",
-		Long:    `Gets and installs one or more modules by a short name or a valid URL to a git repository.`,
-		Args:    cobra.MinimumNArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			for _, moduleName := range args {
-				moduleName := utils.CleanupModuleName(moduleName)
-				if moduleName == "" {
-					continue
-				}
+// A PackagesFilePackageItem is an item inside `PackagesFile.Packages` map.
+type PackagesFilePackageItem struct {
+	Sources []string `yaml:"sources"` // one or more source repositories
+}
 
-				p := exec.Command("go", "get", "-u", moduleName)
-
-				p.Stdout = os.Stdout
-
-				if err := p.Run(); err != nil {
-					log.Fatalln(err)
-				}
+// LoadPackagesFileIfExist - Loads a packages.y(a)ml file if it exists
+// and return `true` if file has been loaded successfully.
+func LoadPackagesFileIfExist(app *AppContext) bool {
+	cwd, err := os.Getwd()
+	if err == nil {
+		packagesFilePath := path.Join(cwd, "packages.yaml")
+		info, err := os.Stat(packagesFilePath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return false
 			}
-		},
+
+			utils.CloseWithError(err)
+		}
+
+		if info.IsDir() {
+			return false
+		}
+
+		yamlData, err := os.ReadFile(packagesFilePath)
+		if err != nil {
+			utils.CloseWithError(err)
+		}
+
+		var pf PackagesFile
+		err = yaml.Unmarshal(yamlData, &pf)
+		if err != nil {
+			utils.CloseWithError(err)
+		}
+
+		app.PackagesFile = pf
+		return true
 	}
 
-	parentCmd.Flags().BoolVarP(&update, "update", "u", false, "update modules")
-
-	parentCmd.AddCommand(
-		installCmd,
-	)
+	return false
 }

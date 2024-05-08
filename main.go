@@ -24,32 +24,40 @@ package main
 
 import (
 	"fmt"
-	"os"
+
+	"github.com/spf13/cobra"
 
 	"github.com/mkloubert/go-package-manager/commands"
-	"github.com/spf13/cobra"
+	"github.com/mkloubert/go-package-manager/types"
+	"github.com/mkloubert/go-package-manager/utils"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gpm",
-	Short: "A package manager for Go",
-	Long:  `A package manager for Go projects which simplifies the way of installing dependencies.`,
+	Use:     "gpm",
+	Short:   "Package manager for Go",
+	Long:    `A package manager for Go projects which simplifies the way of installing dependencies and setting up projects.`,
+	Version: AppVersion,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO
+		cmd.Help()
 	},
 }
 
 func main() {
-	var verbose bool
+	var app types.AppContext
 
 	// use "verbose flag" everywhere
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
 
-	commands.Init_Install_Command(rootCmd)
-	commands.Init_Tidy_Command(rootCmd)
+	types.LoadPackagesFileIfExist(&app)
 
+	fmt.Println(app.PackagesFile)
+
+	// initialize commands
+	commands.Init_Install_Command(rootCmd, &app)
+	commands.Init_Tidy_Command(rootCmd, &app)
+
+	// execute
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		utils.CloseWithError(err)
 	}
 }

@@ -25,6 +25,7 @@ package utils
 import (
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -44,6 +45,12 @@ func CleanupModuleName(moduleName string) string {
 	}
 
 	return strings.TrimSpace(moduleName)
+}
+
+// CloseWithError() - exits with code 1 and output an error
+func CloseWithError(err error) {
+	fmt.Println(err)
+	os.Exit(1)
 }
 
 // GetBoolFlag() - returns a boolean command line flag value without error
