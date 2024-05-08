@@ -23,19 +23,42 @@
 package commands
 
 import (
+	"log"
+	"os"
+	"os/exec"
+
+	"github.com/mkloubert/go-package-manager/utils"
 	"github.com/spf13/cobra"
 )
 
 func Init_Install_Command(parentCmd *cobra.Command) {
+	var update bool
+
 	var installCmd = &cobra.Command{
-		Use:   "install [module name or url]",
-		Short: "Installs one or more modules",
-		Long:  `Gets and installs one or more modules by a short name or an URL to a git repository.`,
-		Args:  cobra.MinimumNArgs(1),
+		Use:     "install [module name or url]",
+		Aliases: []string{"i"},
+		Short:   "Installs one or more modules",
+		Long:    `Gets and installs one or more modules by a short name or a valid URL to a git repository.`,
+		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			// verbose := utils.GetBoolFlag(cmd, "verbose", false)
+			for _, moduleName := range args {
+				moduleName := utils.CleanupModuleName(moduleName)
+				if moduleName == "" {
+					continue
+				}
+
+				p := exec.Command("go", "get", "-u", moduleName)
+
+				p.Stdout = os.Stdout
+
+				if err := p.Run(); err != nil {
+					log.Fatalln(err)
+				}
+			}
 		},
 	}
+
+	parentCmd.Flags().BoolVarP(&update, "update", "u", false, "update modules")
 
 	parentCmd.AddCommand(
 		installCmd,

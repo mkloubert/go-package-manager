@@ -20,38 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package utils
+package commands
 
 import (
-	"fmt"
-	"net/url"
-	"strings"
+	"log"
+	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 )
 
-// CleanupModuleName() - cleans up a module name
-func CleanupModuleName(moduleName string) string {
-	moduleName = strings.TrimSpace(moduleName)
+func Init_Tidy_Command(parentCmd *cobra.Command) {
+	var tidyCmd = &cobra.Command{
+		Use:     "tidy",
+		Aliases: []string{"t"},
+		Short:   "Installs one or more modules",
+		Long:    `Gets and installs one or more modules by a short name or an URL to a git repository.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			p := exec.Command("go", "mod", "tidy")
 
-	parsedURL, err := url.Parse(moduleName)
-	if err == nil {
-		moduleName = fmt.Sprintf(
-			"%v%v%v",
-			parsedURL.Host, parsedURL.Port(),
-			parsedURL.Path,
-		)
+			p.Stdout = os.Stdout
+
+			if err := p.Run(); err != nil {
+				log.Fatalln(err)
+			}
+		},
 	}
 
-	return strings.TrimSpace(moduleName)
-}
-
-// GetBoolFlag() - returns a boolean command line flag value without error
-func GetBoolFlag(cmd *cobra.Command, name string, defaultValue bool) bool {
-	val, err := cmd.Flags().GetBool(name)
-	if err == nil {
-		return val
-	}
-
-	return defaultValue
+	parentCmd.AddCommand(
+		tidyCmd,
+	)
 }

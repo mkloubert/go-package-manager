@@ -40,12 +40,13 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-	var Verbose bool
+	var verbose bool
 
 	// use "verbose flag" everywhere
-	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 
 	commands.Init_Install_Command(rootCmd)
+	commands.Init_Tidy_Command(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
