@@ -37,6 +37,7 @@ type PackagesFile struct {
 
 // A PackagesFilePackageItem is an item inside `PackagesFile.Packages` map.
 type PackagesFilePackageItem struct {
+	Aliases []string `yaml:"aliases"` // one or more aliases
 	Sources []string `yaml:"sources"` // one or more source repositories
 }
 

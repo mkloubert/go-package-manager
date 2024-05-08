@@ -30,7 +30,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/mkloubert/go-package-manager/types"
-	"github.com/mkloubert/go-package-manager/utils"
 )
 
 func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
@@ -44,24 +43,23 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			for _, moduleName := range args {
-				moduleName := utils.CleanupModuleName(moduleName)
-				if moduleName == "" {
-					continue
-				}
+				urls := app.GetModuleUrls(moduleName)
 
-				var p *exec.Cmd
-				if noUpdate {
-					app.Debug("Running 'go get " + moduleName + "' ...")
-					p = exec.Command("go", "get", moduleName)
-				} else {
-					app.Debug("Running 'go get -u " + moduleName + "' ...")
-					p = exec.Command("go", "get", "-u", moduleName)
-				}
+				for _, u := range urls {
+					var p *exec.Cmd
+					if noUpdate {
+						app.Debug("Running 'go get " + u + "' ...")
+						p = exec.Command("go", "get", u)
+					} else {
+						app.Debug("Running 'go get -u " + u + "' ...")
+						p = exec.Command("go", "get", "-u", u)
+					}
 
-				p.Stdout = os.Stdout
+					p.Stdout = os.Stdout
 
-				if err := p.Run(); err != nil {
-					log.Fatalln(err)
+					if err := p.Run(); err != nil {
+						log.Fatalln(err)
+					}
 				}
 			}
 		},

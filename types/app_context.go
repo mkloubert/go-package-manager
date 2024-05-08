@@ -25,6 +25,9 @@ package types
 import (
 	"fmt"
 	"log"
+	"strings"
+
+	"github.com/mkloubert/go-package-manager/utils"
 )
 
 // An AppContext contains all information for running this app
@@ -34,10 +37,43 @@ type AppContext struct {
 	Verbose      bool         // output verbose information
 }
 
+// app.Debug() - writes debug information with the underlying logger
 func (app *AppContext) Debug(v ...any) *AppContext {
 	if app.Verbose {
 		app.L.Printf("[VERBOSE] %v", fmt.Sprintln(v...))
 	}
 
 	return app
+}
+
+// app.GetModuleUrls() - returns the list of module urls based on the
+// information from packages.y(a)ml file
+func (app *AppContext) GetModuleUrls(moduleNameOrUrl string) []string {
+	moduleNameOrUrl = utils.CleanupModuleName(moduleNameOrUrl)
+
+	urls := make([]string, 0)
+
+	for k, v := range app.PackagesFile.Packages {
+		// collect all module aliases
+		allModuleAliases := []string{strings.TrimSpace(k)}        // main alias
+		allModuleAliases = append(allModuleAliases, v.Aliases...) // sub aliases
+
+		// checkout if matching
+		for _, ma := range allModuleAliases {
+			if ma == moduleNameOrUrl {
+				for _, s := range v.Sources {
+					urls = append(urls, utils.CleanupModuleName(s))
+				}
+
+				break
+			}
+		}
+	}
+
+	if len(urls) == 0 {
+		// take input as fallback
+		urls = append(urls, moduleNameOrUrl)
+	}
+
+	return urls
 }
