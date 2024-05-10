@@ -20,47 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package main
+package commands
 
 import (
-	"log"
-
 	"github.com/spf13/cobra"
 
-	"github.com/mkloubert/go-package-manager/commands"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 )
 
-var rootCmd = &cobra.Command{
-	Use:     "gpm",
-	Short:   "Package manager for Go",
-	Long:    `A package manager for Go projects which simplifies the way of installing dependencies and setting up projects.`,
-	Version: AppVersion,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
+func Init_Uninstall_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var uninstallCmd = &cobra.Command{
+		Use:     "uninstall [module name or url]",
+		Aliases: []string{"u"},
+		Short:   "Uninstalls one or more modules",
+		Long:    `Uninstalls one or more modules by a short name or a valid URL to a git repository.`,
+		Args:    cobra.MinimumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			for _, moduleName := range args {
+				urls := app.GetModuleUrls(moduleName)
 
-func main() {
-	var app types.AppContext
-	app.L = log.Default()
+				for _, u := range urls {
+					p := utils.CreateShellCommandByArgs("go", "get", u+"@none")
 
-	// use "verbose flag" everywhere
-	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
-
-	types.LoadGpmFileIfExist(&app)
-
-	// initialize commands
-	commands.Init_Install_Command(rootCmd, &app)
-	commands.Init_Uninstall_Command(rootCmd, &app)
-	commands.Init_Run_Command(rootCmd, &app)
-	commands.Init_Start_Command(rootCmd, &app)
-	commands.Init_Test_Command(rootCmd, &app)
-	commands.Init_Tidy_Command(rootCmd, &app)
-
-	// execute
-	if err := rootCmd.Execute(); err != nil {
-		utils.CloseWithError(err)
+					utils.RunCommand(p)
+				}
+			}
+		},
 	}
+
+	parentCmd.AddCommand(
+		uninstallCmd,
+	)
 }

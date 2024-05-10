@@ -23,7 +23,6 @@
 package commands
 
 import (
-	"log"
 	"os/exec"
 
 	"github.com/spf13/cobra"
@@ -55,9 +54,7 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 						p = utils.CreateShellCommandByArgs("go", "get", "-u", u)
 					}
 
-					if err := p.Run(); err != nil {
-						log.Fatalln(err)
-					}
+					utils.RunCommand(p)
 				}
 			}
 		},
