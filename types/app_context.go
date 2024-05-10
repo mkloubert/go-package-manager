@@ -48,6 +48,22 @@ func (app *AppContext) Debug(v ...any) *AppContext {
 	return app
 }
 
+// app.GetCurrentGitBranch() - returns the name of the current branch using git command
+func (app *AppContext) GetCurrentGitBranch() (string, error) {
+	p := exec.Command("git", "symbolic-ref", "--short", "HEAD")
+
+	var output bytes.Buffer
+	p.Stdout = &output
+
+	err := p.Run()
+	if err != nil {
+		return "", err
+	}
+	defer output.Reset()
+
+	return strings.TrimSpace(output.String()), nil
+}
+
 // app.GetGitBranches() - returns the list of branches using git command
 func (app *AppContext) GetGitBranches() ([]string, error) {
 	p := exec.Command("git", "branch", "-a")
@@ -57,7 +73,7 @@ func (app *AppContext) GetGitBranches() ([]string, error) {
 
 	err := p.Run()
 	if err != nil {
-		return []string{}, nil
+		return []string{}, err
 	}
 	defer output.Reset()
 
@@ -79,6 +95,36 @@ func (app *AppContext) GetGitBranches() ([]string, error) {
 	}
 
 	return branchNames, nil
+}
+
+// app.GetGitRemotes() - returns the list of remotes using git command
+func (app *AppContext) GetGitRemotes() ([]string, error) {
+	p := exec.Command("git", "remote")
+
+	var output bytes.Buffer
+	p.Stdout = &output
+
+	err := p.Run()
+	if err != nil {
+		return []string{}, err
+	}
+	defer output.Reset()
+
+	lines := strings.Split(output.String(), "\n")
+
+	if len(lines) == 1 && lines[0] == "" {
+		return []string{}, nil
+	}
+
+	remotes := make([]string, 0)
+	for _, l := range lines {
+		r := strings.TrimSpace(l)
+		if r != "" {
+			remotes = append(remotes, r)
+		}
+	}
+
+	return remotes, nil
 }
 
 // app.GetModuleUrls() - returns the list of module urls based on the
@@ -137,5 +183,5 @@ func (app *AppContext) RunShellCommandByArgs(c string, a ...string) {
 
 	p := utils.CreateShellCommandByArgs(c, a...)
 
-	utils.RunCommand(p, a...)
+	utils.RunCommand(p)
 }
