@@ -52,6 +52,7 @@ func main() {
 	types.LoadGpmFileIfExist(&app)
 
 	// initialize commands
+	commands.Init_Build_Command(rootCmd, &app)
 	commands.Init_Checkout_Command(rootCmd, &app)
 	commands.Init_Install_Command(rootCmd, &app)
 	commands.Init_Pull_Command(rootCmd, &app)
