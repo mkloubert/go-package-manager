@@ -77,3 +77,21 @@ func (app *AppContext) GetModuleUrls(moduleNameOrUrl string) []string {
 
 	return urls
 }
+
+// app.RunCurrentProject() - runs the current go project
+func (app *AppContext) RunCurrentProject(additionalArgs ...string) {
+	p := utils.CreateShellCommandByArgs("go", "run", ".")
+
+	app.Debug(fmt.Sprintf("Running '%v' ...", "go run ."))
+	utils.RunCommand(p, additionalArgs...)
+}
+
+// app.RunScript() - runs a script defined in packages.y(a)ml file
+func (app *AppContext) RunScript(scriptName string, additionalArgs ...string) {
+	cmdToExecute := app.PackagesFile.Scripts[scriptName]
+
+	p := utils.CreateShellCommand(cmdToExecute)
+
+	app.Debug(fmt.Sprintf("Running script '%v' ...", scriptName))
+	utils.RunCommand(p, additionalArgs...)
+}

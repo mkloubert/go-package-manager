@@ -20,45 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package main
+package commands
 
 import (
-	"log"
-
-	"github.com/spf13/cobra"
-
-	"github.com/mkloubert/go-package-manager/commands"
 	"github.com/mkloubert/go-package-manager/types"
-	"github.com/mkloubert/go-package-manager/utils"
+	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:     "gpm",
-	Short:   "Package manager for Go",
-	Long:    `A package manager for Go projects which simplifies the way of installing dependencies and setting up projects.`,
-	Version: AppVersion,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
+const startScriptName = "start"
 
-func main() {
-	var app types.AppContext
-	app.L = log.Default()
+func Init_Start_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var startCmd = &cobra.Command{
+		Use:     "start",
+		Aliases: []string{"s"},
+		Short:   "Runs current project",
+		Long:    `Runs the current project or 'start' script, if defined.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			_, ok := app.PackagesFile.Scripts[startScriptName]
 
-	// use "verbose flag" everywhere
-	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
-
-	types.LoadPackagesFileIfExist(&app)
-
-	// initialize commands
-	commands.Init_Install_Command(rootCmd, &app)
-	commands.Init_Run_Command(rootCmd, &app)
-	commands.Init_Start_Command(rootCmd, &app)
-	commands.Init_Tidy_Command(rootCmd, &app)
-
-	// execute
-	if err := rootCmd.Execute(); err != nil {
-		utils.CloseWithError(err)
+			if ok {
+				app.RunScript(startScriptName, args...)
+			} else {
+				app.RunCurrentProject(args...)
+			}
+		},
 	}
+
+	parentCmd.AddCommand(
+		startCmd,
+	)
 }

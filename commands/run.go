@@ -38,7 +38,7 @@ func Init_Run_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short:   "Runs a command by name",
 		Long:    `Runs a command by name which is defined in packages.ya(m)l file.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			commandsToExecute := []string{}
+			scriptsToExecute := []string{}
 
 			for _, scriptName := range args {
 				scriptName = strings.TrimSpace(scriptName)
@@ -46,22 +46,19 @@ func Init_Run_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					continue
 				}
 
-				cmdToExecute, ok := app.PackagesFile.Scripts[scriptName]
+				_, ok := app.PackagesFile.Scripts[scriptName]
 				if !ok {
 					utils.CloseWithError(fmt.Errorf("script '%v' not found", scriptName))
-					return
 				}
 
-				commandsToExecute = append(commandsToExecute, cmdToExecute)
+				scriptsToExecute = append(scriptsToExecute, scriptName)
 			}
 
-			for _, cmdToExecute := range commandsToExecute {
-				app.Debug(fmt.Sprintf("Running '%v' ...", cmdToExecute))
-
-				p := utils.CreateShellCommand(cmdToExecute)
-
-				if err := p.Run(); err != nil {
-					utils.CloseWithError(err)
+			if len(scriptsToExecute) == 0 {
+				app.RunCurrentProject()
+			} else {
+				for _, scriptName := range scriptsToExecute {
+					app.RunScript(scriptName)
 				}
 			}
 		},

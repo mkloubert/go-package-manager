@@ -89,3 +89,12 @@ func GetBoolFlag(cmd *cobra.Command, name string, defaultValue bool) bool {
 
 	return defaultValue
 }
+
+// RunCommand() - runs a command and exists on error
+func RunCommand(p *exec.Cmd, additionalArgs ...string) {
+	p.Args = append(p.Args, additionalArgs...)
+
+	if err := p.Run(); err != nil {
+		CloseWithError(err)
+	}
+}
