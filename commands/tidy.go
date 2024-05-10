@@ -23,13 +23,10 @@
 package commands
 
 import (
-	"log"
-	"os"
-	"os/exec"
-
 	"github.com/spf13/cobra"
 
 	"github.com/mkloubert/go-package-manager/types"
+	"github.com/mkloubert/go-package-manager/utils"
 )
 
 func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
@@ -40,12 +37,11 @@ func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Long:    `Cleans up the project from unused modules and add missing ones depending on the current source code.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			app.Debug("Running 'go mod tidy' ...")
-			p := exec.Command("go", "mod", "tidy")
 
-			p.Stdout = os.Stdout
+			p := utils.CreateShellCommandByArgs("go", "mod", "tidy")
 
 			if err := p.Run(); err != nil {
-				log.Fatalln(err)
+				utils.CloseWithError(err)
 			}
 		},
 	}

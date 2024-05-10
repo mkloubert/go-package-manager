@@ -8,3 +8,6 @@ packages:
       - yml
     sources:
       - https://github.com/go-yaml/yaml
+
+scripts:
+  test: "exit 0"

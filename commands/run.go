@@ -20,44 +20,54 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package main
+package commands
 
 import (
-	"log"
+	"fmt"
+	"strings"
 
-	"github.com/spf13/cobra"
-
-	"github.com/mkloubert/go-package-manager/commands"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
+	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:     "gpm",
-	Short:   "Package manager for Go",
-	Long:    `A package manager for Go projects which simplifies the way of installing dependencies and setting up projects.`,
-	Version: AppVersion,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
+func Init_Run_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var runCmd = &cobra.Command{
+		Use:     "run",
+		Aliases: []string{"r"},
+		Short:   "Runs a command by name",
+		Long:    `Runs a command by name which is defined in packages.ya(m)l file.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			commandsToExecute := []string{}
 
-func main() {
-	var app types.AppContext
-	app.L = log.Default()
+			for _, scriptName := range args {
+				scriptName = strings.TrimSpace(scriptName)
+				if scriptName == "" {
+					continue
+				}
 
-	// use "verbose flag" everywhere
-	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
+				cmdToExecute, ok := app.PackagesFile.Scripts[scriptName]
+				if !ok {
+					utils.CloseWithError(fmt.Errorf("script '%v' not found", scriptName))
+					return
+				}
 
-	types.LoadPackagesFileIfExist(&app)
+				commandsToExecute = append(commandsToExecute, cmdToExecute)
+			}
 
-	// initialize commands
-	commands.Init_Install_Command(rootCmd, &app)
-	commands.Init_Run_Command(rootCmd, &app)
-	commands.Init_Tidy_Command(rootCmd, &app)
+			for _, cmdToExecute := range commandsToExecute {
+				app.Debug(fmt.Sprintf("Running '%v' ...", cmdToExecute))
 
-	// execute
-	if err := rootCmd.Execute(); err != nil {
-		utils.CloseWithError(err)
+				p := utils.CreateShellCommand(cmdToExecute)
+
+				if err := p.Run(); err != nil {
+					utils.CloseWithError(err)
+				}
+			}
+		},
 	}
+
+	parentCmd.AddCommand(
+		runCmd,
+	)
 }

@@ -33,6 +33,7 @@ import (
 // A PackagesFile stores all data of a packages.y(a)ml file.
 type PackagesFile struct {
 	Packages map[string]PackagesFilePackageItem `yaml:"packages"` // the package mappings
+	Scripts  map[string]string                  `yaml:"scripts"`  // one or more scripts
 }
 
 // A PackagesFilePackageItem is an item inside `PackagesFile.Packages` map.

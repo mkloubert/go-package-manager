@@ -26,6 +26,8 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -51,6 +53,31 @@ func CleanupModuleName(moduleName string) string {
 func CloseWithError(err error) {
 	fmt.Println(err)
 	os.Exit(1)
+}
+
+// CreateShellCommand() - creates a new shell command based on the operating system
+// without running it
+func CreateShellCommand(c string) *exec.Cmd {
+	var p *exec.Cmd
+	if runtime.GOOS == "windows" {
+		p = CreateShellCommandByArgs("cmd", "/C", c)
+	} else {
+		p = CreateShellCommandByArgs("sh", "-c", c)
+	}
+
+	return p
+}
+
+// CreateShellCommand() - creates a new shell command without running it
+func CreateShellCommandByArgs(c string, args ...string) *exec.Cmd {
+	p := exec.Command(c, args...)
+
+	p.Env = os.Environ()
+	p.Stdout = os.Stdout
+	p.Stderr = os.Stderr
+	p.Stdin = os.Stdin
+
+	return p
 }
 
 // GetBoolFlag() - returns a boolean command line flag value without error
