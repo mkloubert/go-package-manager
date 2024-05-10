@@ -23,8 +23,10 @@
 package types
 
 import (
+	"bytes"
 	"fmt"
 	"log"
+	"os/exec"
 	"strings"
 
 	"github.com/mkloubert/go-package-manager/utils"
@@ -44,6 +46,39 @@ func (app *AppContext) Debug(v ...any) *AppContext {
 	}
 
 	return app
+}
+
+// app.GetGitBranches() - returns the list of branches using git command
+func (app *AppContext) GetGitBranches() ([]string, error) {
+	p := exec.Command("git", "branch", "-a")
+
+	var output bytes.Buffer
+	p.Stdout = &output
+
+	err := p.Run()
+	if err != nil {
+		return []string{}, nil
+	}
+	defer output.Reset()
+
+	lines := strings.Split(output.String(), "\n")
+
+	var branchNames []string
+	for _, l := range lines {
+		name := strings.TrimSpace(l)
+		if name == "" {
+			continue
+		}
+
+		name = strings.TrimSpace(
+			strings.TrimPrefix(name, "* "),
+		)
+		if name != "" {
+			branchNames = append(branchNames, name)
+		}
+	}
+
+	return branchNames, nil
 }
 
 // app.GetModuleUrls() - returns the list of module urls based on the
@@ -94,4 +129,13 @@ func (app *AppContext) RunScript(scriptName string, additionalArgs ...string) {
 
 	app.Debug(fmt.Sprintf("Running script '%v' ...", scriptName))
 	utils.RunCommand(p, additionalArgs...)
+}
+
+// app.RunShellCommandByArgs() - runs a shell command by arguments
+func (app *AppContext) RunShellCommandByArgs(c string, a ...string) {
+	app.Debug(fmt.Sprintf("Running '%v %v' ...", c, strings.Join(a, " ")))
+
+	p := utils.CreateShellCommandByArgs(c, a...)
+
+	utils.RunCommand(p, a...)
 }

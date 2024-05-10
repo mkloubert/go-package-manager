@@ -52,12 +52,13 @@ func main() {
 	types.LoadGpmFileIfExist(&app)
 
 	// initialize commands
+	commands.Init_Checkout_Command(rootCmd, &app)
 	commands.Init_Install_Command(rootCmd, &app)
-	commands.Init_Uninstall_Command(rootCmd, &app)
 	commands.Init_Run_Command(rootCmd, &app)
 	commands.Init_Start_Command(rootCmd, &app)
 	commands.Init_Test_Command(rootCmd, &app)
 	commands.Init_Tidy_Command(rootCmd, &app)
+	commands.Init_Uninstall_Command(rootCmd, &app)
 
 	// execute
 	if err := rootCmd.Execute(); err != nil {

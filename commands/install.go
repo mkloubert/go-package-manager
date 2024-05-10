@@ -23,12 +23,9 @@
 package commands
 
 import (
-	"os/exec"
-
 	"github.com/spf13/cobra"
 
 	"github.com/mkloubert/go-package-manager/types"
-	"github.com/mkloubert/go-package-manager/utils"
 )
 
 func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
@@ -45,16 +42,11 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				urls := app.GetModuleUrls(moduleName)
 
 				for _, u := range urls {
-					var p *exec.Cmd
 					if noUpdate {
-						app.Debug("Running 'go get " + u + "' ...")
-						p = utils.CreateShellCommandByArgs("go", "get", u)
+						app.RunShellCommandByArgs("go", "get", u)
 					} else {
-						app.Debug("Running 'go get -u " + u + "' ...")
-						p = utils.CreateShellCommandByArgs("go", "get", "-u", u)
+						app.RunShellCommandByArgs("go", "get", "-u", u)
 					}
-
-					utils.RunCommand(p)
 				}
 			}
 		},

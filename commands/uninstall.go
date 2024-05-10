@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/mkloubert/go-package-manager/types"
-	"github.com/mkloubert/go-package-manager/utils"
 )
 
 func Init_Uninstall_Command(parentCmd *cobra.Command, app *types.AppContext) {
@@ -41,9 +40,7 @@ func Init_Uninstall_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				urls := app.GetModuleUrls(moduleName)
 
 				for _, u := range urls {
-					p := utils.CreateShellCommandByArgs("go", "get", u+"@none")
-
-					utils.RunCommand(p)
+					app.RunShellCommandByArgs("go", "get", u+"@none")
 				}
 			}
 		},

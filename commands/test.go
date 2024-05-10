@@ -41,7 +41,7 @@ func Init_Test_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			if ok {
 				app.RunScript(testScriptName, args...)
 			} else {
-				app.RunCurrentProject(args...)
+				app.RunShellCommandByArgs("go", "test", ".")
 			}
 		},
 	}

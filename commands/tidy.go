@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/mkloubert/go-package-manager/types"
-	"github.com/mkloubert/go-package-manager/utils"
 )
 
 const tidyScriptName = "tidy"
@@ -43,11 +42,7 @@ func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			if ok {
 				app.RunScript(tidyScriptName, args...)
 			} else {
-				app.Debug("Running '%v' ...", "go mod tidy")
-
-				p := utils.CreateShellCommandByArgs("go", "mod", "tidy")
-
-				utils.RunCommand(p, args...)
+				app.RunShellCommandByArgs("go", "mod", "tidy")
 			}
 		},
 	}
