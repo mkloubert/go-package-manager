@@ -29,19 +29,25 @@ import (
 	"github.com/mkloubert/go-package-manager/utils"
 )
 
+const tidyScriptName = "tidy"
+
 func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var tidyCmd = &cobra.Command{
 		Use:     "tidy",
-		Aliases: []string{"t"},
+		Aliases: []string{"td"},
 		Short:   "Add missing and remove unused modules",
 		Long:    `Cleans up the project from unused modules and add missing ones depending on the current source code.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			app.Debug("Running 'go mod tidy' ...")
+			_, ok := app.GpmFile.Scripts[tidyScriptName]
 
-			p := utils.CreateShellCommandByArgs("go", "mod", "tidy")
+			if ok {
+				app.RunScript(tidyScriptName, args...)
+			} else {
+				app.Debug("Running '%v' ...", "go mod tidy")
 
-			if err := p.Run(); err != nil {
-				utils.CloseWithError(err)
+				p := utils.CreateShellCommandByArgs("go", "mod", "tidy")
+
+				utils.RunCommand(p, args...)
 			}
 		},
 	}

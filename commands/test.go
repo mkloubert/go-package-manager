@@ -27,19 +27,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const startScriptName = "start"
+const testScriptName = "test"
 
-func Init_Start_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var startCmd = &cobra.Command{
-		Use:     "start",
-		Aliases: []string{"s"},
-		Short:   "Runs current project",
-		Long:    `Runs the current project or 'start' script, if defined.`,
+func Init_Test_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var testCmd = &cobra.Command{
+		Use:     "test",
+		Aliases: []string{"t", "tst"},
+		Short:   "Runs tests",
+		Long:    `Runs tests or 'test' script, if defined.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			_, ok := app.GpmFile.Scripts[startScriptName]
+			_, ok := app.GpmFile.Scripts[testScriptName]
 
 			if ok {
-				app.RunScript(startScriptName, args...)
+				app.RunScript(testScriptName, args...)
 			} else {
 				app.RunCurrentProject(args...)
 			}
@@ -47,6 +47,6 @@ func Init_Start_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	}
 
 	parentCmd.AddCommand(
-		startCmd,
+		testCmd,
 	)
 }

@@ -36,7 +36,7 @@ func Init_Run_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Use:     "run",
 		Aliases: []string{"r"},
 		Short:   "Runs a command by name",
-		Long:    `Runs a command by name which is defined in packages.ya(m)l file.`,
+		Long:    `Runs a command by name which is defined in gpm.ya(m)l file.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			scriptsToExecute := []string{}
 
@@ -46,7 +46,7 @@ func Init_Run_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					continue
 				}
 
-				_, ok := app.PackagesFile.Scripts[scriptName]
+				_, ok := app.GpmFile.Scripts[scriptName]
 				if !ok {
 					utils.CloseWithError(fmt.Errorf("script '%v' not found", scriptName))
 				}

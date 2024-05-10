@@ -30,24 +30,24 @@ import (
 	"github.com/mkloubert/go-package-manager/utils"
 )
 
-// A PackagesFile stores all data of a packages.y(a)ml file.
-type PackagesFile struct {
-	Packages map[string]PackagesFilePackageItem `yaml:"packages"` // the package mappings
-	Scripts  map[string]string                  `yaml:"scripts"`  // one or more scripts
+// A GpmFile stores all data of a gpm.y(a)ml file.
+type GpmFile struct {
+	Packages map[string]GpmFilePackageItem `yaml:"packages"` // the package mappings
+	Scripts  map[string]string             `yaml:"scripts"`  // one or more scripts
 }
 
-// A PackagesFilePackageItem is an item inside `PackagesFile.Packages` map.
-type PackagesFilePackageItem struct {
+// A GpmFilePackageItem is an item inside `PackagesFile.Packages` map.
+type GpmFilePackageItem struct {
 	Aliases []string `yaml:"aliases"` // one or more aliases
 	Sources []string `yaml:"sources"` // one or more source repositories
 }
 
-// LoadPackagesFileIfExist - Loads a packages.y(a)ml file if it exists
+// LoadGpmFileIfExist - Loads a gpm.y(a)ml file if it exists
 // and return `true` if file has been loaded successfully.
-func LoadPackagesFileIfExist(app *AppContext) bool {
+func LoadGpmFileIfExist(app *AppContext) bool {
 	cwd, err := os.Getwd()
 	if err == nil {
-		packagesFilePath := path.Join(cwd, "packages.yaml")
+		packagesFilePath := path.Join(cwd, "gpm.yaml")
 		info, err := os.Stat(packagesFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -66,13 +66,13 @@ func LoadPackagesFileIfExist(app *AppContext) bool {
 			utils.CloseWithError(err)
 		}
 
-		var pf PackagesFile
-		err = yaml.Unmarshal(yamlData, &pf)
+		var gpm GpmFile
+		err = yaml.Unmarshal(yamlData, &gpm)
 		if err != nil {
 			utils.CloseWithError(err)
 		}
 
-		app.PackagesFile = pf
+		app.GpmFile = gpm
 		return true
 	}
 

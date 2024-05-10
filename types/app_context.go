@@ -32,9 +32,9 @@ import (
 
 // An AppContext contains all information for running this app
 type AppContext struct {
-	L            *log.Logger  // the logger to use
-	PackagesFile PackagesFile // the packages.y(a)ml file
-	Verbose      bool         // output verbose information
+	GpmFile GpmFile     // the gpm.y(a)ml file
+	L       *log.Logger // the logger to use
+	Verbose bool        // output verbose information
 }
 
 // app.Debug() - writes debug information with the underlying logger
@@ -47,13 +47,13 @@ func (app *AppContext) Debug(v ...any) *AppContext {
 }
 
 // app.GetModuleUrls() - returns the list of module urls based on the
-// information from packages.y(a)ml file
+// information from gpm.y(a)ml file
 func (app *AppContext) GetModuleUrls(moduleNameOrUrl string) []string {
 	moduleNameOrUrl = utils.CleanupModuleName(moduleNameOrUrl)
 
 	urls := make([]string, 0)
 
-	for k, v := range app.PackagesFile.Packages {
+	for k, v := range app.GpmFile.Packages {
 		// collect all module aliases
 		allModuleAliases := []string{strings.TrimSpace(k)}        // main alias
 		allModuleAliases = append(allModuleAliases, v.Aliases...) // sub aliases
@@ -86,9 +86,9 @@ func (app *AppContext) RunCurrentProject(additionalArgs ...string) {
 	utils.RunCommand(p, additionalArgs...)
 }
 
-// app.RunScript() - runs a script defined in packages.y(a)ml file
+// app.RunScript() - runs a script defined in gpm.y(a)ml file
 func (app *AppContext) RunScript(scriptName string, additionalArgs ...string) {
-	cmdToExecute := app.PackagesFile.Scripts[scriptName]
+	cmdToExecute := app.GpmFile.Scripts[scriptName]
 
 	p := utils.CreateShellCommand(cmdToExecute)
 

@@ -49,12 +49,13 @@ func main() {
 	// use "verbose flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
 
-	types.LoadPackagesFileIfExist(&app)
+	types.LoadGpmFileIfExist(&app)
 
 	// initialize commands
 	commands.Init_Install_Command(rootCmd, &app)
 	commands.Init_Run_Command(rootCmd, &app)
 	commands.Init_Start_Command(rootCmd, &app)
+	commands.Init_Test_Command(rootCmd, &app)
 	commands.Init_Tidy_Command(rootCmd, &app)
 
 	// execute
