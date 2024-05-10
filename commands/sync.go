@@ -20,51 +20,64 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package main
+package commands
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/spf13/cobra"
 
-	"github.com/mkloubert/go-package-manager/commands"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 )
 
-var rootCmd = &cobra.Command{
-	Use:     "gpm",
-	Short:   "Package manager for Go",
-	Long:    `A package manager for Go projects which simplifies the way of installing dependencies and setting up projects.`,
-	Version: AppVersion,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
+func Init_Sync_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var defaultRemoteOnly bool
 
-func main() {
-	var app types.AppContext
-	app.L = log.Default()
+	var syncCmd = &cobra.Command{
+		Use:     "sync [remotes]",
+		Aliases: []string{"snc"},
+		Short:   "Sync remotes",
+		Long:    `Synchronizes all git remotes or specific ones.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			currentBranchName, _ := app.GetCurrentGitBranch()
 
-	// use "verbose flag" everywhere
-	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
+			var remotes []string
+			if len(args) == 0 {
+				listOfRemotes, err := app.GetGitRemotes()
+				if err != nil {
+					utils.CloseWithError(err)
+				}
 
-	types.LoadGpmFileIfExist(&app)
+				remotes = append(remotes, listOfRemotes...)
+			} else {
+				remotes = append(remotes, args...)
+			}
 
-	// initialize commands
-	commands.Init_Checkout_Command(rootCmd, &app)
-	commands.Init_Install_Command(rootCmd, &app)
-	commands.Init_Pull_Command(rootCmd, &app)
-	commands.Init_Push_Command(rootCmd, &app)
-	commands.Init_Run_Command(rootCmd, &app)
-	commands.Init_Start_Command(rootCmd, &app)
-	commands.Init_Sync_Command(rootCmd, &app)
-	commands.Init_Test_Command(rootCmd, &app)
-	commands.Init_Tidy_Command(rootCmd, &app)
-	commands.Init_Uninstall_Command(rootCmd, &app)
+			if len(remotes) == 0 {
+				utils.CloseWithError(fmt.Errorf("no remotes found"))
+			}
 
-	// execute
-	if err := rootCmd.Execute(); err != nil {
-		utils.CloseWithError(err)
+			if defaultRemoteOnly {
+				// default only
+				remotes = []string{remotes[0]}
+			}
+
+			// first pull from
+			// and then push to remotes
+			for _, gitAction := range []string{"pull", "push"} {
+				for _, r := range remotes {
+					cmdArgs := []string{"git", gitAction, r, currentBranchName}
+
+					app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
+				}
+			}
+		},
 	}
+
+	syncCmd.Flags().BoolVarP(&defaultRemoteOnly, "default", "d", false, "default / first remote only")
+
+	parentCmd.AddCommand(
+		syncCmd,
+	)
 }
