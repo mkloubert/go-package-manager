@@ -66,6 +66,7 @@ func main() {
 	commands.Init_Install_Command(rootCmd, &app)
 	commands.Init_Pull_Command(rootCmd, &app)
 	commands.Init_Push_Command(rootCmd, &app)
+	commands.Init_Remove_Command(rootCmd, &app)
 	commands.Init_Run_Command(rootCmd, &app)
 	commands.Init_Start_Command(rootCmd, &app)
 	commands.Init_Sync_Command(rootCmd, &app)

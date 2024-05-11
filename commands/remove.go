@@ -31,34 +31,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init_add_alias_command(parentCmd *cobra.Command, app *types.AppContext) {
-	var reset bool
-
-	var addAliasCmd = &cobra.Command{
-		Use:     "alias",
+func init_remove_alias_command(parentCmd *cobra.Command, app *types.AppContext) {
+	var removeAliasCmd = &cobra.Command{
+		Use:     "alias [alias name]",
 		Aliases: []string{"a"},
-		Short:   "Add package alias",
-		Long:    `Adds an alias for one or more packages.`,
-		Args:    cobra.MinimumNArgs(1),
+		Short:   "Remove package alias",
+		Long:    `Removes one or more aliases.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			alias := strings.TrimSpace(args[0])
+			for _, a := range args {
+				alias := strings.TrimSpace(a)
 
-			if reset {
-				app.Debug(fmt.Sprintf("Resetting list of package alias '%v' ...", alias))
-				app.AliasesFile.Aliases[alias] = []string{}
+				app.Debug(fmt.Sprintf("Removing package alias '%v' ...", alias))
+				delete(app.AliasesFile.Aliases, alias)
 			}
-
-			sources := app.AliasesFile.Aliases[alias]
-
-			for _, s := range args[1:] {
-				s = strings.TrimSpace(s)
-				if s != "" {
-					app.Debug(fmt.Sprintf("Adding source '%v' for package alias '%v' ...", s, alias))
-					sources = append(sources, s)
-				}
-			}
-
-			app.AliasesFile.Aliases[alias] = sources
 
 			err := app.UpdateAliasesFile()
 			if err != nil {
@@ -67,27 +52,25 @@ func init_add_alias_command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
-	addAliasCmd.Flags().BoolVarP(&reset, "reset", "r", false, "reset list before add")
-
 	parentCmd.AddCommand(
-		addAliasCmd,
+		removeAliasCmd,
 	)
 }
 
-func Init_Add_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var addCmd = &cobra.Command{
-		Use:     "add [resource]",
-		Aliases: []string{"ad"},
-		Short:   "Add command",
-		Long:    `Adds a resource.`,
+func Init_Remove_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var removeCmd = &cobra.Command{
+		Use:     "remove [resource]",
+		Aliases: []string{"rm"},
+		Short:   "Remove command",
+		Long:    `Removes a resource.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Help()
 		},
 	}
 
-	init_add_alias_command(addCmd, app)
+	init_remove_alias_command(removeCmd, app)
 
 	parentCmd.AddCommand(
-		addCmd,
+		removeCmd,
 	)
 }
