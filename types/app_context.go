@@ -26,17 +26,22 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
+	"path"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/mkloubert/go-package-manager/utils"
 )
 
 // An AppContext contains all information for running this app
 type AppContext struct {
-	GpmFile GpmFile     // the gpm.y(a)ml file
-	L       *log.Logger // the logger to use
-	Verbose bool        // output verbose information
+	AliasesFile AliasesFile // aliases.yaml file in home folder
+	Cwd         string      // current working directory
+	GpmFile     GpmFile     // the gpm.y(a)ml file
+	L           *log.Logger // the logger to use
+	Verbose     bool        // output verbose information
 }
 
 // app.Debug() - writes debug information with the underlying logger
@@ -46,6 +51,16 @@ func (app *AppContext) Debug(v ...any) *AppContext {
 	}
 
 	return app
+}
+
+// app.GetAliasesFilePath() - returns the possible path of the aliases.yaml file
+func (app *AppContext) GetAliasesFilePath() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err == nil {
+		return path.Join(homeDir, ".gpm/aliases.yaml"), nil
+	} else {
+		return "", err
+	}
 }
 
 // app.GetCurrentGitBranch() - returns the name of the current branch using git command
@@ -127,6 +142,11 @@ func (app *AppContext) GetGitRemotes() ([]string, error) {
 	return remotes, nil
 }
 
+// app.GetAliasesFilePath() - returns the possible path of the gpm.yaml file
+func (app *AppContext) GetGpmFilePath() (string, error) {
+	return path.Join(app.Cwd, "gpm.yaml"), nil
+}
+
 // app.GetModuleUrls() - returns the list of module urls based on the
 // information from gpm.y(a)ml file
 func (app *AppContext) GetModuleUrls(moduleNameOrUrl string) []string {
@@ -134,20 +154,13 @@ func (app *AppContext) GetModuleUrls(moduleNameOrUrl string) []string {
 
 	urls := make([]string, 0)
 
-	for k, v := range app.GpmFile.Packages {
-		// collect all module aliases
-		allModuleAliases := []string{strings.TrimSpace(k)}        // main alias
-		allModuleAliases = append(allModuleAliases, v.Aliases...) // sub aliases
-
-		// checkout if matching
-		for _, ma := range allModuleAliases {
-			if ma == moduleNameOrUrl {
-				for _, s := range v.Sources {
-					urls = append(urls, utils.CleanupModuleName(s))
-				}
-
-				break
+	for alias, sources := range app.AliasesFile.Aliases {
+		if alias == moduleNameOrUrl {
+			for _, s := range sources {
+				urls = append(urls, utils.CleanupModuleName(s))
 			}
+
+			break
 		}
 	}
 
@@ -157,6 +170,74 @@ func (app *AppContext) GetModuleUrls(moduleNameOrUrl string) []string {
 	}
 
 	return urls
+}
+
+// app.LoadAliasesFileIfExist - Loads a gpm.y(a)ml file if it exists
+// and return `true` if file has been loaded successfully.
+func (app *AppContext) LoadAliasesFileIfExist() bool {
+	aliasesFilePath, err := app.GetAliasesFilePath()
+	if err == nil {
+		isExisting, err := utils.IsFileExisting(aliasesFilePath)
+		if err != nil {
+			utils.CloseWithError(err)
+		}
+
+		if !isExisting {
+			return false
+		}
+
+		app.Debug(fmt.Sprintf("Loading '%v' file ...", aliasesFilePath))
+
+		yamlData, err := os.ReadFile(aliasesFilePath)
+		if err != nil {
+			utils.CloseWithError(err)
+		}
+
+		var aliases AliasesFile
+		err = yaml.Unmarshal(yamlData, &aliases)
+		if err != nil {
+			utils.CloseWithError(err)
+		}
+
+		app.AliasesFile = aliases
+		return true
+	}
+
+	return false
+}
+
+// app.LoadGpmFileIfExist - Loads a gpm.y(a)ml file if it exists
+// and return `true` if file has been loaded successfully.
+func (app *AppContext) LoadGpmFileIfExist() bool {
+	gpmFilePath, err := app.GetGpmFilePath()
+	if err != nil {
+		utils.CloseWithError(err)
+	}
+
+	isExisting, err := utils.IsFileExisting(gpmFilePath)
+	if err != nil {
+		utils.CloseWithError(err)
+	}
+
+	if !isExisting {
+		return false
+	}
+
+	app.Debug(fmt.Sprintf("Loading '%v' file ...", gpmFilePath))
+
+	yamlData, err := os.ReadFile(gpmFilePath)
+	if err != nil {
+		utils.CloseWithError(err)
+	}
+
+	var gpm GpmFile
+	err = yaml.Unmarshal(yamlData, &gpm)
+	if err != nil {
+		utils.CloseWithError(err)
+	}
+
+	app.GpmFile = gpm
+	return true
 }
 
 // app.RunCurrentProject() - runs the current go project
@@ -184,4 +265,35 @@ func (app *AppContext) RunShellCommandByArgs(c string, a ...string) {
 	p := utils.CreateShellCommandByArgs(c, a...)
 
 	utils.RunCommand(p)
+}
+
+func (app *AppContext) UpdateAliasesFile() error {
+	aliasesFilePath, err := app.GetAliasesFilePath()
+	if err != nil {
+		return err
+	}
+
+	aliasesFileDirectoryPath := path.Dir(aliasesFilePath)
+
+	isExisting, err := utils.IsDirExisting(aliasesFileDirectoryPath)
+	if err != nil {
+		return err
+	}
+
+	if !isExisting {
+		app.Debug(fmt.Sprintf("Creating directory '%v' ...", aliasesFileDirectoryPath))
+
+		err = os.MkdirAll(aliasesFileDirectoryPath, 0750)
+		if err != nil {
+			return err
+		}
+	}
+
+	yamlData, err := yaml.Marshal(&app.AliasesFile)
+	if err != nil {
+		utils.CloseWithError(err)
+	}
+
+	app.Debug(fmt.Sprintf("Updating file '%v' ...", aliasesFilePath))
+	return os.WriteFile(aliasesFilePath, yamlData, 0750)
 }

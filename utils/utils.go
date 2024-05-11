@@ -249,6 +249,34 @@ func IndexOfString(arr []string, value string) int {
 	return -1
 }
 
+// IsDirExisting() - checks if path is an existing directory
+func IsDirExisting(dp string) (bool, error) {
+	info, err := os.Stat(dp)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return info.IsDir(), nil
+}
+
+// IsFileExisting() - checks if path is an existing file
+func IsFileExisting(fp string) (bool, error) {
+	info, err := os.Stat(fp)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return !info.IsDir(), nil
+}
+
 // RunCommand() - runs a command and exists on error
 func RunCommand(p *exec.Cmd, additionalArgs ...string) {
 	p.Args = append(p.Args, additionalArgs...)

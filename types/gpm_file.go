@@ -22,14 +22,6 @@
 
 package types
 
-import (
-	"os"
-	"path"
-
-	"github.com/goccy/go-yaml"
-	"github.com/mkloubert/go-package-manager/utils"
-)
-
 // A GpmFile stores all data of a gpm.y(a)ml file.
 type GpmFile struct {
 	Packages map[string]GpmFilePackageItem `yaml:"packages"` // the package mappings
@@ -38,43 +30,5 @@ type GpmFile struct {
 
 // A GpmFilePackageItem is an item inside `PackagesFile.Packages` map.
 type GpmFilePackageItem struct {
-	Aliases []string `yaml:"aliases"` // one or more aliases
 	Sources []string `yaml:"sources"` // one or more source repositories
-}
-
-// LoadGpmFileIfExist - Loads a gpm.y(a)ml file if it exists
-// and return `true` if file has been loaded successfully.
-func LoadGpmFileIfExist(app *AppContext) bool {
-	cwd, err := os.Getwd()
-	if err == nil {
-		packagesFilePath := path.Join(cwd, "gpm.yaml")
-		info, err := os.Stat(packagesFilePath)
-		if err != nil {
-			if os.IsNotExist(err) {
-				return false
-			}
-
-			utils.CloseWithError(err)
-		}
-
-		if info.IsDir() {
-			return false
-		}
-
-		yamlData, err := os.ReadFile(packagesFilePath)
-		if err != nil {
-			utils.CloseWithError(err)
-		}
-
-		var gpm GpmFile
-		err = yaml.Unmarshal(yamlData, &gpm)
-		if err != nil {
-			utils.CloseWithError(err)
-		}
-
-		app.GpmFile = gpm
-		return true
-	}
-
-	return false
 }

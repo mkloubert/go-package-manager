@@ -24,6 +24,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -43,15 +44,23 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
+	cwd, err := os.Getwd()
+	if err != nil {
+		utils.CloseWithError(err)
+	}
+
 	var app types.AppContext
 	app.L = log.Default()
+	app.Cwd = cwd
 
 	// use "verbose flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
 
-	types.LoadGpmFileIfExist(&app)
+	app.LoadAliasesFileIfExist()
+	app.LoadGpmFileIfExist()
 
 	// initialize commands
+	commands.Init_Add_Command(rootCmd, &app)
 	commands.Init_Build_Command(rootCmd, &app)
 	commands.Init_Checkout_Command(rootCmd, &app)
 	commands.Init_Install_Command(rootCmd, &app)
