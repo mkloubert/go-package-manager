@@ -227,9 +227,6 @@ func (app *AppContext) LoadAliasesFileIfExist() bool {
 // and return `true` if file has been loaded successfully.
 func (app *AppContext) LoadGpmFileIfExist() bool {
 	defer func() {
-		if app.GpmFile.Packages == nil {
-			app.GpmFile.Packages = map[string]GpmFilePackageItem{}
-		}
 		if app.GpmFile.Scripts == nil {
 			app.GpmFile.Scripts = map[string]string{}
 		}

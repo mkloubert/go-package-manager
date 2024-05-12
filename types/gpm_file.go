@@ -24,11 +24,5 @@ package types
 
 // A GpmFile stores all data of a gpm.y(a)ml file.
 type GpmFile struct {
-	Packages map[string]GpmFilePackageItem `yaml:"packages"` // the package mappings
-	Scripts  map[string]string             `yaml:"scripts"`  // one or more scripts
-}
-
-// A GpmFilePackageItem is an item inside `PackagesFile.Packages` map.
-type GpmFilePackageItem struct {
-	Sources []string `yaml:"sources"` // one or more source repositories
+	Scripts map[string]string `yaml:"scripts"` // one or more scripts
 }
