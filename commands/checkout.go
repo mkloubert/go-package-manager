@@ -62,8 +62,8 @@ func Init_Checkout_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					utils.CloseWithError(err)
 				}
 
-				systemPrompt := `You are a assistant for git operations. Do exactly what the user wants.`
-				prompt := fmt.Sprintf(`I need the name for a git branch of maximum 48 characters.
+				aiPrompts := app.GetAIPromptSettings(
+					fmt.Sprintf(`I need the name for a git branch of maximum 48 characters.
 For the context I give you the following description: %v
 Use only the following format for the full name: prefix/name
 Allowed are the following prefixes:
@@ -72,11 +72,13 @@ Allowed are the following prefixes:
 - "hotfix/" for hotfixes (e.g. "hotfix/critical-payment-issue")
 - "docs/" for documentation (e.g. "docs/assets-optimization")
 The name must match the description.
-Your full name for the branch:`, string(jsonStr))
+Your full name for the branch without your explanation:`, string(jsonStr)),
+					`You are a assistant for git operations. Do exactly what the user wants.`,
+				)
 
-				app.Debug(fmt.Sprintf("Chat with AI using following prompt: %v", prompt))
-				answer, err := utils.ChatWithAI(prompt, utils.ChatWithAIOption{
-					SystemPrompt: &systemPrompt,
+				app.Debug(fmt.Sprintf("Chat with AI using following prompt: %v", aiPrompts.Prompt))
+				answer, err := app.ChatWithAI(aiPrompts.Prompt, types.ChatWithAIOption{
+					SystemPrompt: aiPrompts.SystemPrompt,
 				})
 				if err != nil {
 					utils.CloseWithError(err)

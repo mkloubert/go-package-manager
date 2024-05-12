@@ -53,6 +53,14 @@ func main() {
 	app.L = log.Default()
 	app.Cwd = cwd
 
+	// use "no-system-prompt flag" everywhere
+	rootCmd.PersistentFlags().BoolVarP(&app.NoSystemPrompt, "no-system-prompt", "", false, "do not use system prompt")
+	// use "ollama flag" everywhere
+	rootCmd.PersistentFlags().BoolVarP(&app.Ollama, "ollama", "", false, "use Ollama")
+	// use "prompt flag" everywhere
+	rootCmd.PersistentFlags().StringVarP(&app.Prompt, "prompt", "", "", "custom (AI) prompt")
+	// use "system-prompt flag" everywhere
+	rootCmd.PersistentFlags().StringVarP(&app.SystemPrompt, "system-prompt", "", "", "custom (AI) system prompt")
 	// use "verbose flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
 

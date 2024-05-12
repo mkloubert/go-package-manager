@@ -24,8 +24,11 @@ package types
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path"
@@ -35,14 +38,270 @@ import (
 	"github.com/mkloubert/go-package-manager/utils"
 )
 
+// AIPrompts stores prompts for AI chats
+type AIPrompts struct {
+	Prompt       string  // the prompt
+	SystemPrompt *string // the system prompt, if defined
+}
+
 // An AppContext contains all information for running this app
 type AppContext struct {
-	AliasesFile  AliasesFile  // aliases.yaml file in home folder
-	Cwd          string       // current working directory
-	GpmFile      GpmFile      // the gpm.y(a)ml file
-	L            *log.Logger  // the logger to use
-	ProjectsFile ProjectsFile // projects.yaml file in home folder
-	Verbose      bool         // output verbose information
+	AliasesFile    AliasesFile  // aliases.yaml file in home folder
+	Cwd            string       // current working directory
+	GpmFile        GpmFile      // the gpm.y(a)ml file
+	L              *log.Logger  // the logger to use
+	NoSystemPrompt bool         // do not use system prompt
+	Ollama         bool         // use Ollama
+	ProjectsFile   ProjectsFile // projects.yaml file in home folder
+	Prompt         string       // custom (AI) prompt
+	SystemPrompt   string       // custom system prompt
+	Verbose        bool         // output verbose information
+}
+
+// ChatWithAIOption stores settings for
+// `ChatWithAI()` function
+type ChatWithAIOption struct {
+	Model        *string // custom model
+	SystemPrompt *string // custom system prompt
+	Temperature  *int    // custom temperature
+}
+
+// OllamaGenerateResponse is the response of
+// a successful Ollama API call
+type OllamaGenerateResponse struct {
+	Model    string `json:"model"`    // used model
+	Response string `json:"response"` // the response
+}
+
+// OpenAIChatCompletionResponseV1 stores data of a successful
+// OpenAI chat completion response API response (version 1)
+type OpenAIChatCompletionResponseV1 struct {
+	Choices []OpenAIChatCompletionResponseV1Choice `json:"choices"` // list of choices
+	Model   string                                 `json:"model"`   // used model
+	Usage   OpenAIChatCompletionResponseV1Usage    `json:"usage"`   // the usage
+}
+
+// OpenAIChatCompletionResponseV1Choice is an item inside `choices` property
+// of an `OpenAIChatCompletionResponseV1` object
+type OpenAIChatCompletionResponseV1Choice struct {
+	Index   int32                                       `json:"index"`   // the zero-based index
+	Message OpenAIChatCompletionResponseV1ChoiceMessage `json:"message"` // the message information
+}
+
+// OpenAIChatCompletionResponseV1ChoiceMessage contains data for `message` property
+// of an `OpenAIChatCompletionResponseV1ChoiceMessage` object
+type OpenAIChatCompletionResponseV1ChoiceMessage struct {
+	Content string `json:"content"` // the message context
+	Role    string `json:"role"`    // the role like 'user' or 'assistant'
+}
+
+// OpenAIChatCompletionResponseV1Usage contains data for `usage` property
+// of an `OpenAIChatCompletionResponseV1` object
+type OpenAIChatCompletionResponseV1Usage struct {
+	CompletionTokens int32 `json:"completion_tokens"` // number of completion tokens
+	PromptTokens     int32 `json:"prompt_tokens"`     // number of prompt tokens
+	TotalTokens      int32 `json:"total_tokens"`      // number of total used tokens
+}
+
+const aiApiOllama = "ollama"
+const aiApiOpenAI = "openai"
+
+// ChatWithAI() - does a simple AI chat based on the current app settings
+func (app *AppContext) ChatWithAI(prompt string, options ...ChatWithAIOption) (string, error) {
+	OPENAI_API_KEY := strings.TrimSpace(os.Getenv("OPENAI_API_KEY"))
+
+	GPM_AI_API := strings.TrimSpace(
+		strings.ToLower(os.Getenv("GPM_AI_API")),
+	)
+	if GPM_AI_API == "" {
+		if app.Ollama {
+			GPM_AI_API = aiApiOllama
+		} else {
+			if OPENAI_API_KEY == "" {
+				GPM_AI_API = aiApiOllama
+			} else {
+				GPM_AI_API = aiApiOpenAI
+			}
+		}
+	}
+
+	if GPM_AI_API == aiApiOpenAI {
+		app.Debug("Using Open AI API ...")
+
+		if OPENAI_API_KEY == "" {
+			return "", fmt.Errorf("no api key found for OpenAI")
+		}
+
+		return app.chatWithOpenAI(prompt, options...)
+	}
+
+	if GPM_AI_API == aiApiOllama {
+		app.Debug("Using Ollama API ...")
+
+		return app.chatWithOllama(prompt, options...)
+	}
+
+	return "", fmt.Errorf("ai api '%v' is not supported", GPM_AI_API)
+}
+
+func (app *AppContext) chatWithOllama(prompt string, options ...ChatWithAIOption) (string, error) {
+	model := utils.GetDefaultAIChatModel()
+	if model == "" {
+		return "", fmt.Errorf("no ai model defined")
+	}
+	var systemPrompt *string
+	temperature := 0
+
+	for _, o := range options {
+		if o.Model != nil {
+			model = *o.Model
+		}
+		if o.SystemPrompt != nil {
+			systemPrompt = o.SystemPrompt
+		}
+		if o.Temperature != nil {
+			temperature = *o.Temperature
+		}
+	}
+
+	url := "http://localhost:11434/api/generate"
+
+	data := map[string]interface{}{
+		"model":       model,
+		"prompt":      prompt,
+		"stream":      false,
+		"temperature": temperature,
+	}
+
+	if systemPrompt != nil {
+		data["system"] = systemPrompt
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+
+	app.Debug(fmt.Sprintf("Will do POST request to '%v' with body: %v", url, string(jsonData)))
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonData)))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("unexpected response: %v", resp.StatusCode)
+	}
+
+	responseData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var response OllamaGenerateResponse
+	err = json.Unmarshal(responseData, &response)
+	if err != nil {
+		return "", err
+	}
+
+	return response.Response, nil
+}
+
+func (app *AppContext) chatWithOpenAI(prompt string, options ...ChatWithAIOption) (string, error) {
+	model := utils.GetDefaultAIChatModel()
+	var systemPrompt *string
+	temperature := 0
+
+	OPENAI_API_KEY := strings.TrimSpace(os.Getenv("OPENAI_API_KEY"))
+
+	for _, o := range options {
+		if o.Model != nil {
+			model = *o.Model
+		}
+		if o.SystemPrompt != nil {
+			systemPrompt = o.SystemPrompt
+		}
+		if o.Temperature != nil {
+			temperature = *o.Temperature
+		}
+	}
+
+	if model == "" {
+		model = "gpt-3.5-turbo"
+	}
+
+	url := "https://api.openai.com/v1/chat/completions"
+
+	messages := make([]interface{}, 0)
+	if systemPrompt != nil {
+		messages = append(messages, map[string]interface{}{
+			"role":    "system",
+			"content": systemPrompt,
+		})
+	}
+	messages = append(messages, map[string]interface{}{
+		"role":    "user",
+		"content": prompt,
+	})
+
+	data := map[string]interface{}{
+		"messages":    messages,
+		"model":       model,
+		"temperature": temperature,
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonData)))
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+OPENAI_API_KEY)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("unexpected response: %v", resp.StatusCode)
+	}
+
+	responseData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var response OpenAIChatCompletionResponseV1
+	err = json.Unmarshal(responseData, &response)
+	if err != nil {
+		return "", err
+	}
+
+	answer := ""
+	for _, c := range response.Choices {
+		if c.Message.Role == "assistant" {
+			answer = c.Message.Content
+		}
+	}
+
+	return answer, nil
 }
 
 // app.Debug() - writes debug information with the underlying logger
@@ -54,6 +313,36 @@ func (app *AppContext) Debug(v ...any) *AppContext {
 	return app
 }
 
+// app.GetAIPrompt() - returns the AI prompt based on the current app settings
+func (app *AppContext) GetAIPrompt(defaultPrompt string) string {
+	prompt := app.Prompt // first from command line arguments
+
+	if prompt == "" {
+		prompt = os.Getenv("GPM_AI_PROMPT") // no from environment variable
+	}
+
+	if prompt == "" {
+		prompt = defaultPrompt // take the default
+	}
+
+	return prompt
+}
+
+// app.GetAIPromptSettings() - returns AI prompt settings
+func (app *AppContext) GetAIPromptSettings(defaultPrompt string, defaultSystemPrompt string) AIPrompts {
+	var systemPrompt *string
+	if !app.NoSystemPrompt {
+		systemPromptToUse := app.GetSystemAIPrompt(defaultSystemPrompt)
+
+		systemPrompt = &systemPromptToUse
+	}
+
+	return AIPrompts{
+		Prompt:       app.GetAIPrompt(defaultPrompt),
+		SystemPrompt: systemPrompt,
+	}
+}
+
 // app.GetAliasesFilePath() - returns the possible path of the aliases.yaml file
 func (app *AppContext) GetAliasesFilePath() (string, error) {
 	homeDir, err := os.UserHomeDir()
@@ -62,6 +351,21 @@ func (app *AppContext) GetAliasesFilePath() (string, error) {
 	} else {
 		return "", err
 	}
+}
+
+// app.GetSystemAIPrompt() - returns the AI system prompt based on the current app settings
+func (app *AppContext) GetSystemAIPrompt(defaultPrompt string) string {
+	prompt := app.SystemPrompt // first from command line arguments
+
+	if prompt == "" {
+		prompt = os.Getenv("GPM_AI_SYSTEM_PROMPT") // no from environment variable
+	}
+
+	if prompt == "" {
+		prompt = defaultPrompt // take the default
+	}
+
+	return prompt
 }
 
 // app.GetCurrentGitBranch() - returns the name of the current branch using git command
