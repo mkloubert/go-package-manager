@@ -34,7 +34,7 @@ import (
 func init_remove_alias_command(parentCmd *cobra.Command, app *types.AppContext) {
 	var removeAliasCmd = &cobra.Command{
 		Use:     "alias [alias name]",
-		Aliases: []string{"a"},
+		Aliases: []string{"a", "aliases"},
 		Short:   "Remove package alias",
 		Long:    `Removes one or more aliases.`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -46,6 +46,32 @@ func init_remove_alias_command(parentCmd *cobra.Command, app *types.AppContext) 
 			}
 
 			err := app.UpdateAliasesFile()
+			if err != nil {
+				utils.CloseWithError(err)
+			}
+		},
+	}
+
+	parentCmd.AddCommand(
+		removeAliasCmd,
+	)
+}
+
+func init_remove_project_command(parentCmd *cobra.Command, app *types.AppContext) {
+	var removeAliasCmd = &cobra.Command{
+		Use:     "project [alias name]",
+		Aliases: []string{"p", "projects", "prj", "prjs"},
+		Short:   "Remove project",
+		Long:    `Removes one or more projects with their git resources.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			for _, a := range args {
+				alias := strings.TrimSpace(a)
+
+				app.Debug(fmt.Sprintf("Removing project '%v' ...", alias))
+				delete(app.ProjectsFile.Projects, alias)
+			}
+
+			err := app.UpdateProjectsFile()
 			if err != nil {
 				utils.CloseWithError(err)
 			}
@@ -69,6 +95,7 @@ func Init_Remove_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	}
 
 	init_remove_alias_command(removeCmd, app)
+	init_remove_project_command(removeCmd, app)
 
 	parentCmd.AddCommand(
 		removeCmd,
