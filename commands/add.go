@@ -74,6 +74,31 @@ func init_add_alias_command(parentCmd *cobra.Command, app *types.AppContext) {
 	)
 }
 
+func init_add_project_command(parentCmd *cobra.Command, app *types.AppContext) {
+	var addProjectCmd = &cobra.Command{
+		Use:     "project [alias] [git resource]",
+		Aliases: []string{"p", "prj"},
+		Short:   "Add project",
+		Long:    `Adds project with a specific alias and Git resource.`,
+		Args:    cobra.MinimumNArgs(2),
+		Run: func(cmd *cobra.Command, args []string) {
+			alias := strings.TrimSpace(args[0])
+			gitResource := strings.TrimSpace(args[1])
+
+			app.ProjectsFile.Projects[alias] = gitResource
+
+			err := app.UpdateProjectsFile()
+			if err != nil {
+				utils.CloseWithError(err)
+			}
+		},
+	}
+
+	parentCmd.AddCommand(
+		addProjectCmd,
+	)
+}
+
 func Init_Add_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var addCmd = &cobra.Command{
 		Use:     "add [resource]",
@@ -86,6 +111,7 @@ func Init_Add_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	}
 
 	init_add_alias_command(addCmd, app)
+	init_add_project_command(addCmd, app)
 
 	parentCmd.AddCommand(
 		addCmd,

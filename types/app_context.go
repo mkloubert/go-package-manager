@@ -37,11 +37,12 @@ import (
 
 // An AppContext contains all information for running this app
 type AppContext struct {
-	AliasesFile AliasesFile // aliases.yaml file in home folder
-	Cwd         string      // current working directory
-	GpmFile     GpmFile     // the gpm.y(a)ml file
-	L           *log.Logger // the logger to use
-	Verbose     bool        // output verbose information
+	AliasesFile  AliasesFile  // aliases.yaml file in home folder
+	Cwd          string       // current working directory
+	GpmFile      GpmFile      // the gpm.y(a)ml file
+	L            *log.Logger  // the logger to use
+	ProjectsFile ProjectsFile // projects.yaml file in home folder
+	Verbose      bool         // output verbose information
 }
 
 // app.Debug() - writes debug information with the underlying logger
@@ -172,9 +173,25 @@ func (app *AppContext) GetModuleUrls(moduleNameOrUrl string) []string {
 	return urls
 }
 
+// app.GetProjectsFilePath() - returns the possible path of the projects.yaml file
+func (app *AppContext) GetProjectsFilePath() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err == nil {
+		return path.Join(homeDir, ".gpm/projects.yaml"), nil
+	} else {
+		return "", err
+	}
+}
+
 // app.LoadAliasesFileIfExist - Loads a gpm.y(a)ml file if it exists
 // and return `true` if file has been loaded successfully.
 func (app *AppContext) LoadAliasesFileIfExist() bool {
+	defer func() {
+		if app.AliasesFile.Aliases == nil {
+			app.AliasesFile.Aliases = map[string][]string{}
+		}
+	}()
+
 	aliasesFilePath, err := app.GetAliasesFilePath()
 	if err == nil {
 		isExisting, err := utils.IsFileExisting(aliasesFilePath)
@@ -209,6 +226,15 @@ func (app *AppContext) LoadAliasesFileIfExist() bool {
 // app.LoadGpmFileIfExist - Loads a gpm.y(a)ml file if it exists
 // and return `true` if file has been loaded successfully.
 func (app *AppContext) LoadGpmFileIfExist() bool {
+	defer func() {
+		if app.GpmFile.Packages == nil {
+			app.GpmFile.Packages = map[string]GpmFilePackageItem{}
+		}
+		if app.GpmFile.Scripts == nil {
+			app.GpmFile.Scripts = map[string]string{}
+		}
+	}()
+
 	gpmFilePath, err := app.GetGpmFilePath()
 	if err != nil {
 		utils.CloseWithError(err)
@@ -240,6 +266,46 @@ func (app *AppContext) LoadGpmFileIfExist() bool {
 	return true
 }
 
+// app.LoadProjectsFileIfExist() - Loads an aliases.yaml file if it exists
+// and return `true` if file has been loaded successfully.
+func (app *AppContext) LoadProjectsFileIfExist() bool {
+	defer func() {
+		if app.ProjectsFile.Projects == nil {
+			app.ProjectsFile.Projects = map[string]string{}
+		}
+	}()
+
+	projectsFilePath, err := app.GetProjectsFilePath()
+	if err == nil {
+		isExisting, err := utils.IsFileExisting(projectsFilePath)
+		if err != nil {
+			utils.CloseWithError(err)
+		}
+
+		if !isExisting {
+			return false
+		}
+
+		app.Debug(fmt.Sprintf("Loading '%v' file ...", projectsFilePath))
+
+		yamlData, err := os.ReadFile(projectsFilePath)
+		if err != nil {
+			utils.CloseWithError(err)
+		}
+
+		var projects ProjectsFile
+		err = yaml.Unmarshal(yamlData, &projects)
+		if err != nil {
+			utils.CloseWithError(err)
+		}
+
+		app.ProjectsFile = projects
+		return true
+	}
+
+	return false
+}
+
 // app.RunCurrentProject() - runs the current go project
 func (app *AppContext) RunCurrentProject(additionalArgs ...string) {
 	p := utils.CreateShellCommandByArgs("go", "run", ".")
@@ -267,6 +333,7 @@ func (app *AppContext) RunShellCommandByArgs(c string, a ...string) {
 	utils.RunCommand(p)
 }
 
+// app.UpdateAliasesFile() - Updates the aliases.yaml file in home folder.
 func (app *AppContext) UpdateAliasesFile() error {
 	aliasesFilePath, err := app.GetAliasesFilePath()
 	if err != nil {
@@ -296,4 +363,36 @@ func (app *AppContext) UpdateAliasesFile() error {
 
 	app.Debug(fmt.Sprintf("Updating file '%v' ...", aliasesFilePath))
 	return os.WriteFile(aliasesFilePath, yamlData, 0750)
+}
+
+// app.UpdateProjectsFile() - Updates the projects.yaml file in home folder.
+func (app *AppContext) UpdateProjectsFile() error {
+	projectsFilePath, err := app.GetProjectsFilePath()
+	if err != nil {
+		return err
+	}
+
+	projectsFileDirectoryPath := path.Dir(projectsFilePath)
+
+	isExisting, err := utils.IsDirExisting(projectsFileDirectoryPath)
+	if err != nil {
+		return err
+	}
+
+	if !isExisting {
+		app.Debug(fmt.Sprintf("Creating directory '%v' ...", projectsFileDirectoryPath))
+
+		err = os.MkdirAll(projectsFileDirectoryPath, 0750)
+		if err != nil {
+			return err
+		}
+	}
+
+	yamlData, err := yaml.Marshal(&app.ProjectsFile)
+	if err != nil {
+		utils.CloseWithError(err)
+	}
+
+	app.Debug(fmt.Sprintf("Updating file '%v' ...", projectsFilePath))
+	return os.WriteFile(projectsFilePath, yamlData, 0750)
 }

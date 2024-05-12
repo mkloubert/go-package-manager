@@ -57,6 +57,7 @@ func main() {
 	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
 
 	app.LoadAliasesFileIfExist()
+	app.LoadProjectsFileIfExist()
 	app.LoadGpmFileIfExist()
 
 	// initialize commands
