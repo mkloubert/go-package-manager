@@ -33,7 +33,7 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 	var installCmd = &cobra.Command{
 		Use:     "install [module name or url]",
-		Aliases: []string{"i"},
+		Aliases: []string{"i", "inst"},
 		Short:   "Installs one or more modules",
 		Long:    `Gets and installs one or more modules by a short name or a valid URL to a git repository.`,
 		Args:    cobra.MinimumNArgs(1),
