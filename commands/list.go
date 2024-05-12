@@ -51,6 +51,25 @@ func init_list_aliases_command(parentCmd *cobra.Command, app *types.AppContext) 
 	)
 }
 
+func init_list_projects_command(parentCmd *cobra.Command, app *types.AppContext) {
+	var listProjectsCmd = &cobra.Command{
+		Use:     "projects",
+		Aliases: []string{"p", "prj", "project", "prjs"},
+		Short:   "List projects",
+		Long:    `Lists (all) projects with their Git resources.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			for alias, gitResource := range app.ProjectsFile.Projects {
+				fmt.Printf("%v%v", alias, fmt.Sprintln())
+				fmt.Printf("\t%v%v", gitResource, fmt.Sprintln())
+			}
+		},
+	}
+
+	parentCmd.AddCommand(
+		listProjectsCmd,
+	)
+}
+
 func Init_List_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var listCmd = &cobra.Command{
 		Use:     "list [resource]",
@@ -63,6 +82,7 @@ func Init_List_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	}
 
 	init_list_aliases_command(listCmd, app)
+	init_list_projects_command(listCmd, app)
 
 	parentCmd.AddCommand(
 		listCmd,
