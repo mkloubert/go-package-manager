@@ -37,6 +37,7 @@
     - [Ollama](#ollama-)
 - [gpm.yaml](#gpmyaml-)
   - [Scripts](#scripts-)
+- [Environment variables](#environment-variables-)
 - [Contribution](#contribution-)
 - [Support](#support-)
 - [License](#license-)
@@ -402,6 +403,19 @@ Two good models are [llama3 by Meta](https://ollama.com/library/llama3) or [phi3
 The idea of an `gpm.yaml` file is very similar to `package.json` file for Node / NPM environments.
 
 An [example can be found here](./gpm.yaml).
+
+## Environment variables [<a href="#table-of-contents">↑</a>]
+
+Environment variables can be loaded from external files, which are handled in this order:
+
+- `$HOME/.gpm/.env<SUFFIX>` (if exist)
+- `<PROJECT-DIR>/.env` (if exist)
+- `<PROJECT-DIR>/.env<SUFFIX>` (if exist)
+- `<PROJECT-DIR>/.env.local` (if exist)
+- `<PROJECT-DIR>/.env<SUFFIX>.local` (if exist)
+- from `--env-file` flags (must exist!)
+
+`<SUFFIX>` is the lower case value from `--environment` and can be empty.
 
 ### Scripts [<a href="#gpmyaml-">↑</a>]
 

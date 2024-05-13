@@ -35,6 +35,7 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
+	"github.com/joho/godotenv"
 	"github.com/mkloubert/go-package-manager/utils"
 )
 
@@ -48,6 +49,8 @@ type AIPrompts struct {
 type AppContext struct {
 	AliasesFile    AliasesFile  // aliases.yaml file in home folder
 	Cwd            string       // current working directory
+	EnvFiles       []string     // one or more env files
+	Environment    string       // the name of the environment
 	GpmFile        GpmFile      // the gpm.y(a)ml file
 	L              *log.Logger  // the logger to use
 	NoSystemPrompt bool         // do not use system prompt
@@ -353,6 +356,47 @@ func (app *AppContext) GetAliasesFilePath() (string, error) {
 	}
 }
 
+// app.GetEnvFilePaths() - returns possible paths of .env* files
+func (app *AppContext) GetEnvFilePaths() ([]string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err == nil {
+		envFilename := ".env"
+		envFileWithSuffix := ".env"
+		envLocalFilename := ".env.local"
+
+		environment := app.GetEnvironment()
+		if environment != "" {
+			envFileWithSuffix += "." + environment
+		}
+
+		envFilePaths := utils.RemoveDuplicatesInStringList(
+			[]string{
+				path.Join(homeDir, ".gpm/"+envFilename),                  // ${HOME}/.env
+				path.Join(app.Cwd, envFilename),                          // <PROJECT-DIR>/.env
+				path.Join(app.Cwd, envFileWithSuffix),                    // <PROJECT-DIR>/.env<SUFFIX>
+				path.Join(app.Cwd, envLocalFilename),                     // <PROJECT-DIR>/.env.local
+				path.Join(app.Cwd, envFilename+"."+environment+".local"), // <PROJECT-DIR>/.env<SUFFIX>.local
+			},
+		)
+
+		return envFilePaths, nil
+	} else {
+		return []string{}, err
+	}
+}
+
+// app.GetEnvironment() - returns the name of the environment
+func (app *AppContext) GetEnvironment() string {
+	environment := strings.TrimSpace(app.Environment) // first try --environment flag
+	if environment == "" {
+		environment = os.Getenv("GPM_ENV") // now try GPM_ENV
+	}
+
+	return strings.TrimSpace(
+		strings.ToLower(environment),
+	)
+}
+
 // app.GetSystemAIPrompt() - returns the AI system prompt based on the current app settings
 func (app *AppContext) GetSystemAIPrompt(defaultPrompt string) string {
 	prompt := app.SystemPrompt // first from command line arguments
@@ -522,12 +566,47 @@ func (app *AppContext) LoadAliasesFileIfExist() bool {
 
 		app.AliasesFile = aliases
 		return true
+	} else {
+		utils.CloseWithError(err)
 	}
 
 	return false
 }
 
-// app.LoadGpmFileIfExist - Loads a gpm.y(a)ml file if it exists
+func (app *AppContext) loadEnvFile(envFilePath string) {
+	app.Debug(fmt.Sprintf("Loading env file '%v' ...", envFilePath))
+	err := godotenv.Overload(envFilePath)
+	if err != nil {
+		utils.CloseWithError(err)
+	}
+}
+
+// app.LoadEnvFilesIfExist() - Loads .env* files if they exist
+// and return `true` if file has been loaded successfully.
+func (app *AppContext) LoadEnvFilesIfExist() {
+	envFilePaths, err := app.GetEnvFilePaths()
+	if err == nil {
+		for _, envFilePath := range envFilePaths {
+			isExisting, err := utils.IsFileExisting(envFilePath)
+			if err != nil {
+				utils.CloseWithError(err)
+			}
+
+			if isExisting {
+				app.loadEnvFile(envFilePath)
+			}
+		}
+
+		// now from `--env-file` flags
+		for _, envFilePath := range app.EnvFiles {
+			app.loadEnvFile(envFilePath)
+		}
+	} else {
+		utils.CloseWithError(err)
+	}
+}
+
+// app.LoadGpmFileIfExist() - Loads a gpm.y(a)ml file if it exists
 // and return `true` if file has been loaded successfully.
 func (app *AppContext) LoadGpmFileIfExist() bool {
 	defer func() {
@@ -602,6 +681,8 @@ func (app *AppContext) LoadProjectsFileIfExist() bool {
 
 		app.ProjectsFile = projects
 		return true
+	} else {
+		utils.CloseWithError(err)
 	}
 
 	return false

@@ -137,6 +137,23 @@ func IsFileExisting(fp string) (bool, error) {
 	return !info.IsDir(), nil
 }
 
+// RemoveDuplicatesInStringList() - removes duplicates in string list
+func RemoveDuplicatesInStringList(arr []string) []string {
+	alreadySeen := map[string]bool{}
+	result := []string{}
+
+	for _, value := range arr {
+		if _, alreadyExists := alreadySeen[value]; !alreadyExists {
+			alreadySeen[value] = true
+			result = append(result, value)
+		}
+	}
+
+	alreadySeen = nil
+
+	return result
+}
+
 // RunCommand() - runs a command and exists on error
 func RunCommand(p *exec.Cmd, additionalArgs ...string) {
 	p.Args = append(p.Args, additionalArgs...)

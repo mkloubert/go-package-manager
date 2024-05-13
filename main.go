@@ -53,6 +53,10 @@ func main() {
 	app.L = log.Default()
 	app.Cwd = cwd
 
+	// use "environment flag" everywhere
+	rootCmd.PersistentFlags().StringVarP(&app.Environment, "environment", "", "", "name of the environment")
+	// use "env-file flag" everywhere
+	rootCmd.PersistentFlags().StringArrayVarP(&app.EnvFiles, "env-file", "e", []string{}, "one or more environment files")
 	// use "no-system-prompt flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.NoSystemPrompt, "no-system-prompt", "", false, "do not use system prompt")
 	// use "ollama flag" everywhere
@@ -64,6 +68,7 @@ func main() {
 	// use "verbose flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
 
+	app.LoadEnvFilesIfExist()
 	app.LoadAliasesFileIfExist()
 	app.LoadProjectsFileIfExist()
 	app.LoadGpmFileIfExist()
