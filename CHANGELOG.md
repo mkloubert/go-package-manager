@@ -1,5 +1,5 @@
 # Change Log (go-package-manager)
 
-## 0.10.0
+## 0.10.1
 
 - initial release
