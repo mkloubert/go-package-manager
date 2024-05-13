@@ -77,6 +77,7 @@ func main() {
 	commands.Init_Add_Command(rootCmd, &app)
 	commands.Init_Build_Command(rootCmd, &app)
 	commands.Init_Checkout_Command(rootCmd, &app)
+	commands.Init_Exec_Command(rootCmd, &app)
 	commands.Init_Install_Command(rootCmd, &app)
 	commands.Init_List_Command(rootCmd, &app)
 	commands.Init_New_Command(rootCmd, &app)

@@ -19,6 +19,7 @@
     - [Build project](#build-project-)
     - [Checkout branch](#checkout-branch-)
     - [Cleanup project](#cleanup-project-)
+    - [Execute shell command](#execute-shell-command-)
     - [Install dependencies](#install-dependencies-)
     - [List aliases](#list-aliases-)
     - [List projects](#list-projects-)
@@ -198,6 +199,16 @@ gpm tidy
 ```
 
 is a short form of `go mod tidy`.
+
+#### Execute shell command [<a href="#commands-">↑</a>]
+
+For example
+
+```bash
+gpm execute go version
+```
+
+will run `go version` with the settings and environment variables loaded from [.env* files](#environment-variables-).
 
 #### Install dependencies [<a href="#commands-">↑</a>]
 
