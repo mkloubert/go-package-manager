@@ -46,4 +46,4 @@ jobs:
         sha256sum: true
         project_path: "./"
         binary_name: "gpm"
-        extra_files: LICENSE
+        extra_files: LICENSE README.md CHANGELOG.md
