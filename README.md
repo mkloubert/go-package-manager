@@ -34,7 +34,7 @@
     - [OpenAI / ChatGPT](#openai--chatgpt-)
     - [Ollama](#ollama-)
 - [gpm.yaml](#gpmyaml-)
-  - [Script](#scripts-)
+  - [Scripts](#scripts-)
 - [Contribution](#contribution-)
 - [Support](#support-)
 - [License](#license-)
