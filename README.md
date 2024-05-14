@@ -443,15 +443,16 @@ From the project folder you will be able to execute `gpm run test1` or `gpm run 
 
 #### Predefined [<a href="#scripts-">↑</a>]
 
-| Name          |                                                                                     |
-|---------------|-------------------------------------------------------------------------------------|
-| `postbuild`   | Is executed after successful execution of [build command](#build-project-)          |
-| `postinstall` | Is executed after successful execution of [install command](#install-dependencies-) |
-| `prebuild`    | Is executed before [build command](#build-project-) is executed                     |
-| `preinstall`  | Is executed before [install command](#install-dependencies-) is executed            |
-| `start`       | Is executed by [start command](#start-project-)                                     |
-| `test`        | Is executed by [test command](#run-tests-)                                          |
-| `tidy`        | Is executed by [tidy command](#cleanup-project-)                                    |
+| Name          |                                                                                             |
+|---------------|---------------------------------------------------------------------------------------------|
+| `postbuild`   | Is executed after successful execution of [build command](#build-project-).                 |
+| `postinstall` | Is executed after successful execution of [install command](#install-dependencies-).        |
+| `prebuild`    | Is executed before [build command](#build-project-) is executed.                            |
+| `preinstall`  | Is executed before [install command](#install-dependencies-) is executed.                   |
+| `pretest`     | Is executed before [test command](#run-tests-) is executed.                                 |
+| `start`       | Is executed by [start command](#start-project-). If not defined `go run .` is executed.     |
+| `test`        | Is executed by [test command](#run-tests-). If not defined `go test .` is executed.         |
+| `tidy`        | Is executed by [tidy command](#cleanup-project-). If not defined `go mod tidy` is executed. |                                       |
 
 ## Contribution [<a href="#table-of-contents">↑</a>]
 

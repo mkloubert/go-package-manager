@@ -48,7 +48,7 @@ func Init_Start_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
-	parentCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+startScriptName+"' script")
+	startCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+startScriptName+"' script")
 
 	parentCmd.AddCommand(
 		startCmd,

@@ -27,9 +27,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const postTestScriptName = "posttest"
+const preTestScriptName = "pretest"
 const testScriptName = "test"
 
 func Init_Test_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var noPostScript bool
+	var noPreScript bool
 	var noScript bool
 
 	var testCmd = &cobra.Command{
@@ -48,7 +52,9 @@ func Init_Test_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
-	parentCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+testScriptName+"' script")
+	testCmd.Flags().BoolVarP(&noPostScript, "no-post-script", "", false, "do not handle '"+postTestScriptName+"' script")
+	testCmd.Flags().BoolVarP(&noPreScript, "no-pre-script", "", false, "do not handle '"+preTestScriptName+"' script")
+	testCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+testScriptName+"' script")
 
 	parentCmd.AddCommand(
 		testCmd,

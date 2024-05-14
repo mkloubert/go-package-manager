@@ -49,7 +49,7 @@ func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
-	parentCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+tidyScriptName+"' script")
+	tidyCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+tidyScriptName+"' script")
 
 	parentCmd.AddCommand(
 		tidyCmd,
