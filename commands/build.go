@@ -30,6 +30,8 @@ import (
 const buildScriptName = "build"
 
 func Init_Build_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var noScript bool
+
 	var buildCmd = &cobra.Command{
 		Use:     "build",
 		Aliases: []string{"b"},
@@ -38,7 +40,7 @@ func Init_Build_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Run: func(cmd *cobra.Command, args []string) {
 			_, ok := app.GpmFile.Scripts[buildScriptName]
 
-			if ok {
+			if !noScript && ok {
 				app.RunScript(buildScriptName, args...)
 			} else {
 				cmdArgs := []string{"go", "build", "."}
@@ -48,6 +50,8 @@ func Init_Build_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			}
 		},
 	}
+
+	buildCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle 'build' script")
 
 	parentCmd.AddCommand(
 		buildCmd,

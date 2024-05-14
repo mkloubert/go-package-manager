@@ -54,8 +54,14 @@ func Init_Run_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				scriptsToExecute = append(scriptsToExecute, scriptName)
 			}
 
-			for _, scriptName := range scriptsToExecute {
-				app.RunScript(scriptName)
+			if len(scriptsToExecute) == 0 {
+				app.RunCurrentProject()
+			} else {
+				// run scripts
+
+				for _, scriptName := range scriptsToExecute {
+					app.RunScript(scriptName)
+				}
 			}
 		},
 	}
