@@ -31,6 +31,8 @@ import (
 const tidyScriptName = "tidy"
 
 func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var noScript bool
+
 	var tidyCmd = &cobra.Command{
 		Use:     "tidy",
 		Aliases: []string{"td"},
@@ -39,13 +41,15 @@ func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Run: func(cmd *cobra.Command, args []string) {
 			_, ok := app.GpmFile.Scripts[tidyScriptName]
 
-			if ok {
+			if !noScript && ok {
 				app.RunScript(tidyScriptName, args...)
 			} else {
 				app.RunShellCommandByArgs("go", "mod", "tidy")
 			}
 		},
 	}
+
+	parentCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+tidyScriptName+"' script")
 
 	parentCmd.AddCommand(
 		tidyCmd,

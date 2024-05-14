@@ -30,6 +30,8 @@ import (
 const testScriptName = "test"
 
 func Init_Test_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var noScript bool
+
 	var testCmd = &cobra.Command{
 		Use:     "test",
 		Aliases: []string{"t", "tst"},
@@ -38,13 +40,15 @@ func Init_Test_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Run: func(cmd *cobra.Command, args []string) {
 			_, ok := app.GpmFile.Scripts[testScriptName]
 
-			if ok {
+			if !noScript && ok {
 				app.RunScript(testScriptName, args...)
 			} else {
 				app.RunShellCommandByArgs("go", "test", ".")
 			}
 		},
 	}
+
+	parentCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+testScriptName+"' script")
 
 	parentCmd.AddCommand(
 		testCmd,

@@ -38,6 +38,7 @@
     - [Ollama](#ollama-)
 - [gpm.yaml](#gpmyaml-)
   - [Scripts](#scripts-)
+    - [Predefined](#predefined-)
 - [Environment variables](#environment-variables-)
 - [Contribution](#contribution-)
 - [Support](#support-)
@@ -439,6 +440,18 @@ scripts:
 ```
 
 From the project folder you will be able to execute `gpm run test1` or `gpm run test2` to run the defined shell/terminal commands.
+
+#### Predefined [<a href="#scripts-">↑</a>]
+
+| Name          |                                                                                     |
+|---------------|-------------------------------------------------------------------------------------|
+| `postbuild`   | Is executed after successful execution of [build command](#build-project-)          |
+| `postinstall` | Is executed after successful execution of [install command](#install-dependencies-) |
+| `prebuild`    | Is executed before [build command](#build-project-) is executed                     |
+| `preinstall`  | Is executed before [install command](#install-dependencies-) is executed            |
+| `start`       | Is executed by [start command](#start-project-)                                     |
+| `test`        | Is executed by [test command](#run-tests-)                                          |
+| `tidy`        | Is executed by [tidy command](#cleanup-project-)                                    |
 
 ## Contribution [<a href="#table-of-contents">↑</a>]
 

@@ -28,7 +28,12 @@ import (
 	"github.com/mkloubert/go-package-manager/types"
 )
 
+const postInstallScriptName = "postinstall"
+const preInstallScriptName = "preinstall"
+
 func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var noPostScript bool
+	var noPreScript bool
 	var noUpdate bool
 
 	var installCmd = &cobra.Command{
@@ -38,6 +43,13 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Long:    `Gets and installs one or more modules by a short name or a valid URL to a git repository.`,
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
+			if !noPreScript {
+				_, ok := app.GpmFile.Scripts[preInstallScriptName]
+				if ok {
+					app.RunScript(preInstallScriptName)
+				}
+			}
+
 			for _, moduleName := range args {
 				urls := app.GetModuleUrls(moduleName)
 
@@ -49,9 +61,18 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					}
 				}
 			}
+
+			if !noPostScript {
+				_, ok := app.GpmFile.Scripts[postInstallScriptName]
+				if ok {
+					app.RunScript(postInstallScriptName)
+				}
+			}
 		},
 	}
 
+	installCmd.Flags().BoolVarP(&noPostScript, "no-post-script", "", false, "do not handle '"+postInstallScriptName+"' script")
+	installCmd.Flags().BoolVarP(&noPreScript, "no-pre-script", "", false, "do not handle '"+preInstallScriptName+"' script")
 	installCmd.Flags().BoolVarP(&noUpdate, "no-update", "n", false, "do not update modules")
 
 	parentCmd.AddCommand(

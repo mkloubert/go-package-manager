@@ -28,9 +28,13 @@ import (
 )
 
 const buildScriptName = "build"
+const postBuildScriptName = "postbuild"
+const preBuildScriptName = "prebuild"
 
 func Init_Build_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var noScript bool
+	var noPostScript bool
+	var noPreScript bool
 
 	var buildCmd = &cobra.Command{
 		Use:     "build",
@@ -38,8 +42,14 @@ func Init_Build_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short:   "Runs build command",
 		Long:    `Runs the 'build' script or the official 'go build .'.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			_, ok := app.GpmFile.Scripts[buildScriptName]
+			if !noPreScript {
+				_, ok := app.GpmFile.Scripts[preBuildScriptName]
+				if ok {
+					app.RunScript(preBuildScriptName)
+				}
+			}
 
+			_, ok := app.GpmFile.Scripts[buildScriptName]
 			if !noScript && ok {
 				app.RunScript(buildScriptName, args...)
 			} else {
@@ -48,10 +58,19 @@ func Init_Build_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 				app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
 			}
+
+			if !noPostScript {
+				_, ok := app.GpmFile.Scripts[postBuildScriptName]
+				if ok {
+					app.RunScript(postBuildScriptName)
+				}
+			}
 		},
 	}
 
-	buildCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle 'build' script")
+	buildCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+buildScriptName+"' script")
+	buildCmd.Flags().BoolVarP(&noPostScript, "no-post-script", "", false, "do not handle '"+postBuildScriptName+"' script")
+	buildCmd.Flags().BoolVarP(&noPreScript, "no-pre-script", "", false, "do not handle '"+preBuildScriptName+"' script")
 
 	parentCmd.AddCommand(
 		buildCmd,
