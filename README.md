@@ -167,6 +167,8 @@ will clone the repository into a temp folder and run `gpm build` from it.
 
 The final executable will be installed in `$HOME/.gpm/bin` folder. So it could be useful to add it to the `$PATH` enviornment variable.
 
+FYI: Instead of the URL as argument you can use a project alias added by [add project command](#add-project-).
+
 #### Build project [<a href="#commands-">↑</a>]
 
 ```bash

@@ -45,131 +45,133 @@ func Init_Make_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short:   "Make project",
 		Long:    `Downloads a Git repository and build it.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			for _, moduleNameOrUrl := range args {
-				urls := app.GetModuleUrls(moduleNameOrUrl)
-				app.Debug(fmt.Sprintf("Found urls for '%v': '%v'", moduleNameOrUrl, urls))
-
-				for _, gitResource := range urls {
-					func() {
-						// get `$HOME/.gpm/bin` folder
-						binPath, err := app.EnsureBinFolder()
-						if err != nil {
-							utils.CloseWithError(err)
-						}
-
-						// current executable path
-						selfPath, err := os.Executable()
-						if err != nil {
-							utils.CloseWithError(err)
-						}
-
-						// get project name from git resource
-						projectName := strings.TrimSuffix(
-							path.Base(gitResource), ".git",
-						)
-
-						// create temp folder where to clone
-						// git repo to
-						tempDir, err := os.MkdirTemp("", "*-"+projectName)
-						if err != nil {
-							utils.CloseWithError(err)
-						}
-						defer func() {
-							app.Debug(fmt.Sprintf("Removing folder '%v' ...", tempDir))
-							os.RemoveAll(tempDir)
-						}()
-
-						tempDirName := path.Base(tempDir)
-
-						// clone repo
-						app.Debug(fmt.Sprintf("Cloning '%v' to '%v' ...", gitResource, tempDir))
-						app.RunShellCommandByArgs("git", "clone", "--depth", "1", gitResource, tempDir)
-
-						buildArgs := []string{selfPath, "build"}
-						buildArgs = append(buildArgs, args[1:]...)
-
-						p := utils.CreateShellCommandByArgs(buildArgs[0], buildArgs[1:]...)
-						p.Dir = tempDir
-						// run `gpm build` in cloned repository
-						app.Debug(fmt.Sprintf("Running '%v' in '%v' ...", strings.Join(buildArgs, " "), p.Dir))
-						utils.RunCommand(p)
-
-						// define possible executable file names
-						outExecutableFilenameByProject := strings.TrimSpace(name)
-						outExecutableFilenameByTempDir := tempDirName
-						if outExecutableFilenameByProject == "" {
-							outExecutableFilenameByProject = projectName
-						}
-						if !noAutoExt && utils.IsWindows() {
-							// Windows uses .exe
-
-							outExecutableFilenameByProject += constants.WindowsExecutableExt
-							outExecutableFilenameByTempDir += constants.WindowsExecutableExt
-						}
-
-						outExecutableFilePathByProject := path.Join(tempDir, outExecutableFilenameByProject)
-						outExecutableFilePathByTempDir := path.Join(tempDir, outExecutableFilenameByTempDir)
-
-						isOutExecutableFileByProjectExisting, err := utils.IsFileExisting(outExecutableFilePathByProject)
-						if err != nil {
-							utils.CloseWithError(err)
-						}
-
-						var buildExecutableFilePath string
-
-						if isOutExecutableFileByProjectExisting {
-							// found executable file in repo
-							buildExecutableFilePath = outExecutableFilePathByProject
-						} else {
-							// try to find executable by name of temp directory instead
-
-							isOutExecutableFileByTempDirNameExisting, err := utils.IsFileExisting(outExecutableFilenameByTempDir)
-							if err != nil {
-								utils.CloseWithError(err)
-							}
-
-							if isOutExecutableFileByTempDirNameExisting {
-								buildExecutableFilePath = outExecutableFilePathByTempDir
-							} else {
-								utils.CloseWithError(fmt.Errorf("no matching executable file found. use --executable flag to specify"))
-							}
-						}
-
-						executableNameInBinFolder := strings.TrimSpace(executable)
-						if executableNameInBinFolder == "" {
-							// use project name as default for the
-							// name of the final executable file in
-							// ${HOME}/.gpm/bin folder
-							executableNameInBinFolder = projectName
-						}
-
-						executableFileInBinFolder := path.Join(binPath, executableNameInBinFolder)
-
-						isExecutableFileInBinFolderExisting, err := utils.IsFileExisting(executableFileInBinFolder)
-						if err == nil {
-							if isExecutableFileInBinFolderExisting {
-								app.Debug(fmt.Sprintf("Removing executable '%v' ...", executableFileInBinFolder))
-								os.Remove(executableFileInBinFolder)
-							}
-						} else {
-							utils.CloseWithError(err)
-						}
-
-						// move build executable to ${HOME}/.gpm/bin folder
-						app.Debug(fmt.Sprintf("Moving build executable '%v' to '%v' ...", buildExecutableFilePath, executableFileInBinFolder))
-						err = os.Rename(buildExecutableFilePath, executableFileInBinFolder)
-						if err != nil {
-							utils.CloseWithError(err)
-						}
-
-						// make file in ${HOME}/.gpm/bin folder executable
-						app.Debug(fmt.Sprintf("Setting up permissions for '%v' executable ...", executableFileInBinFolder))
-						err = os.Chmod(executableFileInBinFolder, constants.DefaultDirMode)
-						if err != nil {
-							utils.CloseWithError(err)
-						}
-					}()
+			for _, projectNameOrUrl := range args {
+				gitResource, ok := app.ProjectsFile.Projects[projectNameOrUrl]
+				if !ok {
+					gitResource = projectNameOrUrl
 				}
+
+				func() {
+					app.Debug(fmt.Sprintf("Will make project from '%v' ...", gitResource))
+
+					// get `$HOME/.gpm/bin` folder
+					binPath, err := app.EnsureBinFolder()
+					if err != nil {
+						utils.CloseWithError(err)
+					}
+
+					// current executable path
+					selfPath, err := os.Executable()
+					if err != nil {
+						utils.CloseWithError(err)
+					}
+
+					// get project name from git resource
+					projectName := strings.TrimSuffix(
+						path.Base(gitResource), ".git",
+					)
+
+					// create temp folder where to clone
+					// git repo to
+					tempDir, err := os.MkdirTemp("", "*-"+projectName)
+					if err != nil {
+						utils.CloseWithError(err)
+					}
+					defer func() {
+						app.Debug(fmt.Sprintf("Removing folder '%v' ...", tempDir))
+						os.RemoveAll(tempDir)
+					}()
+
+					tempDirName := path.Base(tempDir)
+
+					// clone repo
+					app.Debug(fmt.Sprintf("Cloning '%v' to '%v' ...", gitResource, tempDir))
+					app.RunShellCommandByArgs("git", "clone", "--depth", "1", gitResource, tempDir)
+
+					buildArgs := []string{selfPath, "build"}
+					buildArgs = append(buildArgs, args[1:]...)
+
+					p := utils.CreateShellCommandByArgs(buildArgs[0], buildArgs[1:]...)
+					p.Dir = tempDir
+					// run `gpm build` in cloned repository
+					app.Debug(fmt.Sprintf("Running '%v' in '%v' ...", strings.Join(buildArgs, " "), p.Dir))
+					utils.RunCommand(p)
+
+					// define possible executable file names
+					outExecutableFilenameByProject := strings.TrimSpace(name)
+					outExecutableFilenameByTempDir := tempDirName
+					if outExecutableFilenameByProject == "" {
+						outExecutableFilenameByProject = projectName
+					}
+					if !noAutoExt && utils.IsWindows() {
+						// Windows uses .exe
+
+						outExecutableFilenameByProject += constants.WindowsExecutableExt
+						outExecutableFilenameByTempDir += constants.WindowsExecutableExt
+					}
+
+					outExecutableFilePathByProject := path.Join(tempDir, outExecutableFilenameByProject)
+					outExecutableFilePathByTempDir := path.Join(tempDir, outExecutableFilenameByTempDir)
+
+					isOutExecutableFileByProjectExisting, err := utils.IsFileExisting(outExecutableFilePathByProject)
+					if err != nil {
+						utils.CloseWithError(err)
+					}
+
+					var buildExecutableFilePath string
+
+					if isOutExecutableFileByProjectExisting {
+						// found executable file in repo
+						buildExecutableFilePath = outExecutableFilePathByProject
+					} else {
+						// try to find executable by name of temp directory instead
+
+						isOutExecutableFileByTempDirNameExisting, err := utils.IsFileExisting(outExecutableFilenameByTempDir)
+						if err != nil {
+							utils.CloseWithError(err)
+						}
+
+						if isOutExecutableFileByTempDirNameExisting {
+							buildExecutableFilePath = outExecutableFilePathByTempDir
+						} else {
+							utils.CloseWithError(fmt.Errorf("no matching executable file found. use --executable flag to specify"))
+						}
+					}
+
+					executableNameInBinFolder := strings.TrimSpace(executable)
+					if executableNameInBinFolder == "" {
+						// use project name as default for the
+						// name of the final executable file in
+						// ${HOME}/.gpm/bin folder
+						executableNameInBinFolder = projectName
+					}
+
+					executableFileInBinFolder := path.Join(binPath, executableNameInBinFolder)
+
+					isExecutableFileInBinFolderExisting, err := utils.IsFileExisting(executableFileInBinFolder)
+					if err == nil {
+						if isExecutableFileInBinFolderExisting {
+							app.Debug(fmt.Sprintf("Removing executable '%v' ...", executableFileInBinFolder))
+							os.Remove(executableFileInBinFolder)
+						}
+					} else {
+						utils.CloseWithError(err)
+					}
+
+					// move build executable to ${HOME}/.gpm/bin folder
+					app.Debug(fmt.Sprintf("Moving build executable '%v' to '%v' ...", buildExecutableFilePath, executableFileInBinFolder))
+					err = os.Rename(buildExecutableFilePath, executableFileInBinFolder)
+					if err != nil {
+						utils.CloseWithError(err)
+					}
+
+					// make file in ${HOME}/.gpm/bin folder executable
+					app.Debug(fmt.Sprintf("Setting up permissions for '%v' executable ...", executableFileInBinFolder))
+					err = os.Chmod(executableFileInBinFolder, constants.DefaultDirMode)
+					if err != nil {
+						utils.CloseWithError(err)
+					}
+				}()
 			}
 		},
 	}
