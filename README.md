@@ -39,7 +39,7 @@
     - [OpenAI / ChatGPT](#openai--chatgpt-)
     - [Ollama](#ollama-)
 - [gpm.yaml](#gpmyaml-)
-  - [Files](#)
+  - [Files](#files-)
   - [Scripts](#scripts-)
     - [Predefined](#predefined-)
 - [Environment variables](#environment-variables-)
