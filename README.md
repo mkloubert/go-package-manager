@@ -27,6 +27,7 @@
     - [Push to Git remotes](#push-to-git-remotes-)
     - [Remove alias](#remove-alias-)
     - [Remove project](#remove-project-)
+    - [Remove project executable]()
     - [Run script](#run-script-)
     - [Run tests](#run-tests-)
     - [Start project](#start-project-)
@@ -321,6 +322,16 @@ gpm remove project yaml
 ```
 
 you will remove the `yaml` alias from `projects.yaml` file, which is stored in `$HOME/.gpm` folder.
+
+#### Remove project executable [<a href="#commands-">↑</a>]
+
+If you installed a binary with [make command](#build-and-install-executable-) like
+
+```bash
+gpm make https://github.com/gopasspw/gopass
+```
+
+you can simply remove it with `gpm remove binary gopass` if the binary is stored as `gopass` in `$HOME/.gpm/bin` folder.
 
 #### Run script [<a href="#commands-">↑</a>]
 

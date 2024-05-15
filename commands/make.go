@@ -100,8 +100,8 @@ func Init_Make_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					if !noAutoExt && utils.IsWindows() {
 						// Windows uses .exe
 
-						outExecutableFilenameByProject += ".exe"
-						outExecutableFilenameByTempDir += ".exe"
+						outExecutableFilenameByProject += constants.WindowsExecutableExt
+						outExecutableFilenameByTempDir += constants.WindowsExecutableExt
 					}
 
 					outExecutableFilePathByProject := path.Join(tempDir, outExecutableFilenameByProject)

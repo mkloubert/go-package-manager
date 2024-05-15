@@ -24,8 +24,11 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"path"
 	"strings"
 
+	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 	"github.com/spf13/cobra"
@@ -54,6 +57,57 @@ func init_remove_alias_command(parentCmd *cobra.Command, app *types.AppContext) 
 
 	parentCmd.AddCommand(
 		removeAliasCmd,
+	)
+}
+
+func init_remove_binary_command(parentCmd *cobra.Command, app *types.AppContext) {
+	var noAutoExt bool
+
+	var removeBinaryCmd = &cobra.Command{
+		Use:     "binary [executable name]",
+		Aliases: []string{"b", "bin", "bins", "binaries"},
+		Short:   "Remove package alias",
+		Long:    `Removes one or more aliases.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			for _, a := range args {
+				binName := strings.TrimSpace(a)
+
+				binFilename := binName
+				if !noAutoExt {
+					if utils.IsWindows() && !strings.HasSuffix(binFilename, constants.WindowsExecutableExt) {
+						binFilename += constants.WindowsExecutableExt
+					}
+				}
+
+				binPath, err := app.EnsureBinFolder()
+				if err != nil {
+					utils.CloseWithError(err)
+				}
+
+				executableFilePath := path.Join(binPath, binFilename)
+
+				isExecutableFileExisting, err := utils.IsFileExisting(executableFilePath)
+				if err != nil {
+					utils.CloseWithError(err)
+				}
+				if !isExecutableFileExisting {
+					app.Debug(fmt.Sprintf("Executable file '%v' not found", executableFilePath))
+					return
+				}
+
+				app.Debug(fmt.Sprintf("Removing executable file '%v' ...", executableFilePath))
+				err = os.Remove(executableFilePath)
+				if err != nil {
+					utils.CloseWithError(err)
+				}
+			}
+		},
+	}
+
+	removeBinaryCmd.Flags().BoolVarP(&noAutoExt, "no-auto-extension", "", false, "do not add file extension automatically")
+
+	parentCmd.AddCommand(
+		removeBinaryCmd,
 	)
 }
 
@@ -95,6 +149,7 @@ func Init_Remove_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	}
 
 	init_remove_alias_command(removeCmd, app)
+	init_remove_binary_command(removeCmd, app)
 	init_remove_project_command(removeCmd, app)
 
 	parentCmd.AddCommand(
