@@ -2,8 +2,6 @@
 
 [![Share via Facebook](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Facebook.png)](https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&quote=gpm%20-%20Go%20Package%20Manager) [![Share via X](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/X.png)](https://x.com/intent/tweet?source=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&text=gpm%20-%20Go%20Package%20Manager) [![Share via Pinterest](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Pinterest.png)](https://pinterest.com/pin/create/button/?url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&description=gpm%20-%20Go%20Package%20Manager) [![Share via Reddit](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Reddit.png)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&title=gpm%20-%20Go%20Package%20Manager) [![Share via LinkedIn](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/LinkedIn.png)](https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&title=gpm%20-%20Go%20Package%20Manager) [![Share via Wordpress](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Wordpress.png)](https://wordpress.com/press-this.php?u=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&s=gpm%20-%20Go%20Package%20Manager) [![Share via Email](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Email.png)](mailto:?subject=gpm%20-%20Go%20Package%20Manager&body=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager)
 
-<a name="toc"></a>
-
 ## Table of contents
 
 - [Overview](#overview-)
@@ -16,6 +14,7 @@
   - [Commands](#commands-)
     - [Add alias](#add-alias-)
     - [Add project](#add-project-)
+    - [Build and install executable](#build-and-install-executable-)
     - [Build project](#build-project-)
     - [Checkout branch](#checkout-branch-)
     - [Cleanup project](#cleanup-project-)
@@ -43,6 +42,7 @@
 - [Contribution](#contribution-)
 - [Support](#support-)
 - [License](#license-)
+- [Credits](#credits-)
 
 ## Overview [<a href="#table-of-contents">↑</a>]
 
@@ -102,8 +102,6 @@ will download the latest version [from GitHub](https://github.com/mkloubert/go-p
 Invoke-WebRequest 'https://api.github.com/repos/mkloubert/go-package-manager/releases/latest' -UseBasicParsing | ConvertFrom-Json | % { $_.assets | Where-Object { $_.browser_download_url -like '*windows*<!!!CPU!!!>*.zip' -and $_.browser_download_url -notlike '*sha256*' } | Select-Object -ExpandProperty browser_download_url -First 1 } | % { $url=$_; $output="gpm.zip"; Invoke-WebRequest $url -OutFile $output; Expand-Archive $output -DestinationPath "$env:TEMP\gpm" -Force; New-Item -ItemType Directory -Path "C:\Program Files\gpm" -Force | Out-Null; Copy-Item "$env:TEMP\gpm\gpm.exe" -Destination "C:\Program Files\gpm" }
 ```
 
-<a name="build-from-source"></a>
-
 ### Build from source [<a href="#installation-">↑</a>]
 
 ```bash
@@ -115,9 +113,7 @@ cd gpm
 go build . && ./gpm --version
 ```
 
-<a name="usage"></a>
-
-## Usage [<a href="#toc">↑</a>]
+## Usage [<a href="#table-of-contents">↑</a>]
 
 ### Commands [<a href="#usage-">↑</a>]
 
@@ -139,8 +135,6 @@ gpm install yaml
 
 `go get -u https://github.com/go-yaml/yaml` will be executed instead.
 
-<a name="add-project"></a>
-
 #### Add project [<a href="#commands-">↑</a>]
 
 With
@@ -159,7 +153,15 @@ gpm new react-project
 
 the repository will be cloned to `react-spa-template` subfolder, then its `.git` folder will be removed and the new folder will be re-initialized with `git init`.
 
-<a name="checkout-branch"></a>
+#### Build and install executable [<a href="#commands-">↑</a>]
+
+```bash
+gpm make https://github.com/gohugoio/hugo
+```
+
+will clone the repository into a temp folder and run `gpm build` from it.
+
+The final executable will be installed in `$HOME/.gpm/bin` folder. So it could be useful to add it to the `$PATH` enviornment variable.
 
 #### Build project [<a href="#commands-">↑</a>]
 
@@ -190,8 +192,6 @@ gpm checkout "i will fix the save button on start page" --suggest
 for example could suggest a value like `feature/fix-save-button-on-start-page` when using ChatGPT 3.5
 
 Have a look at the [Setup AI](#setup-ai) which describes how to setup OpenAI or Ollama API.
-
-<a name="setup-ai"></a>
 
 #### Cleanup project [<a href="#commands-">↑</a>]
 
@@ -467,3 +467,11 @@ If you like the project you can [donate via PayPal](https://paypal.me/MarcelKlou
 ## License [<a href="#table-of-contents">↑</a>]
 
 The project is licensed under the [MIT](./LICENSE).
+
+## Credits [<a href="#table-of-contents">↑</a>]
+
+`gpm` makes use of these following great projects:
+
+- [cobra](https://github.com/spf13/cobra) by [Steve Francia](https://github.com/spf13)
+- [go-yaml](https://github.com/goccy/go-yaml) by [Masaaki Goshima](https://github.com/goccy)
+- [godotenv](https://github.com/joho/godotenv) by [John Barton](https://github.com/joho)

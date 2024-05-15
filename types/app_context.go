@@ -37,6 +37,8 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/joho/godotenv"
 	"github.com/mkloubert/go-package-manager/utils"
+
+	constants "github.com/mkloubert/go-package-manager/constants"
 )
 
 // AIPrompts stores prompts for AI chats
@@ -316,6 +318,31 @@ func (app *AppContext) Debug(v ...any) *AppContext {
 	return app
 }
 
+// app.EnsureBinFolder() - ensures and returns the path of central bin folder
+func (app *AppContext) EnsureBinFolder() (string, error) {
+	binPath, err := app.GetBinFolderPath()
+	if err != nil {
+		return "", err
+	}
+
+	info, err := os.Stat(binPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(binPath, constants.DefaultDirMode)
+			if err == nil {
+				return binPath, nil
+			}
+			return "", nil
+		}
+		return "", err
+	}
+
+	if info.IsDir() {
+		return binPath, nil
+	}
+	return "", fmt.Errorf("%v is no directory", binPath)
+}
+
 // app.GetAIPrompt() - returns the AI prompt based on the current app settings
 func (app *AppContext) GetAIPrompt(defaultPrompt string) string {
 	prompt := app.Prompt // first from command line arguments
@@ -356,6 +383,29 @@ func (app *AppContext) GetAliasesFilePath() (string, error) {
 	}
 }
 
+// app.GetBinFolderPath() - returns the possible path of a central bin folder
+func (app *AppContext) GetBinFolderPath() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err == nil {
+		var binPath string
+
+		GPM_BIN_PATH := strings.TrimSpace(os.Getenv("GPM_BIN_PATH"))
+		if GPM_BIN_PATH != "" {
+			binPath = GPM_BIN_PATH
+		} else {
+			binPath = path.Join(homeDir, ".gpm/bin")
+		}
+
+		if !path.IsAbs(binPath) {
+			binPath = path.Join(app.Cwd, binPath)
+		}
+
+		return binPath, nil
+	} else {
+		return "", nil
+	}
+}
+
 // app.GetEnvFilePaths() - returns possible paths of .env* files
 func (app *AppContext) GetEnvFilePaths() ([]string, error) {
 	homeDir, err := os.UserHomeDir()
@@ -383,33 +433,6 @@ func (app *AppContext) GetEnvFilePaths() ([]string, error) {
 	} else {
 		return []string{}, err
 	}
-}
-
-// app.GetEnvironment() - returns the name of the environment
-func (app *AppContext) GetEnvironment() string {
-	environment := strings.TrimSpace(app.Environment) // first try --environment flag
-	if environment == "" {
-		environment = os.Getenv("GPM_ENV") // now try GPM_ENV
-	}
-
-	return strings.TrimSpace(
-		strings.ToLower(environment),
-	)
-}
-
-// app.GetSystemAIPrompt() - returns the AI system prompt based on the current app settings
-func (app *AppContext) GetSystemAIPrompt(defaultPrompt string) string {
-	prompt := app.SystemPrompt // first from command line arguments
-
-	if prompt == "" {
-		prompt = os.Getenv("GPM_AI_SYSTEM_PROMPT") // no from environment variable
-	}
-
-	if prompt == "" {
-		prompt = defaultPrompt // take the default
-	}
-
-	return prompt
 }
 
 // app.GetCurrentGitBranch() - returns the name of the current branch using git command
@@ -459,6 +482,18 @@ func (app *AppContext) GetGitBranches() ([]string, error) {
 	}
 
 	return branchNames, nil
+}
+
+// app.GetEnvironment() - returns the name of the environment
+func (app *AppContext) GetEnvironment() string {
+	environment := strings.TrimSpace(app.Environment) // first try --environment flag
+	if environment == "" {
+		environment = os.Getenv("GPM_ENV") // now try GPM_ENV
+	}
+
+	return strings.TrimSpace(
+		strings.ToLower(environment),
+	)
 }
 
 // app.GetGitRemotes() - returns the list of remotes using git command
@@ -529,6 +564,21 @@ func (app *AppContext) GetProjectsFilePath() (string, error) {
 	} else {
 		return "", err
 	}
+}
+
+// app.GetSystemAIPrompt() - returns the AI system prompt based on the current app settings
+func (app *AppContext) GetSystemAIPrompt(defaultPrompt string) string {
+	prompt := app.SystemPrompt // first from command line arguments
+
+	if prompt == "" {
+		prompt = os.Getenv("GPM_AI_SYSTEM_PROMPT") // no from environment variable
+	}
+
+	if prompt == "" {
+		prompt = defaultPrompt // take the default
+	}
+
+	return prompt
 }
 
 // app.LoadAliasesFileIfExist - Loads a gpm.y(a)ml file if it exists
@@ -732,7 +782,7 @@ func (app *AppContext) UpdateAliasesFile() error {
 	if !isExisting {
 		app.Debug(fmt.Sprintf("Creating directory '%v' ...", aliasesFileDirectoryPath))
 
-		err = os.MkdirAll(aliasesFileDirectoryPath, 0750)
+		err = os.MkdirAll(aliasesFileDirectoryPath, constants.DefaultDirMode)
 		if err != nil {
 			return err
 		}
@@ -744,7 +794,7 @@ func (app *AppContext) UpdateAliasesFile() error {
 	}
 
 	app.Debug(fmt.Sprintf("Updating file '%v' ...", aliasesFilePath))
-	return os.WriteFile(aliasesFilePath, yamlData, 0750)
+	return os.WriteFile(aliasesFilePath, yamlData, constants.DefaultFileMode)
 }
 
 // app.UpdateProjectsFile() - Updates the projects.yaml file in home folder.
@@ -764,7 +814,7 @@ func (app *AppContext) UpdateProjectsFile() error {
 	if !isExisting {
 		app.Debug(fmt.Sprintf("Creating directory '%v' ...", projectsFileDirectoryPath))
 
-		err = os.MkdirAll(projectsFileDirectoryPath, 0750)
+		err = os.MkdirAll(projectsFileDirectoryPath, constants.DefaultDirMode)
 		if err != nil {
 			return err
 		}
@@ -776,5 +826,5 @@ func (app *AppContext) UpdateProjectsFile() error {
 	}
 
 	app.Debug(fmt.Sprintf("Updating file '%v' ...", projectsFilePath))
-	return os.WriteFile(projectsFilePath, yamlData, 0750)
+	return os.WriteFile(projectsFilePath, yamlData, constants.DefaultFileMode)
 }

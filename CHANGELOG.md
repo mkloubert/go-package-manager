@@ -1,5 +1,11 @@
 # Change Log (go-package-manager)
 
+## 0.12.0
+
+- feat: `make` command, which downloads a Git repository, then runs `build` command from it and move the final executable to `$HOME/.gpm/bin` folder
+- feat: can setup `GPM_BIN_PATH` environment variable for a custom central folder for binaries, which is `$HOME/.gpm/bin` by default
+- chore: code cleanups and improvements
+
 ## 0.11.0
 
 - feat: load `.env` files from `$HOME/.gpm` and project directories, if exist, automatically

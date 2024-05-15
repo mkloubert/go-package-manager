@@ -60,7 +60,7 @@ func CloseWithError(err error) {
 // without running it
 func CreateShellCommand(c string) *exec.Cmd {
 	var p *exec.Cmd
-	if runtime.GOOS == "windows" {
+	if IsWindows() {
 		p = CreateShellCommandByArgs("cmd", "/C", c)
 	} else {
 		// UNIX / Linux
@@ -135,6 +135,11 @@ func IsFileExisting(fp string) (bool, error) {
 	}
 
 	return !info.IsDir(), nil
+}
+
+// IsWindows() - checks if current operating system is Microsoft Windows or not
+func IsWindows() bool {
+	return runtime.GOOS == "windows"
 }
 
 // RemoveDuplicatesInStringList() - removes duplicates in string list

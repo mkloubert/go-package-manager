@@ -80,6 +80,7 @@ func main() {
 	commands.Init_Exec_Command(rootCmd, &app)
 	commands.Init_Install_Command(rootCmd, &app)
 	commands.Init_List_Command(rootCmd, &app)
+	commands.Init_Make_Command(rootCmd, &app)
 	commands.Init_New_Command(rootCmd, &app)
 	commands.Init_Pull_Command(rootCmd, &app)
 	commands.Init_Push_Command(rootCmd, &app)
