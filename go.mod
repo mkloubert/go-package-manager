@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/goccy/go-yaml v1.11.3
+	github.com/hashicorp/go-version v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.8.0
 )

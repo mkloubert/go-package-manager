@@ -27,6 +27,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -140,6 +141,30 @@ func IsFileExisting(fp string) (bool, error) {
 // IsWindows() - checks if current operating system is Microsoft Windows or not
 func IsWindows() bool {
 	return runtime.GOOS == "windows"
+}
+
+// ListFiles() - checks if current operating system is Microsoft Windows or not
+func ListFiles(dir string, pattern string) ([]string, error) {
+	var matchingFiles []string
+
+	err := filepath.Walk(dir, func(p string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relPath, err := filepath.Rel(dir, p)
+		if err != nil {
+			return err
+		}
+
+		r := regexp.MustCompile(pattern)
+		if r.MatchString(relPath) {
+			matchingFiles = append(matchingFiles, p)
+		}
+
+		return nil
+	})
+	return matchingFiles, err
 }
 
 // RemoveDuplicatesInStringList() - removes duplicates in string list

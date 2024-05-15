@@ -6,6 +6,8 @@
 - feat: can setup `GPM_BIN_PATH` environment variable for a custom central folder for binaries, which is `$HOME/.gpm/bin` by default
 - feat: `remove binary` command, which removes binary installed with `make` command
 - feat: `list binaries` command, which lists binaries installed with `make` command
+- feat: `pack` command, which compresses files defined in `files` section of `gpm.yaml` file to zip archive
+- fix: setup `Dir` property of commands used in Git* methods of `AppContext` instance
 - chore: code cleanups and improvements
 
 ## 0.11.0

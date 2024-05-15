@@ -39,7 +39,6 @@ func Init_Start_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Long:    `Runs the current project or 'start' script, if defined.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			_, ok := app.GpmFile.Scripts[startScriptName]
-
 			if !noScript && ok {
 				app.RunScript(startScriptName, args...)
 			} else {

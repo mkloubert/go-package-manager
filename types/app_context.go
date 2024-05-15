@@ -35,6 +35,7 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
+	"github.com/hashicorp/go-version"
 	"github.com/joho/godotenv"
 	"github.com/mkloubert/go-package-manager/utils"
 
@@ -378,9 +379,8 @@ func (app *AppContext) GetAliasesFilePath() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err == nil {
 		return path.Join(homeDir, ".gpm/aliases.yaml"), nil
-	} else {
-		return "", err
 	}
+	return "", err
 }
 
 // app.GetBinFolderPath() - returns the possible path of a central bin folder
@@ -401,9 +401,8 @@ func (app *AppContext) GetBinFolderPath() (string, error) {
 		}
 
 		return binPath, nil
-	} else {
-		return "", nil
 	}
+	return "", nil
 }
 
 // app.GetEnvFilePaths() - returns possible paths of .env* files
@@ -438,6 +437,7 @@ func (app *AppContext) GetEnvFilePaths() ([]string, error) {
 // app.GetCurrentGitBranch() - returns the name of the current branch using git command
 func (app *AppContext) GetCurrentGitBranch() (string, error) {
 	p := exec.Command("git", "symbolic-ref", "--short", "HEAD")
+	p.Dir = app.Cwd
 
 	var output bytes.Buffer
 	p.Stdout = &output
@@ -454,6 +454,7 @@ func (app *AppContext) GetCurrentGitBranch() (string, error) {
 // app.GetGitBranches() - returns the list of branches using git command
 func (app *AppContext) GetGitBranches() ([]string, error) {
 	p := exec.Command("git", "branch", "-a")
+	p.Dir = app.Cwd
 
 	var output bytes.Buffer
 	p.Stdout = &output
@@ -499,6 +500,7 @@ func (app *AppContext) GetEnvironment() string {
 // app.GetGitRemotes() - returns the list of remotes using git command
 func (app *AppContext) GetGitRemotes() ([]string, error) {
 	p := exec.Command("git", "remote")
+	p.Dir = app.Cwd
 
 	var output bytes.Buffer
 	p.Stdout = &output
@@ -526,9 +528,56 @@ func (app *AppContext) GetGitRemotes() ([]string, error) {
 	return remotes, nil
 }
 
+// app.GetGitTags() - returns the list of tags using git command
+func (app *AppContext) GetGitTags() ([]string, error) {
+	p := exec.Command("git", "tag")
+	p.Dir = app.Cwd
+
+	var output bytes.Buffer
+	p.Stdout = &output
+
+	err := p.Run()
+	if err != nil {
+		return []string{}, err
+	}
+	defer output.Reset()
+
+	tags := strings.Split(
+		strings.TrimSpace(output.String()), "\n",
+	)
+
+	return tags, nil
+}
+
 // app.GetAliasesFilePath() - returns the possible path of the gpm.yaml file
 func (app *AppContext) GetGpmFilePath() (string, error) {
 	return path.Join(app.Cwd, "gpm.yaml"), nil
+}
+
+// app.GetLatestVersion() - Returns the latest version based on the Git tags
+// of the current repository or nil if not found.
+func (app *AppContext) GetLatestVersion() (*version.Version, error) {
+	allVersions, err := app.GetVersions()
+	if err != nil {
+		return nil, err
+	}
+
+	var latestVersion *version.Version
+	for _, v := range allVersions {
+		updateVersion := func() {
+			latestVersion = v
+		}
+
+		if latestVersion != nil {
+			if latestVersion.LessThanOrEqual(v) {
+				updateVersion()
+			}
+		} else {
+			updateVersion()
+		}
+	}
+
+	return latestVersion, nil
 }
 
 // app.GetModuleUrls() - returns the list of module urls based on the
@@ -579,6 +628,68 @@ func (app *AppContext) GetSystemAIPrompt(defaultPrompt string) string {
 	}
 
 	return prompt
+}
+
+// app.GetVersions() - Returns all versions represented by Git tags
+// inside the current working directory.
+func (app *AppContext) GetVersions() ([]*version.Version, error) {
+	var versions []*version.Version
+
+	tags, err := app.GetGitTags()
+	if err != nil {
+		return versions, err
+	}
+
+	for _, t := range tags {
+		v, err := version.NewVersion(t)
+		if err == nil {
+			versions = append(versions, v)
+		}
+	}
+
+	return versions, nil
+}
+
+// app.ListFiles() - Lists all files inside the current working directory
+// based of the patterns from "files" section of gpm.yaml file.
+func (app *AppContext) ListFiles() ([]string, error) {
+	var patterns []string
+	if len(app.GpmFile.Files) == 0 {
+		executableFilename := path.Base(app.Cwd)
+		if utils.IsWindows() {
+			executableFilename += constants.WindowsExecutableExt
+		}
+
+		patterns = append(
+			patterns,
+			"^"+executableFilename+"$",
+			"^CHANGELOG.md$", "^CONTRIBUTING.md$", "^CONTRIBUTION.md$", "^LICENSE$", "^README.md$",
+		)
+	} else {
+		patterns = append(patterns, app.GpmFile.Files...)
+	}
+
+	var files []string
+	matchingFiles := map[string]bool{}
+
+	for _, p := range patterns {
+		filesByPattern, err := utils.ListFiles(app.Cwd, p)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, f := range filesByPattern {
+			_, ok := matchingFiles[f]
+			if !ok {
+				matchingFiles[f] = true
+				files = append(files, f)
+			}
+		}
+	}
+
+	matchingFiles = nil
+
+	return files, nil
 }
 
 // app.LoadAliasesFileIfExist - Loads a gpm.y(a)ml file if it exists
@@ -659,12 +770,6 @@ func (app *AppContext) LoadEnvFilesIfExist() {
 // app.LoadGpmFileIfExist() - Loads a gpm.y(a)ml file if it exists
 // and return `true` if file has been loaded successfully.
 func (app *AppContext) LoadGpmFileIfExist() bool {
-	defer func() {
-		if app.GpmFile.Scripts == nil {
-			app.GpmFile.Scripts = map[string]string{}
-		}
-	}()
-
 	gpmFilePath, err := app.GetGpmFilePath()
 	if err != nil {
 		utils.CloseWithError(err)

@@ -43,7 +43,6 @@ func Init_Test_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Long:    `Runs tests or 'test' script, if defined.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			_, ok := app.GpmFile.Scripts[testScriptName]
-
 			if !noScript && ok {
 				app.RunScript(testScriptName, args...)
 			} else {

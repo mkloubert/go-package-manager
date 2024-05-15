@@ -30,12 +30,21 @@ import (
 
 // A GpmFile stores all data of a gpm.y(a)ml file.
 type GpmFile struct {
+	Files   []string          `yaml:"files"`   // whitelist of file patterns which are used by pack command for example
 	Scripts map[string]string `yaml:"scripts"` // one or more scripts
 }
 
 // LoadGpmFile() - Loads a gpm.yaml file via a file path
 func LoadGpmFile(gpmFilePath string) (GpmFile, error) {
 	var gpm GpmFile
+	defer func() {
+		if gpm.Files == nil {
+			gpm.Files = []string{}
+		}
+		if gpm.Scripts == nil {
+			gpm.Scripts = map[string]string{}
+		}
+	}()
 
 	yamlData, err := os.ReadFile(gpmFilePath)
 	if err != nil {

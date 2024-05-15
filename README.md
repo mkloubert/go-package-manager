@@ -24,6 +24,7 @@
     - [List executables](#list-executables-)
     - [List projects](#list-projects-)
     - [New project](#new-project-)
+    - [Pack project](#pack-project-)
     - [Pull from Git remotes](#pull-from-git-remotes-)
     - [Push to Git remotes](#push-to-git-remotes-)
     - [Remove alias](#remove-alias-)
@@ -38,6 +39,7 @@
     - [OpenAI / ChatGPT](#openai--chatgpt-)
     - [Ollama](#ollama-)
 - [gpm.yaml](#gpmyaml-)
+  - [Files](#)
   - [Scripts](#scripts-)
     - [Predefined](#predefined-)
 - [Environment variables](#environment-variables-)
@@ -291,6 +293,24 @@ gpm new mkloubert
 
 later which will simply call `git clone git@github.com:mkloubert/mkloubert.git` instead that clones the Git repository to `mkloubert` subfolder, removes its `.git` folder and re-initializes it with `git init`.
 
+#### Pack project [<a href="#commands-">↑</a>]
+
+If you run
+
+```bash
+gpm pack
+```
+
+all files as defined in [files section of gpm.yaml](#gpmyaml-) will be written to a `.zip` file for the current CPU architecture and operating system.
+
+Running with arguments like
+
+```bash
+gpm pack ^windows
+```
+
+will create packages for all supported CPU architectures supported by Microsoft Windows and the Go compiler.
+
 #### Pull from Git remotes [<a href="#commands-">↑</a>]
 
 The execution of
@@ -436,18 +456,30 @@ The idea of an `gpm.yaml` file is very similar to `package.json` file for Node /
 
 An [example can be found here](./gpm.yaml).
 
-## Environment variables [<a href="#table-of-contents">↑</a>]
+### Files [<a href="#gpmyaml-">↑</a>]
 
-Environment variables can be loaded from external files, which are handled in this order:
+The `files` section contains a list of regular expressions of files which is used by [pack command](#pack-project-):
 
-- `$HOME/.gpm/.env<SUFFIX>` (if exist)
-- `<PROJECT-DIR>/.env` (if exist)
-- `<PROJECT-DIR>/.env<SUFFIX>` (if exist)
-- `<PROJECT-DIR>/.env.local` (if exist)
-- `<PROJECT-DIR>/.env<SUFFIX>.local` (if exist)
-- from `--env-file` flags (must exist!)
+```yaml
+# ...
 
-`<SUFFIX>` is the lower case value from `--environment` and can be empty.
+files:
+  - my-app
+  - LICENSE
+  - README.md
+  - ^commands/p
+
+# ...
+```
+
+If the list is empty or not defined, the following default values are set:
+
+- possible name of the executable file build with [build command](#build-project-)
+- `^CHANGELOG.md$`
+- `^CONTRIBUTING.md$`
+- `^CONTRIBUTION.md$`
+- `^LICENSE$`
+- `^README.md$`
 
 ### Scripts [<a href="#gpmyaml-">↑</a>]
 
@@ -473,6 +505,19 @@ From the project folder you will be able to execute `gpm run test1` or `gpm run 
 | `start`       | Is executed by [start command](#start-project-). If not defined `go run .` is executed.     |
 | `test`        | Is executed by [test command](#run-tests-). If not defined `go test .` is executed.         |
 | `tidy`        | Is executed by [tidy command](#cleanup-project-). If not defined `go mod tidy` is executed. |                                       |
+
+## Environment variables [<a href="#table-of-contents">↑</a>]
+
+Environment variables can be loaded from external files, which are handled in this order:
+
+- `$HOME/.gpm/.env<SUFFIX>` (if exist)
+- `<PROJECT-DIR>/.env` (if exist)
+- `<PROJECT-DIR>/.env<SUFFIX>` (if exist)
+- `<PROJECT-DIR>/.env.local` (if exist)
+- `<PROJECT-DIR>/.env<SUFFIX>.local` (if exist)
+- from `--env-file` flags (must exist!)
+
+`<SUFFIX>` is the lower case value from `--environment` and can be empty.
 
 ## Contribution [<a href="#table-of-contents">↑</a>]
 

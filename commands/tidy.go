@@ -40,7 +40,6 @@ func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Long:    `Cleans up the project from unused modules and add missing ones depending on the current source code.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			_, ok := app.GpmFile.Scripts[tidyScriptName]
-
 			if !noScript && ok {
 				app.RunScript(tidyScriptName, args...)
 			} else {
