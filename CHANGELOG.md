@@ -5,6 +5,7 @@
 - feat: `make` command, which downloads a Git repository, then runs `build` command from it and move the final executable to `$HOME/.gpm/bin` folder ... command is also able to handle aliases create by `add alias` command as well
 - feat: can setup `GPM_BIN_PATH` environment variable for a custom central folder for binaries, which is `$HOME/.gpm/bin` by default
 - feat: `remove binary` command, which removes binary installed with `make` command
+- feat: `list binaries` command, which lists binaries installed with `make` command
 - chore: code cleanups and improvements
 
 ## 0.11.0

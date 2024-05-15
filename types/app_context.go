@@ -681,18 +681,13 @@ func (app *AppContext) LoadGpmFileIfExist() bool {
 
 	app.Debug(fmt.Sprintf("Loading '%v' file ...", gpmFilePath))
 
-	yamlData, err := os.ReadFile(gpmFilePath)
-	if err != nil {
-		utils.CloseWithError(err)
-	}
-
-	var gpm GpmFile
-	err = yaml.Unmarshal(yamlData, &gpm)
+	gpm, err := LoadGpmFile(gpmFilePath)
 	if err != nil {
 		utils.CloseWithError(err)
 	}
 
 	app.GpmFile = gpm
+
 	return true
 }
 

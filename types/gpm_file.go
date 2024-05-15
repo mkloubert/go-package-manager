@@ -22,7 +22,27 @@
 
 package types
 
+import (
+	"os"
+
+	"github.com/goccy/go-yaml"
+)
+
 // A GpmFile stores all data of a gpm.y(a)ml file.
 type GpmFile struct {
 	Scripts map[string]string `yaml:"scripts"` // one or more scripts
+}
+
+// LoadGpmFile() - Loads a gpm.yaml file via a file path
+func LoadGpmFile(gpmFilePath string) (GpmFile, error) {
+	var gpm GpmFile
+
+	yamlData, err := os.ReadFile(gpmFilePath)
+	if err != nil {
+		return gpm, err
+	}
+
+	err = yaml.Unmarshal(yamlData, &gpm)
+
+	return gpm, err
 }

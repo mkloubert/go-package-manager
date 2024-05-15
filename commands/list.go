@@ -24,8 +24,12 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"sort"
+	"strings"
 
 	"github.com/mkloubert/go-package-manager/types"
+	"github.com/mkloubert/go-package-manager/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -42,6 +46,53 @@ func init_list_aliases_command(parentCmd *cobra.Command, app *types.AppContext) 
 				for _, s := range sources {
 					fmt.Printf("\t%v%v", s, fmt.Sprintln())
 				}
+			}
+		},
+	}
+
+	parentCmd.AddCommand(
+		listAliasesCmd,
+	)
+}
+
+func init_list_binaries_command(parentCmd *cobra.Command, app *types.AppContext) {
+	var listAliasesCmd = &cobra.Command{
+		Use:     "binaries",
+		Aliases: []string{"b", "bin", "binary", "bin"},
+		Short:   "List binaries",
+		Long:    `Lists (all) binaries installed inside home directory.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			binPath, err := app.GetBinFolderPath()
+			if err != nil {
+				utils.CloseWithError(err)
+			}
+
+			isBinPathExisting, err := utils.IsDirExisting(binPath)
+			if err != nil {
+				utils.CloseWithError(err)
+			}
+
+			if !isBinPathExisting {
+				return
+			}
+
+			binEntries, err := os.ReadDir(binPath)
+			if err != nil {
+				utils.CloseWithError(err)
+			}
+
+			sort.Slice(binEntries, func(indexX, indexY int) bool {
+				return strings.ToLower(binEntries[indexX].Name()) < strings.ToLower(binEntries[indexY].Name())
+			})
+
+			fmt.Println(binPath)
+
+			for _, entry := range binEntries {
+				if entry.IsDir() {
+					continue
+				}
+
+				fmt.Printf("\t%v%v", entry.Name(), fmt.Sprintln())
 			}
 		},
 	}
@@ -82,6 +133,7 @@ func Init_List_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	}
 
 	init_list_aliases_command(listCmd, app)
+	init_list_binaries_command(listCmd, app)
 	init_list_projects_command(listCmd, app)
 
 	parentCmd.AddCommand(

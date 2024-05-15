@@ -21,13 +21,14 @@
     - [Execute shell command](#execute-shell-command-)
     - [Install dependencies](#install-dependencies-)
     - [List aliases](#list-aliases-)
+    - [List executables](#list-executables-)
     - [List projects](#list-projects-)
     - [New project](#new-project-)
     - [Pull from Git remotes](#pull-from-git-remotes-)
     - [Push to Git remotes](#push-to-git-remotes-)
     - [Remove alias](#remove-alias-)
     - [Remove project](#remove-project-)
-    - [Remove project executable]()
+    - [Remove executable](#remove-project-executable-)
     - [Run script](#run-script-)
     - [Run tests](#run-tests-)
     - [Start project](#start-project-)
@@ -249,6 +250,14 @@ yaml
         https://github.com/go-yaml/yaml
 ```
 
+#### List executables [<a href="#commands-">↑</a>]
+
+Executables / binaries created with [make command](#build-and-install-executable-) can be listed with
+
+```bash
+gpm list binaries
+```
+
 #### List projects [<a href="#commands-">↑</a>]
 
 Simply run
@@ -323,7 +332,7 @@ gpm remove project yaml
 
 you will remove the `yaml` alias from `projects.yaml` file, which is stored in `$HOME/.gpm` folder.
 
-#### Remove project executable [<a href="#commands-">↑</a>]
+#### Remove executable [<a href="#commands-">↑</a>]
 
 If you installed a binary with [make command](#build-and-install-executable-) like
 
