@@ -14,6 +14,7 @@
   - [Commands](#commands-)
     - [Add alias](#add-alias-)
     - [Add project](#add-project-)
+    - [AI chat](#ai-chat-)
     - [Audit dependencies](#audit-dependencies-)
     - [Build and install executable](#build-and-install-executable-)
     - [Build project](#build-project-)
@@ -157,6 +158,10 @@ gpm new react-project
 ```
 
 the repository will be cloned to `react-spa-template` subfolder, then its `.git` folder will be removed and the new folder will be re-initialized with `git init`.
+
+#### AI chat [<a href="#commands-">↑</a>]
+
+![AI Chat Demo 1](./assets/demos/chat-ai-demo-1.gif)
 
 #### Audit dependencies [<a href="#commands-">↑</a>]
 
@@ -618,6 +623,7 @@ The project is licensed under the [MIT](./LICENSE).
 
 `gpm` makes use of these following great projects:
 
+- [asciinema](https://github.com/asciinema/asciinema) + [agg](https://github.com/asciinema/agg) by [asciinema team](https://github.com/asciinema)
 - [chroma](https://github.com/alecthomas/chroma) by [Alec Thomas](https://github.com/sponsors/alecthomas)
 - [cobra](https://github.com/spf13/cobra) by [Steve Francia](https://github.com/spf13)
 - [go-version](https://github.com/hashicorp/go-version) by [HashiCorp](https://github.com/hashicorp)
