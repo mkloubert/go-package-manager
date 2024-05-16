@@ -19,6 +19,8 @@
     - [Checkout branch](#checkout-branch-)
     - [Cleanup project](#cleanup-project-)
     - [Execute shell command](#execute-shell-command-)
+    - [Import aliases](#import-aliases-)
+    - [Import projects](#import-projects-)
     - [Install dependencies](#install-dependencies-)
     - [List aliases](#list-aliases-)
     - [List executables](#list-executables-)
@@ -218,6 +220,26 @@ gpm execute go version
 ```
 
 will run `go version` with the settings and environment variables loaded from [.env* files](#environment-variables-).
+
+#### Import aliases [<a href="#commands-">↑</a>]
+
+```bash
+gpm import aliases https://raw.githubusercontent.com/mkloubert/go-package-manager/main/aliases.yaml
+```
+
+loads aliases from `https://raw.githubusercontent.com/mkloubert/go-package-manager/main/aliases.yaml` and merge them with entries in `aliases.yaml` file in `$HOME/.gpm` folder.
+
+You can also use a local file path as well.
+
+#### Import projects [<a href="#commands-">↑</a>]
+
+```bash
+gpm import projects https://raw.githubusercontent.com/mkloubert/go-package-manager/main/projects.yaml
+```
+
+loads projects from `https://raw.githubusercontent.com/mkloubert/go-package-manager/main/projects.yaml` and merge them with entries in `projects.yaml` file in `$HOME/.gpm` folder.
+
+You can also use a local file path as well.
 
 #### Install dependencies [<a href="#commands-">↑</a>]
 
