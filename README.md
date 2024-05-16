@@ -145,10 +145,10 @@ gpm install yaml
 With
 
 ```bash
-gpm add project my-project react-project https://github.com/ofnullable/react-spa-template
+gpm add project react-project https://github.com/ofnullable/react-spa-template
 ```
 
-you define the alias `react` which refers to the Git repository in `https://github.com/ofnullable/react-spa-template`. This information will be stored in `projects.yaml` file inside your `$HOME/.gpm` folder.
+you define the alias `react-project` which refers to the Git repository in `https://github.com/ofnullable/react-spa-template`. This information will be stored in `projects.yaml` file inside your `$HOME/.gpm` folder.
 
 If you later run
 
