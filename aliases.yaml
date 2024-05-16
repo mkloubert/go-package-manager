@@ -1,0 +1,11 @@
+aliases:
+  cobra:
+  - https://github.com/spf13/cobra
+  dotenv:
+  - https://github.com/joho/godotenv
+  mongo:
+  - https://go.mongodb.org/mongo-driver/mongo
+  version:
+  - https://github.com/hashicorp/go-version
+  yaml:
+  - https://github.com/go-yaml/yaml

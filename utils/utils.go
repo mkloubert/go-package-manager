@@ -24,6 +24,8 @@ package utils
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
@@ -91,6 +93,26 @@ func GetBoolFlag(cmd *cobra.Command, name string, defaultValue bool) bool {
 	}
 
 	return defaultValue
+}
+
+// DownloadFromUrl() - downloads data from URL
+func DownloadFromUrl(url string) ([]byte, error) {
+	if !strings.HasPrefix(url, "http:") && !strings.HasPrefix(url, "https:") {
+		url = "https://" + url
+	}
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return []byte{}, err
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return data, nil
 }
 
 // GetDefaultAIChatModel() - returns the name of the default AI chat model

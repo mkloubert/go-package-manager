@@ -740,6 +740,28 @@ func (app *AppContext) LoadAliasesFileIfExist() bool {
 	return false
 }
 
+// app.LoadDataFrom() - loads binary data from a source like
+// local file system or web URL
+func (app *AppContext) LoadDataFrom(source string) ([]byte, error) {
+	source = strings.TrimSpace(source)
+
+	if strings.HasPrefix(source, "https:") || strings.HasPrefix(source, "http:") {
+		// from web
+		app.Debug(fmt.Sprintf("Loading data from web resource '%v' ...", source))
+		return utils.DownloadFromUrl(source)
+	} else {
+		// local file system
+
+		filePath := source
+		if !path.IsAbs(filePath) {
+			filePath = path.Join(app.Cwd, filePath)
+		}
+
+		app.Debug(fmt.Sprintf("Loading data from local resource '%v' ...", filePath))
+		return os.ReadFile(filePath)
+	}
+}
+
 func (app *AppContext) loadEnvFile(envFilePath string) {
 	app.Debug(fmt.Sprintf("Loading env file '%v' ...", envFilePath))
 	err := godotenv.Overload(envFilePath)
@@ -922,7 +944,7 @@ func (app *AppContext) UpdateAliasesFile() error {
 		utils.CloseWithError(err)
 	}
 
-	app.Debug(fmt.Sprintf("Updating file '%v' ...", aliasesFilePath))
+	app.Debug(fmt.Sprintf("Updating alias file '%v' ...", aliasesFilePath))
 	return os.WriteFile(aliasesFilePath, yamlData, constants.DefaultFileMode)
 }
 
@@ -954,6 +976,6 @@ func (app *AppContext) UpdateProjectsFile() error {
 		utils.CloseWithError(err)
 	}
 
-	app.Debug(fmt.Sprintf("Updating file '%v' ...", projectsFilePath))
+	app.Debug(fmt.Sprintf("Updating project file '%v' ...", projectsFilePath))
 	return os.WriteFile(projectsFilePath, yamlData, constants.DefaultFileMode)
 }

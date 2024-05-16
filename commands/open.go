@@ -72,7 +72,7 @@ func init_open_alias_command(parentCmd *cobra.Command, app *types.AppContext) {
 }
 
 func init_open_project_command(parentCmd *cobra.Command, app *types.AppContext) {
-	var openAliasCmd = &cobra.Command{
+	var openProjectCmd = &cobra.Command{
 		Use:     "project [name]",
 		Aliases: []string{"p", "pr", "prj", "prjs", "projects"},
 		Short:   "Open project",
@@ -104,7 +104,7 @@ func init_open_project_command(parentCmd *cobra.Command, app *types.AppContext) 
 	}
 
 	parentCmd.AddCommand(
-		openAliasCmd,
+		openProjectCmd,
 	)
 }
 
@@ -115,6 +115,7 @@ func Init_Open_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short:   "Open resource",
 		Long:    `Opens a resource in the operating system.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
 		},
 	}
 

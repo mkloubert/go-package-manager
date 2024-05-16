@@ -1,0 +1,3 @@
+projects:
+  gpm: https://github.com/mkloubert/go-package-manager
+  mkloubert: https://github.com/gopasspw/gopass
