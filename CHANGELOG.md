@@ -2,6 +2,7 @@
 
 ## 0.13.0
 
+- feat: `audit` command, which uses [osv.dev API](https://google.github.io/osv.dev/api/) to scan installed modules for vulnerabilities
 - feat: `install` command now supports `--tidy` flag to run `tidy` command after successful installation
 - feat: `open alias` command, which opens the URL of an alias from `alias.yaml` file in `$HOME/.gpm/bin` folder
 - feat: `open project` command, which opens the URL of a project  from `projects.yaml` file in `$HOME/.gpm/bin` folder

@@ -555,6 +555,33 @@ func (app *AppContext) GetGitTags() ([]string, error) {
 	return tags, nil
 }
 
+// app.GetGoModules() - returns the list of installed Go modules of current project
+func (app *AppContext) GetGoModules() ([]GoModule, error) {
+	modules := []GoModule{}
+
+	p := exec.Command("go", "list", "-m", "-json", "all")
+	p.Dir = app.Cwd
+
+	app.Debug("Running 'go list -m -json all' ...")
+	output, err := p.Output()
+	if err != nil {
+		return modules, err
+	}
+
+	decoder := json.NewDecoder(strings.NewReader(string(output)))
+	for decoder.More() {
+		var module GoModule
+		err := decoder.Decode(&module)
+		if err != nil {
+			return modules, err
+		}
+
+		modules = append(modules, module)
+	}
+
+	return modules, nil
+}
+
 // app.GetAliasesFilePath() - returns the possible path of the gpm.yaml file
 func (app *AppContext) GetGpmFilePath() (string, error) {
 	return path.Join(app.Cwd, "gpm.yaml"), nil

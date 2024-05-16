@@ -14,6 +14,7 @@
   - [Commands](#commands-)
     - [Add alias](#add-alias-)
     - [Add project](#add-project-)
+    - [Audit dependencies](#audit-dependencies-)
     - [Build and install executable](#build-and-install-executable-)
     - [Build project](#build-project-)
     - [Checkout branch](#checkout-branch-)
@@ -60,8 +61,6 @@ However, it's not only limited to Go but can also be utilized for other project 
 
 **KEEP IN MIND**: This project is in an beta state and under heavy development. It might happen that there will be breaking changes. Have a look at the [CHANGELOG.md file](CHANGELOG.md).
 
-<a name="installation"></a>
-
 ## Installation [<a href="#table-of-contents">↑</a>]
 
 You can install `gpm` from a [pre-build binary](https://github.com/mkloubert/go-package-manager/releases) or build it by your own: 
@@ -95,8 +94,6 @@ curl -s https://api.github.com/repos/mkloubert/go-package-manager/releases/lates
 # use the following commands if you use a legacy Intel 64-bit system
 # curl -s https://api.github.com/repos/mkloubert/go-package-manager/releases/latest | jq -r '.assets[].browser_download_url | select(contains("darwin") and contains("amd64") and (. | tostring | contains("sha256") | not))' | xargs curl -sL | tar xzOf - gpm | sudo tee /usr/local/bin/gpm > /dev/null && sudo chmod +x /usr/local/bin/gpm
 ```
-
-<a name="windows"></a>
 
 ### Windows [<a href="#installation-">↑</a>]
 
@@ -160,6 +157,39 @@ gpm new react-project
 ```
 
 the repository will be cloned to `react-spa-template` subfolder, then its `.git` folder will be removed and the new folder will be re-initialized with `git init`.
+
+#### Audit dependencies [<a href="#commands-">↑</a>]
+
+```bash
+gpm audit
+```
+
+will run a security scan using [API of osv.dev service](https://google.github.io/osv.dev/api/).
+
+The output is in a compact text format with the list of scanned modules and information about vulnerabilities, if available, like this:
+
+```
+github.com/spf13/pflag  v1.0.5
+golang.org/x/crypto     v0.23.0
+golang.org/x/net        v0.21.0
+        [moderate]      GHSA-4v7x-pqxf-cx7m     "net/http, x/net/http2: close connections when receiving too many headers"
+                [ADVISORY]      https://nvd.nist.gov/vuln/detail/CVE-2023-45288
+                [WEB]   https://go.dev/cl/576155
+                [WEB]   https://go.dev/issue/65051
+                [WEB]   https://groups.google.com/g/golang-announce/c/YgW0sx8mN3M
+                [WEB]   https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/QRYFHIQ6XRKRYBI2F5UESH67BJBQXUPT
+                [WEB]   https://nowotarski.info/http2-continuation-flood-technical-details
+                [WEB]   https://pkg.go.dev/vuln/GO-2024-2687
+                [WEB]   https://security.netapp.com/advisory/ntap-20240419-0009
+                [WEB]   http://www.openwall.com/lists/oss-security/2024/04/03/16
+                [WEB]   http://www.openwall.com/lists/oss-security/2024/04/05/4
+        []      GO-2024-2687    "HTTP/2 CONTINUATION flood in net/http"
+                [REPORT]        https://go.dev/issue/65051
+                [FIX]   https://go.dev/cl/576155
+                [WEB]   https://groups.google.com/g/golang-announce/c/YgW0sx8mN3M
+golang.org/x/xerrors    v0.0.0-20231012003039-104605ab7028
+gopkg.in/check.v1       v0.0.0-20161208181325-20d25e280405
+```
 
 #### Build and install executable [<a href="#commands-">↑</a>]
 
