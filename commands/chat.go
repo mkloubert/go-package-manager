@@ -54,6 +54,8 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				utils.CloseWithError(err)
 			}
 
+			consoleFormatter := utils.GetBestChromaFormatterName()
+			consoleStyle := utils.GetBestChromaStyleName()
 			systemPrompt := app.GetSystemAIPrompt(strings.TrimSpace(customSystemPrompt))
 
 			var resetConversation func()
@@ -73,15 +75,21 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 			printHelp := func() {
 				fmt.Println("Following commands are supported:")
-				fmt.Println("\t/exit            exit")
-				fmt.Println("\t/help            print this help")
-				fmt.Println("\t/info            print information about current chat settings")
-				fmt.Println("\t/model <name>    switch to another model")
-				fmt.Println("\t/reset           reset conversation")
+				fmt.Println("\t/cls               clear screen")
+				fmt.Println("\t/exit              exit")
+				fmt.Println("\t/format <name>     formatter for console output")
+				fmt.Println("\t/help              print this help")
+				fmt.Println("\t/info              print information about current chat settings")
+				fmt.Println("\t/model <name>      switch to another model")
+				fmt.Println("\t/reset             reset conversation")
+				fmt.Println("\t/style <name>      console style")
+				fmt.Println("\t/system <text>     reset conversation and update system prompt")
 			}
 
 			printAIInfo := func() {
 				fmt.Printf("AI: %v (%v)%v", api.GetProvider(), api.GetModel(), fmt.Sprintln())
+				fmt.Printf("System prompt: %v", systemPrompt)
+				fmt.Println(api.MoreInfo())
 			}
 
 			printInitialScreen := func() {
@@ -100,10 +108,30 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				scanner.Scan()
 
 				userInput := strings.TrimSpace(scanner.Text())
+				if userInput == "" {
+					fmt.Printf("[INPUT ERROR] Please submit input%v", fmt.Sprintln())
+					continue
+				}
+
 				lowerUserInput := strings.ToLower(userInput)
 
-				if lowerUserInput == "/exit" {
+				if lowerUserInput == "/cls" {
+					utils.ClearConsole()
+					continue
+				} else if lowerUserInput == "/exit" {
 					break
+				} else if strings.HasPrefix(lowerUserInput, "/format ") {
+					newFormatter := strings.TrimSpace(lowerUserInput[8:])
+					if newFormatter == "" {
+						fmt.Printf("[INPUT ERROR] Please define a formatter%v", fmt.Sprintln())
+					} else {
+						consoleFormatter = newFormatter
+					}
+
+					continue
+				} else if lowerUserInput == "/help" {
+					printHelp()
+					continue
 				} else if lowerUserInput == "/info" {
 					printAIInfo()
 					continue
@@ -125,13 +153,29 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					printInitialScreen()
 
 					continue
-				} else if lowerUserInput == "/help" {
-					printHelp()
+				} else if strings.HasPrefix(lowerUserInput, "/style ") {
+					newStyle := strings.TrimSpace(lowerUserInput[7:])
+					if newStyle == "" {
+						fmt.Printf("[INPUT ERROR] Please define a style%v", fmt.Sprintln())
+					} else {
+						consoleStyle = newStyle
+					}
+
+					continue
+				} else if strings.HasPrefix(lowerUserInput, "/system ") {
+					newSystemPrompt := strings.TrimSpace(userInput[8:])
+					if newSystemPrompt == "" {
+						fmt.Printf("[INPUT ERROR] Please define a system prompt%v", fmt.Sprintln())
+					} else {
+						systemPrompt = newSystemPrompt
+						setupResetConversation()
+
+						resetConversation()
+					}
 
 					continue
 				} else if strings.HasPrefix(lowerUserInput, "/") {
 					fmt.Printf("[INPUT ERROR] Invalid command '%v'%v", userInput, fmt.Sprintln())
-
 					continue
 				}
 
@@ -151,7 +195,7 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				s.Stop()
 
 				if err == nil {
-					err := quick.Highlight(os.Stdout, answer, "markdown", "terminal", "monokai")
+					err := quick.Highlight(os.Stdout, answer, "markdown", consoleFormatter, consoleStyle)
 					if err != nil {
 						fmt.Print(answer)
 					}

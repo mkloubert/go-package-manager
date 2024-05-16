@@ -37,6 +37,8 @@ type OpenAIChat struct {
 	ApiKey       string              // the API key to use
 	Conversation []OpenAIChatMessage // the conversation
 	Model        string              // the current model
+	TotalTokens  int32               // number of total used tokens in this session
+	Verbose      bool                // running in verbose mode or not
 }
 
 // OpenAIChatMessage is an item inside
@@ -56,6 +58,14 @@ func (c *OpenAIChat) GetModel() string {
 
 func (c *OpenAIChat) GetProvider() string {
 	return "openai"
+}
+
+func (c *OpenAIChat) MoreInfo() string {
+	return fmt.Sprintf(
+		"%vTotal tokens: %v",
+		fmt.Sprintln(),
+		c.TotalTokens,
+	)
 }
 
 func (c *OpenAIChat) SendMessage(message string, onUpdate ChatAIMessageChunkReceiver) error {
@@ -137,7 +147,24 @@ func (c *OpenAIChat) SendMessage(message string, onUpdate ChatAIMessageChunkRece
 		userMessage, assistantMessage,
 	)
 
-	return onUpdate(assistantMessage.Content)
+	err = onUpdate(assistantMessage.Content)
+	if err != nil {
+		return err
+	}
+
+	c.TotalTokens += chatResponse.Usage.TotalTokens
+
+	if c.Verbose {
+		// additionally output total tokens
+		// in this session
+		onUpdate(fmt.Sprintf(
+			"%v%v",
+			fmt.Sprintln(),
+			c.MoreInfo(),
+		))
+	}
+
+	return nil
 }
 
 func (c *OpenAIChat) UpdateModel(modelName string) {

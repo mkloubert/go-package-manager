@@ -34,8 +34,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/alecthomas/chroma"
-	"github.com/alecthomas/chroma/formatters"
 	"github.com/spf13/cobra"
 )
 
@@ -130,24 +128,36 @@ func DownloadFromUrl(url string) ([]byte, error) {
 	return data, nil
 }
 
-// GetBestChromaFormatter() - returns the best syntax highlight formatter for the console
-func GetBestChromaFormatter() chroma.Formatter {
+// GetBestChromaFormatterName() - returns the best syntax highlight formatter for the console
+func GetBestChromaFormatterName() string {
 	GPM_TERMINAL_FORMATTER := strings.TrimSpace(
 		strings.ToLower(os.Getenv("GPM_TERMINAL_FORMATTER")),
 	)
 	if GPM_TERMINAL_FORMATTER != "" {
-		return formatters.Get(GPM_TERMINAL_FORMATTER)
+		return GPM_TERMINAL_FORMATTER
 	}
 
 	switch os := runtime.GOOS; os {
 	case "darwin":
 	case "linux":
-		return formatters.Get("terminal16m")
+		return "terminal16m"
 	case "windows":
-		return formatters.Get("terminal256")
+		return "terminal256"
 	}
 
-	return formatters.Get("terminal")
+	return "terminal"
+}
+
+// GetBestChromaStyleName() - returns the best syntax highlight style for the console
+func GetBestChromaStyleName() string {
+	GPM_TERMINAL_STYLE := strings.TrimSpace(
+		strings.ToLower(os.Getenv("GPM_TERMINAL_STYLE")),
+	)
+
+	if GPM_TERMINAL_STYLE != "" {
+		return GPM_TERMINAL_STYLE
+	}
+	return "dracula"
 }
 
 // GetDefaultAIChatModel() - returns the name of the default AI chat model

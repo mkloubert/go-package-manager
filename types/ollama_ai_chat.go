@@ -36,6 +36,7 @@ import (
 type OllamaAIChat struct {
 	Conversation []OllamaAIChatMessage // the conversation
 	Model        string                // the current model
+	Verbose      bool                  // running in verbose mode or not
 }
 
 // OllamaAIChatMessage is an item inside
@@ -60,6 +61,10 @@ func (c *OllamaAIChat) GetModel() string {
 
 func (c *OllamaAIChat) GetProvider() string {
 	return "ollama"
+}
+
+func (c *OllamaAIChat) MoreInfo() string {
+	return ""
 }
 
 func (c *OllamaAIChat) SendMessage(message string, onUpdate ChatAIMessageChunkReceiver) error {

@@ -304,7 +304,9 @@ func (app *AppContext) CreateAIChat(options ...CreateAIChatOptions) (ChatAI, err
 
 	var api ChatAI = &OllamaAIChat{}
 	if settings.Provider == constants.AIApiOllama {
-		ollama := OllamaAIChat{}
+		ollama := OllamaAIChat{
+			Verbose: app.Verbose,
+		}
 
 		if initialModel == "" {
 			initialModel = "llama3"
@@ -312,7 +314,9 @@ func (app *AppContext) CreateAIChat(options ...CreateAIChatOptions) (ChatAI, err
 
 		api = &ollama
 	} else if settings.Provider == constants.AIApiOpenAI {
-		openai := OpenAIChat{}
+		openai := OpenAIChat{
+			Verbose: app.Verbose,
+		}
 
 		if initialModel == "" {
 			initialModel = "gpt-3.5-turbo"

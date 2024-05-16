@@ -31,6 +31,8 @@ type ChatAI interface {
 	GetModel() string
 	// ChatAI.GetProvider() - get the name of the chat provider
 	GetProvider() string
+	// ChatAI.MoreInfo() - returns additional information, if available
+	MoreInfo() string
 	// ChatAI.SendMessage() - sends a new message
 	// to the API for the current chat conversation
 	SendMessage(message string, onUpdate ChatAIMessageChunkReceiver) error
