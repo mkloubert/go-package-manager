@@ -24,6 +24,8 @@
     - [List executables](#list-executables-)
     - [List projects](#list-projects-)
     - [New project](#new-project-)
+    - [Open alias](#open-alias-)
+    - [Open project](#open-project-)
     - [Pack project](#pack-project-)
     - [Pull from Git remotes](#pull-from-git-remotes-)
     - [Push to Git remotes](#push-to-git-remotes-)
@@ -294,6 +296,30 @@ gpm new mkloubert
 ```
 
 later which will simply call `git clone git@github.com:mkloubert/mkloubert.git` instead that clones the Git repository to `mkloubert` subfolder, removes its `.git` folder and re-initializes it with `git init`.
+
+#### Open alias [<a href="#commands-">↑</a>]
+
+Aliases created by [Add alias command](#add-alias-) can be opened by default handler of the operating system.
+
+Lets say you created an alias called `cobra` with the URL `https://github.com/spf13/cobra`, the execution of
+
+```bash
+gpm open alias cobra
+```
+
+will open this URL usually in the browser.
+
+#### Open project [<a href="#commands-">↑</a>]
+
+Project entries created by [Add project command](#add-project-) can be opened by default handler of the operating system.
+
+Lets say you created a project alias called `gpm` with the URL `https://github.com/mkloubert/go-package-manager`, the execution of
+
+```bash
+gpm open project cobra
+```
+
+will open this URL usually in the browser.
 
 #### Pack project [<a href="#commands-">↑</a>]
 
