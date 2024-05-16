@@ -167,6 +167,26 @@ func ListFiles(dir string, pattern string) ([]string, error) {
 	return matchingFiles, err
 }
 
+// OpenUrl() - opens a URL by the default application handler
+func OpenUrl(url string) error {
+	var args []string
+	var cmd string
+
+	switch runtime.GOOS {
+	case "darwin":
+		cmd = "open"
+		args = []string{url}
+	case "windows":
+		cmd = "rundll32"
+		args = []string{"url.dll,FileProtocolHandler", url}
+	default:
+		cmd = "xdg-open"
+		args = []string{url}
+	}
+
+	return exec.Command(cmd, args...).Start()
+}
+
 // RemoveDuplicatesInStringList() - removes duplicates in string list
 func RemoveDuplicatesInStringList(arr []string) []string {
 	alreadySeen := map[string]bool{}
@@ -213,4 +233,29 @@ func Slugify(str string, rx ...string) string {
 	str = strings.Trim(str, "-")
 
 	return str
+}
+
+// ToUrlForOpenHandler() - converts an input URL to a URL which
+// can be opened by handler of the current operating system
+func ToUrlForOpenHandler(originalUrl string) (string, error) {
+	urlObj, err := url.Parse(originalUrl)
+	if err != nil {
+		return "", err
+	}
+
+	port := urlObj.Port()
+	if port != "" {
+		port = ":" + port
+	}
+
+	query := urlObj.RawQuery
+	if query != "" {
+		query = "?" + query
+	}
+
+	return fmt.Sprintf(
+		"https://%v%v%v%v",
+		urlObj.Host, port,
+		urlObj.Path, query,
+	), nil
 }
