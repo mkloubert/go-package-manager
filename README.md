@@ -618,7 +618,9 @@ The project is licensed under the [MIT](./LICENSE).
 
 `gpm` makes use of these following great projects:
 
+- [chroma](https://github.com/alecthomas/chroma) by [Alec Thomas](https://github.com/sponsors/alecthomas)
 - [cobra](https://github.com/spf13/cobra) by [Steve Francia](https://github.com/spf13)
 - [go-version](https://github.com/hashicorp/go-version) by [HashiCorp](https://github.com/hashicorp)
-- [go-yaml](https://github.com/goccy/go-yaml) by [Masaaki Goshima](https://github.com/goccy)
+- [go-yaml](https://github.com/goccy/go-yaml) by [Masaaki Goshima](https://github.com/sponsors/goccy)
 - [godotenv](https://github.com/joho/godotenv) by [John Barton](https://github.com/joho)
+- [spinner](https://github.com/sponsors/briandowns) by [Brian Downs](https://github.com/sponsors/briandowns)

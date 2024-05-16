@@ -58,6 +58,7 @@ type AppContext struct {
 	L              *log.Logger  // the logger to use
 	NoSystemPrompt bool         // do not use system prompt
 	Ollama         bool         // use Ollama
+	Out            *io.Writer   // the output stream
 	ProjectsFile   ProjectsFile // projects.yaml file in home folder
 	Prompt         string       // custom (AI) prompt
 	SystemPrompt   string       // custom system prompt
@@ -65,8 +66,16 @@ type AppContext struct {
 }
 
 // ChatWithAIOption stores settings for
-// `ChatWithAI()` function
+// `ChatWithAI()` method
 type ChatWithAIOption struct {
+	Model        *string // custom model
+	SystemPrompt *string // custom system prompt
+	Temperature  *int    // custom temperature
+}
+
+// CreateAIChatOptions stores settings for
+// `CreateAIChat()` method
+type CreateAIChatOptions struct {
 	Model        *string // custom model
 	SystemPrompt *string // custom system prompt
 	Temperature  *int    // custom temperature
@@ -79,81 +88,36 @@ type OllamaGenerateResponse struct {
 	Response string `json:"response"` // the response
 }
 
-// OpenAIChatCompletionResponseV1 stores data of a successful
-// OpenAI chat completion response API response (version 1)
-type OpenAIChatCompletionResponseV1 struct {
-	Choices []OpenAIChatCompletionResponseV1Choice `json:"choices"` // list of choices
-	Model   string                                 `json:"model"`   // used model
-	Usage   OpenAIChatCompletionResponseV1Usage    `json:"usage"`   // the usage
-}
-
-// OpenAIChatCompletionResponseV1Choice is an item inside `choices` property
-// of an `OpenAIChatCompletionResponseV1` object
-type OpenAIChatCompletionResponseV1Choice struct {
-	Index   int32                                       `json:"index"`   // the zero-based index
-	Message OpenAIChatCompletionResponseV1ChoiceMessage `json:"message"` // the message information
-}
-
-// OpenAIChatCompletionResponseV1ChoiceMessage contains data for `message` property
-// of an `OpenAIChatCompletionResponseV1ChoiceMessage` object
-type OpenAIChatCompletionResponseV1ChoiceMessage struct {
-	Content string `json:"content"` // the message context
-	Role    string `json:"role"`    // the role like 'user' or 'assistant'
-}
-
-// OpenAIChatCompletionResponseV1Usage contains data for `usage` property
-// of an `OpenAIChatCompletionResponseV1` object
-type OpenAIChatCompletionResponseV1Usage struct {
-	CompletionTokens int32 `json:"completion_tokens"` // number of completion tokens
-	PromptTokens     int32 `json:"prompt_tokens"`     // number of prompt tokens
-	TotalTokens      int32 `json:"total_tokens"`      // number of total used tokens
-}
-
 // TidyUpOptions - options for app.TidyUp() method
 type TidyUpOptions struct {
 	Arguments *[]string // command line argumuments
 	NoScript  *bool     // true if not running 'tidy' script from gpm.yaml file
 }
 
-const aiApiOllama = "ollama"
-const aiApiOpenAI = "openai"
-
 // ChatWithAI() - does a simple AI chat based on the current app settings
 func (app *AppContext) ChatWithAI(prompt string, options ...ChatWithAIOption) (string, error) {
-	OPENAI_API_KEY := strings.TrimSpace(os.Getenv("OPENAI_API_KEY"))
-
-	GPM_AI_API := strings.TrimSpace(
-		strings.ToLower(os.Getenv("GPM_AI_API")),
-	)
-	if GPM_AI_API == "" {
-		if app.Ollama {
-			GPM_AI_API = aiApiOllama
-		} else {
-			if OPENAI_API_KEY == "" {
-				GPM_AI_API = aiApiOllama
-			} else {
-				GPM_AI_API = aiApiOpenAI
-			}
-		}
+	settings, err := app.GetAIChatSettings()
+	if err != nil {
+		return "", err
 	}
 
-	if GPM_AI_API == aiApiOpenAI {
+	if settings.Provider == constants.AIApiOpenAI {
 		app.Debug("Using Open AI API ...")
 
-		if OPENAI_API_KEY == "" {
+		if settings.ApiKey == nil || *settings.ApiKey == "" {
 			return "", fmt.Errorf("no api key found for OpenAI")
 		}
 
-		return app.chatWithOpenAI(prompt, options...)
+		return app.chatWithOpenAI(prompt, settings, options...)
 	}
 
-	if GPM_AI_API == aiApiOllama {
+	if settings.Provider == constants.AIApiOllama {
 		app.Debug("Using Ollama API ...")
 
 		return app.chatWithOllama(prompt, options...)
 	}
 
-	return "", fmt.Errorf("ai api '%v' is not supported", GPM_AI_API)
+	return "", fmt.Errorf("no implementation for ai api '%v'", settings.Provider)
 }
 
 func (app *AppContext) chatWithOllama(prompt string, options ...ChatWithAIOption) (string, error) {
@@ -228,12 +192,11 @@ func (app *AppContext) chatWithOllama(prompt string, options ...ChatWithAIOption
 	return response.Response, nil
 }
 
-func (app *AppContext) chatWithOpenAI(prompt string, options ...ChatWithAIOption) (string, error) {
+func (app *AppContext) chatWithOpenAI(prompt string, settings AIChatSettings, options ...ChatWithAIOption) (string, error) {
+	apiKey := *settings.ApiKey
 	model := utils.GetDefaultAIChatModel()
 	var systemPrompt *string
 	temperature := 0
-
-	OPENAI_API_KEY := strings.TrimSpace(os.Getenv("OPENAI_API_KEY"))
 
 	for _, o := range options {
 		if o.Model != nil {
@@ -282,7 +245,7 @@ func (app *AppContext) chatWithOpenAI(prompt string, options ...ChatWithAIOption
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+OPENAI_API_KEY)
+	req.Header.Set("Authorization", "Bearer "+apiKey)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -314,6 +277,65 @@ func (app *AppContext) chatWithOpenAI(prompt string, options ...ChatWithAIOption
 	}
 
 	return answer, nil
+}
+
+// app.CreateAIChat() - creates a new ChatAI instance based on the current settings
+func (app *AppContext) CreateAIChat(options ...CreateAIChatOptions) (ChatAI, error) {
+	settings, err := app.GetAIChatSettings()
+	if err != nil {
+		return nil, err
+	}
+
+	initialModel := ""
+	systemPrompt := ""
+
+	for _, o := range options {
+		if o.Model != nil {
+			initialModel = strings.TrimSpace(*o.Model)
+		}
+		if o.SystemPrompt != nil {
+			systemPrompt = strings.TrimSpace(*o.SystemPrompt)
+		}
+	}
+
+	if initialModel == "" {
+		initialModel = utils.GetDefaultAIChatModel()
+	}
+
+	var api ChatAI = &OllamaAIChat{}
+	if settings.Provider == constants.AIApiOllama {
+		ollama := OllamaAIChat{}
+
+		if initialModel == "" {
+			initialModel = "llama3"
+		}
+
+		api = &ollama
+	} else if settings.Provider == constants.AIApiOpenAI {
+		openai := OpenAIChat{}
+
+		if initialModel == "" {
+			initialModel = "gpt-3.5-turbo"
+		}
+		if settings.ApiKey != nil {
+			openai.ApiKey = *settings.ApiKey
+		}
+
+		api = &openai
+	}
+
+	if api != nil {
+		if systemPrompt == "" {
+			api.ClearHistory()
+		} else {
+			api.UpdateSystem(systemPrompt)
+		}
+
+		api.UpdateModel(initialModel)
+
+		return api, nil
+	}
+	return nil, fmt.Errorf("'%v' ai chat provider not implemented", settings.Provider)
 }
 
 // app.Debug() - writes debug information with the underlying logger
@@ -348,6 +370,44 @@ func (app *AppContext) EnsureBinFolder() (string, error) {
 		return binPath, nil
 	}
 	return "", fmt.Errorf("%v is no directory", binPath)
+}
+
+// app.GetAIChatSettings() - returns AI chat settings based on this app
+func (app *AppContext) GetAIChatSettings() (AIChatSettings, error) {
+	var settings AIChatSettings
+
+	OPENAI_API_KEY := strings.TrimSpace(os.Getenv("OPENAI_API_KEY"))
+
+	GPM_AI_API := strings.TrimSpace(
+		strings.ToLower(os.Getenv("GPM_AI_API")),
+	)
+	if GPM_AI_API == "" {
+		if app.Ollama {
+			GPM_AI_API = constants.AIApiOllama
+		} else {
+			if OPENAI_API_KEY == "" {
+				GPM_AI_API = constants.AIApiOllama
+			} else {
+				GPM_AI_API = constants.AIApiOpenAI
+			}
+		}
+	}
+
+	var err error = nil
+
+	switch GPM_AI_API {
+	case constants.AIApiOpenAI:
+		if OPENAI_API_KEY != "" {
+			settings.ApiKey = &OPENAI_API_KEY
+		}
+		settings.Provider = GPM_AI_API
+	case constants.AIApiOllama:
+		settings.Provider = GPM_AI_API
+	default:
+		err = fmt.Errorf("ai api '%v' is not supported", GPM_AI_API)
+	}
+
+	return settings, err
 }
 
 // app.GetAIPrompt() - returns the AI prompt based on the current app settings

@@ -20,13 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package constants
+package types
 
-const AIApiOllama = "ollama"
-const AIApiOpenAI = "openai"
-
-const DefaultDirMode = 0750
-const DefaultFileMode = 0750
-const WindowsExecutableExt = ".exe"
-
-const TidyScriptName = "tidy"
+// AIChatSettings stores settings for AI chats
+type AIChatSettings struct {
+	ApiKey   *string // the API key if available
+	Provider string  // the provider like "ollama" or "openai"
+}

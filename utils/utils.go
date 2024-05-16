@@ -34,6 +34,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/alecthomas/chroma"
+	"github.com/alecthomas/chroma/formatters"
 	"github.com/spf13/cobra"
 )
 
@@ -51,6 +53,19 @@ func CleanupModuleName(moduleName string) string {
 	}
 
 	return strings.TrimSpace(moduleName)
+}
+
+// ClearConsole() - clears the console
+func ClearConsole() error {
+	switch runtime.GOOS {
+	case "windows":
+		cmd := exec.Command("cmd", "/c", "cls")
+		cmd.Stdout = os.Stdout
+		return cmd.Run()
+	}
+
+	fmt.Print("\033[H\033[2J")
+	return nil
 }
 
 // CloseWithError() - exits with code 1 and output an error
@@ -113,6 +128,26 @@ func DownloadFromUrl(url string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+// GetBestChromaFormatter() - returns the best syntax highlight formatter for the console
+func GetBestChromaFormatter() chroma.Formatter {
+	GPM_TERMINAL_FORMATTER := strings.TrimSpace(
+		strings.ToLower(os.Getenv("GPM_TERMINAL_FORMATTER")),
+	)
+	if GPM_TERMINAL_FORMATTER != "" {
+		return formatters.Get(GPM_TERMINAL_FORMATTER)
+	}
+
+	switch os := runtime.GOOS; os {
+	case "darwin":
+	case "linux":
+		return formatters.Get("terminal16m")
+	case "windows":
+		return formatters.Get("terminal256")
+	}
+
+	return formatters.Get("terminal")
 }
 
 // GetDefaultAIChatModel() - returns the name of the default AI chat model

@@ -20,13 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package constants
+package types
 
-const AIApiOllama = "ollama"
-const AIApiOpenAI = "openai"
+// ChatAI describes an object that provides abstract
+// methods to interaction with a chat API
+type ChatAI interface {
+	// ChatAI.ClearHistory() - clears chat history
+	ClearHistory()
+	// ChatAI.GetModel() - get the name of the chat model
+	GetModel() string
+	// ChatAI.GetProvider() - get the name of the chat provider
+	GetProvider() string
+	// ChatAI.SendMessage() - sends a new message
+	// to the API for the current chat conversation
+	SendMessage(message string, onUpdate ChatAIMessageChunkReceiver) error
+	// ChatAI.SendMessage() - switches the model
+	UpdateModel(modelName string)
+	// ChatAI.UpdateSystem() - clears chat history and sets the
+	// system prompt
+	UpdateSystem(systemPromt string)
+}
 
-const DefaultDirMode = 0750
-const DefaultFileMode = 0750
-const WindowsExecutableExt = ".exe"
-
-const TidyScriptName = "tidy"
+type ChatAIMessageChunkReceiver = func(messageChunk string) error
