@@ -229,7 +229,7 @@ gpm import aliases https://raw.githubusercontent.com/mkloubert/go-package-manage
 
 loads aliases from `https://raw.githubusercontent.com/mkloubert/go-package-manager/main/aliases.yaml` and merge them with entries in `aliases.yaml` file in `$HOME/.gpm` folder.
 
-You can also use a local file path as well.
+You can also use a local file path and/or pipe from `STDIN` as well.
 
 #### Import projects [<a href="#commands-">↑</a>]
 
@@ -239,7 +239,7 @@ gpm import projects https://raw.githubusercontent.com/mkloubert/go-package-manag
 
 loads projects from `https://raw.githubusercontent.com/mkloubert/go-package-manager/main/projects.yaml` and merge them with entries in `projects.yaml` file in `$HOME/.gpm` folder.
 
-You can also use a local file path as well.
+You can also use a local file path and/or pipe from `STDIN` as well.
 
 #### Install dependencies [<a href="#commands-">↑</a>]
 

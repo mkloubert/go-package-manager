@@ -40,6 +40,23 @@ func init_import_alias_command(parentCmd *cobra.Command, app *types.AppContext) 
 		Short:   "Import alias",
 		Long:    `Downloads alias files from external resources and merge them with local one.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			importFromYaml := func(yamlData []byte) {
+				var aliasFile types.AliasesFile
+				err := yaml.Unmarshal(yamlData, &aliasFile)
+				if err != nil {
+					utils.CloseWithError(err)
+				}
+
+				if aliasFile.Aliases == nil {
+					return
+				}
+
+				for alias, urls := range aliasFile.Aliases {
+					app.Debug(fmt.Sprintf("Updating alias '%v' with '%v' ...", alias, urls))
+					app.AliasesFile.Aliases[alias] = urls
+				}
+			}
+
 			// collect data ...
 			for _, a := range args {
 				alias := strings.TrimSpace(a)
@@ -52,24 +69,20 @@ func init_import_alias_command(parentCmd *cobra.Command, app *types.AppContext) 
 					utils.CloseWithError(err)
 				}
 
-				var aliasFile types.AliasesFile
-				err = yaml.Unmarshal(yamlData, &aliasFile)
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				importFromYaml(yamlData)
+			}
 
-				if aliasFile.Aliases == nil {
-					continue
-				}
-
-				for alias, urls := range aliasFile.Aliases {
-					app.Debug(fmt.Sprintf("Updating alias '%v' with '%v' ...", alias, urls))
-					app.AliasesFile.Aliases[alias] = urls
-				}
+			stdin, err := utils.LoadFromSTDINIfAvailable()
+			if err != nil {
+				utils.CloseWithError(err)
+			}
+			if stdin != nil {
+				app.Debug("Updating projects from STDIN ...")
+				importFromYaml(*stdin)
 			}
 
 			// ... finally update aliases file
-			err := app.UpdateAliasesFile()
+			err = app.UpdateAliasesFile()
 			if err != nil {
 				utils.CloseWithError(err)
 			}
@@ -88,6 +101,23 @@ func init_import_project_command(parentCmd *cobra.Command, app *types.AppContext
 		Short:   "Import project",
 		Long:    `Downloads project files from external resources and merge them with local one.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			importFromYaml := func(yamlData []byte) {
+				var projectFile types.ProjectsFile
+				err := yaml.Unmarshal(yamlData, &projectFile)
+				if err != nil {
+					utils.CloseWithError(err)
+				}
+
+				if projectFile.Projects == nil {
+					return
+				}
+
+				for alias, url := range projectFile.Projects {
+					app.Debug(fmt.Sprintf("Updating project '%v' with '%v' ...", alias, url))
+					app.ProjectsFile.Projects[alias] = url
+				}
+			}
+
 			// collect data ...
 			for _, a := range args {
 				source := strings.TrimSpace(a)
@@ -100,24 +130,20 @@ func init_import_project_command(parentCmd *cobra.Command, app *types.AppContext
 					utils.CloseWithError(err)
 				}
 
-				var projectFile types.ProjectsFile
-				err = yaml.Unmarshal(yamlData, &projectFile)
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				importFromYaml(yamlData)
+			}
 
-				if projectFile.Projects == nil {
-					continue
-				}
-
-				for alias, url := range projectFile.Projects {
-					app.Debug(fmt.Sprintf("Updating project '%v' with '%v' ...", alias, url))
-					app.ProjectsFile.Projects[alias] = url
-				}
+			stdin, err := utils.LoadFromSTDINIfAvailable()
+			if err != nil {
+				utils.CloseWithError(err)
+			}
+			if stdin != nil {
+				app.Debug("Updating projects from STDIN ...")
+				importFromYaml(*stdin)
 			}
 
 			// ... finally update projects file
-			err := app.UpdateProjectsFile()
+			err = app.UpdateProjectsFile()
 			if err != nil {
 				utils.CloseWithError(err)
 			}
