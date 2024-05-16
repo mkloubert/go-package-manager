@@ -25,6 +25,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 )
 
@@ -34,7 +35,10 @@ const preInstallScriptName = "preinstall"
 func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var noPostScript bool
 	var noPreScript bool
+	var noTidyScript bool
 	var noUpdate bool
+	var tidy bool
+	var tidyArgs []string
 
 	var installCmd = &cobra.Command{
 		Use:     "install [module name or url]",
@@ -62,18 +66,21 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				}
 			}
 
-			if !noPostScript {
-				_, ok := app.GpmFile.Scripts[postInstallScriptName]
-				if ok {
-					app.RunScript(postInstallScriptName)
-				}
+			if tidy {
+				app.TidyUp(types.TidyUpOptions{
+					Arguments: &tidyArgs,
+					NoScript:  &noTidyScript,
+				})
 			}
 		},
 	}
 
 	installCmd.Flags().BoolVarP(&noPostScript, "no-post-script", "", false, "do not handle '"+postInstallScriptName+"' script")
 	installCmd.Flags().BoolVarP(&noPreScript, "no-pre-script", "", false, "do not handle '"+preInstallScriptName+"' script")
+	installCmd.Flags().BoolVarP(&noPreScript, "no-tidy-script", "", false, "do not handle '"+constants.TidyScriptName+"' script")
 	installCmd.Flags().BoolVarP(&noUpdate, "no-update", "n", false, "do not update modules")
+	installCmd.Flags().BoolVarP(&tidy, "tidy", "", false, "tidy up project after install")
+	installCmd.Flags().StringArrayVarP(&tidyArgs, "tidy-arg", "", []string{}, "arguments for tidy command")
 
 	parentCmd.AddCommand(
 		installCmd,

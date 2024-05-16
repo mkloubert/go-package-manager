@@ -25,3 +25,5 @@ package constants
 const DefaultDirMode = 0750
 const DefaultFileMode = 0750
 const WindowsExecutableExt = ".exe"
+
+const TidyScriptName = "tidy"

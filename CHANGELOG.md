@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.13.0
+
+- feat: `install` command now supports `--tidy` flag to run `tidy` command after successful installation
+
 ## 0.12.0
 
 - feat: `make` command, which downloads a Git repository, then runs `build` command from it and move the final executable to `$HOME/.gpm/bin` folder ... command is also able to handle aliases create by `add alias` command as well

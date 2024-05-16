@@ -25,10 +25,9 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 )
-
-const tidyScriptName = "tidy"
 
 func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var noScript bool
@@ -39,16 +38,14 @@ func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short:   "Add missing and remove unused modules",
 		Long:    `Cleans up the project from unused modules and add missing ones depending on the current source code.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			_, ok := app.GpmFile.Scripts[tidyScriptName]
-			if !noScript && ok {
-				app.RunScript(tidyScriptName, args...)
-			} else {
-				app.RunShellCommandByArgs("go", "mod", "tidy")
-			}
+			app.TidyUp(types.TidyUpOptions{
+				Arguments: &args,
+				NoScript:  &noScript,
+			})
 		},
 	}
 
-	tidyCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+tidyScriptName+"' script")
+	tidyCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+constants.TidyScriptName+"' script")
 
 	parentCmd.AddCommand(
 		tidyCmd,

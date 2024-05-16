@@ -501,6 +501,7 @@ From the project folder you will be able to execute `gpm run test1` or `gpm run 
 |---------------|---------------------------------------------------------------------------------------------|
 | `postbuild`   | Is executed after successful execution of [build command](#build-project-).                 |
 | `postinstall` | Is executed after successful execution of [install command](#install-dependencies-).        |
+| `posttest`    | Is executed after successful execution of [test command](#run-tests-).                      |
 | `prebuild`    | Is executed before [build command](#build-project-) is executed.                            |
 | `preinstall`  | Is executed before [install command](#install-dependencies-) is executed.                   |
 | `pretest`     | Is executed before [test command](#run-tests-) is executed.                                 |

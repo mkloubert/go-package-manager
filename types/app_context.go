@@ -109,6 +109,12 @@ type OpenAIChatCompletionResponseV1Usage struct {
 	TotalTokens      int32 `json:"total_tokens"`      // number of total used tokens
 }
 
+// TidyUpOptions - options for app.TidyUp() method
+type TidyUpOptions struct {
+	Arguments *[]string // command line argumuments
+	NoScript  *bool     // true if not running 'tidy' script from gpm.yaml file
+}
+
 const aiApiOllama = "ollama"
 const aiApiOpenAI = "openai"
 
@@ -863,6 +869,29 @@ func (app *AppContext) RunShellCommandByArgs(c string, a ...string) {
 	p := utils.CreateShellCommandByArgs(c, a...)
 
 	utils.RunCommand(p)
+}
+
+// app.TidyUp() - runs 'go mod tidy' for the current project (folder)
+func (app *AppContext) TidyUp(options ...TidyUpOptions) {
+	args := []string{}
+	noScript := false
+
+	// collect and overwrite options if needed
+	for _, o := range options {
+		if o.Arguments != nil {
+			args = *o.Arguments
+		}
+		if o.NoScript != nil {
+			noScript = *o.NoScript
+		}
+	}
+
+	_, ok := app.GpmFile.Scripts[constants.TidyScriptName]
+	if !noScript && ok {
+		app.RunScript(constants.TidyScriptName, args...)
+	} else {
+		app.RunShellCommandByArgs("go", "mod", "tidy")
+	}
 }
 
 // app.UpdateAliasesFile() - Updates the aliases.yaml file in home folder.
