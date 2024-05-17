@@ -2,6 +2,7 @@
 
 ## 0.13.0
 
+- feat: `chat` command, which is a simple user interface for communicating with AI chat bots via [Ollama](https://ollama.com) or [ChatGPT / OpenAI](https://platform.openai.com/docs/api-reference)
 - feat: `audit` command, which uses [osv.dev API](https://google.github.io/osv.dev/api/) to scan installed modules for vulnerabilities
 - feat: `install` command now supports `--tidy` flag to run `tidy` command after successful installation
 - feat: `open alias` command, which opens the URL of an alias from `alias.yaml` file in `$HOME/.gpm/bin` folder

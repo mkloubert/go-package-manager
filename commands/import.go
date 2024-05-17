@@ -34,6 +34,8 @@ import (
 )
 
 func init_import_alias_command(parentCmd *cobra.Command, app *types.AppContext) {
+	var reset bool
+
 	var importAliasCmd = &cobra.Command{
 		Use:     "aliases [source]",
 		Aliases: []string{"a", "al", "alias"},
@@ -55,6 +57,10 @@ func init_import_alias_command(parentCmd *cobra.Command, app *types.AppContext) 
 					app.Debug(fmt.Sprintf("Updating alias '%v' with '%v' ...", alias, urls))
 					app.AliasesFile.Aliases[alias] = urls
 				}
+			}
+
+			if reset {
+				app.AliasesFile.Aliases = map[string][]string{}
 			}
 
 			// collect data ...
@@ -89,12 +95,16 @@ func init_import_alias_command(parentCmd *cobra.Command, app *types.AppContext) 
 		},
 	}
 
+	importAliasCmd.Flags().BoolVarP(&reset, "reset", "", false, "reset before import entries")
+
 	parentCmd.AddCommand(
 		importAliasCmd,
 	)
 }
 
 func init_import_project_command(parentCmd *cobra.Command, app *types.AppContext) {
+	var reset bool
+
 	var importProjectCmd = &cobra.Command{
 		Use:     "projects [source]",
 		Aliases: []string{"p", "pr", "prj", "prjs", "project"},
@@ -116,6 +126,10 @@ func init_import_project_command(parentCmd *cobra.Command, app *types.AppContext
 					app.Debug(fmt.Sprintf("Updating project '%v' with '%v' ...", alias, url))
 					app.ProjectsFile.Projects[alias] = url
 				}
+			}
+
+			if reset {
+				app.ProjectsFile.Projects = map[string]string{}
 			}
 
 			// collect data ...
@@ -149,6 +163,8 @@ func init_import_project_command(parentCmd *cobra.Command, app *types.AppContext
 			}
 		},
 	}
+
+	importProjectCmd.Flags().BoolVarP(&reset, "reset", "", false, "reset before import entries")
 
 	parentCmd.AddCommand(
 		importProjectCmd,

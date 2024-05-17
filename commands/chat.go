@@ -37,26 +37,28 @@ import (
 )
 
 func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var customSystemPrompt string
-
 	var chatCmd = &cobra.Command{
 		Use:     "chat",
 		Aliases: []string{"ct"},
 		Short:   "AI chat",
 		Long:    `Chats with an AI model.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			consoleFormatter := utils.GetBestChromaFormatterName()
+			consoleStyle := utils.GetBestChromaStyleName()
+
+			systemPrompt := ""
+			if !app.NoSystemPrompt {
+				systemPrompt = app.GetSystemAIPrompt("")
+			}
+
 			apiOptions := types.CreateAIChatOptions{
-				SystemPrompt: &customSystemPrompt,
+				SystemPrompt: &systemPrompt,
 			}
 
 			api, err := app.CreateAIChat(apiOptions)
 			if err != nil {
 				utils.CloseWithError(err)
 			}
-
-			consoleFormatter := utils.GetBestChromaFormatterName()
-			consoleStyle := utils.GetBestChromaStyleName()
-			systemPrompt := app.GetSystemAIPrompt(strings.TrimSpace(customSystemPrompt))
 
 			var resetConversation func()
 			setupResetConversation := func() {
@@ -206,8 +208,6 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			}
 		},
 	}
-
-	chatCmd.Flags().StringVarP(&customSystemPrompt, "system-prompt", "", "", "custom system prompt")
 
 	parentCmd.AddCommand(
 		chatCmd,
