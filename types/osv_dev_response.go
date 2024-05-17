@@ -22,6 +22,13 @@
 
 package types
 
+import (
+	"math"
+	"strings"
+
+	"github.com/fatih/color"
+)
+
 // OsvDevResponse stores information about a successful response
 // from osv.dev API
 type OsvDevResponse struct {
@@ -59,4 +66,54 @@ type OsvDevResponseVulnerabilityItemReference struct {
 type OsvDevResponseVulnerabilitySeverityItem struct {
 	Score string `json:"score,omitempty"` // the score
 	Type  string `json:"type,omitempty"`  // the type
+}
+
+// v.GetSeverityDisplayValues() - gets values for display the item
+// while the first element is the display text for the console
+// and the second one the sort value
+func (v *OsvDevResponseVulnerabilityItem) GetSeverityDisplayValues() (string, int) {
+	if v.DatabaseSpecific != nil {
+		if v.IsLow() {
+			return "low", 0
+		}
+		if v.IsModerate() {
+			return color.New(color.FgYellow, color.Bold).Sprint("Moderate"), 1
+		}
+		if v.IsHigh() {
+			return color.New(color.FgRed, color.Bold).Sprint("HIGH"), 2
+		}
+		if v.IsCritical() {
+			return color.New(color.BgRed, color.FgYellow, color.Bold).Sprint("CRITICAL"), 2
+		}
+	}
+
+	return "?", math.MinInt
+}
+
+// v.IsCritical() - checks if this item is critical
+func (v *OsvDevResponseVulnerabilityItem) IsCritical() bool {
+	return strings.Contains(toVulnerabilityItemSeverityText(v), "CRIT")
+}
+
+// v.IsHigh() - checks if this item is high
+func (v *OsvDevResponseVulnerabilityItem) IsHigh() bool {
+	return strings.Contains(toVulnerabilityItemSeverityText(v), "HI")
+}
+
+// v.IsLow() - checks if this item is low
+func (v *OsvDevResponseVulnerabilityItem) IsLow() bool {
+	return strings.Contains(toVulnerabilityItemSeverityText(v), "LO")
+}
+
+// v.IsModerate() - checks if this item is moderate
+func (v *OsvDevResponseVulnerabilityItem) IsModerate() bool {
+	return strings.Contains(toVulnerabilityItemSeverityText(v), "MOD")
+}
+
+func toVulnerabilityItemSeverityText(v *OsvDevResponseVulnerabilityItem) string {
+	if v.DatabaseSpecific != nil {
+		return strings.TrimSpace(strings.ToUpper(v.DatabaseSpecific.Severity))
+	}
+
+	return ""
 }

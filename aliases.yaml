@@ -1,16 +1,23 @@
 aliases:
   chroma:
-  - github.com/alecthomas/chroma
+  - https://github.com/alecthomas/chroma
   cobra:
   - https://github.com/spf13/cobra
+  color:
+  - https://github.com/fatih/color
   dotenv:
   - https://github.com/joho/godotenv
   mongo:
   - https://go.mongodb.org/mongo-driver/mongo
+  pretty:
+  - https://github.com/jedib0t/go-pretty/v6/list
+  - https://github.com/jedib0t/go-pretty/v6/progress
+  - https://github.com/jedib0t/go-pretty/v6/table
+  - https://github.com/jedib0t/go-pretty/v6/text
   spinner:
-  - github.com/briandowns/spinner
+  - https://github.com/briandowns/spinner
   tview:
-  - github.com/rivo/tview
+  - https://github.com/rivo/tview
   version:
   - https://github.com/hashicorp/go-version
   yaml:

@@ -2,6 +2,7 @@
 
 ## 0.14.0
 
+- **BREAKING CHANGE**: `audit` command now uses spinners and pretty tables for output
 - feat: `bump version` command, which upgrades the current version of the underlying repository by setting up a new Git tag locally
 
 ## 0.13.0
