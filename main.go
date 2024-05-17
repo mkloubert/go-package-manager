@@ -77,6 +77,7 @@ func main() {
 	commands.Init_Add_Command(rootCmd, &app)
 	commands.Init_Audit_Command(rootCmd, &app)
 	commands.Init_Build_Command(rootCmd, &app)
+	commands.Init_Bump_Command(rootCmd, &app)
 	commands.Init_Chat_Command(rootCmd, &app)
 	commands.Init_Checkout_Command(rootCmd, &app)
 	commands.Init_Exec_Command(rootCmd, &app)

@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.14.0
+
+- feat: `bump version` command, which upgrades the current version of the underlying repository by setting up a new Git tag locally
+
 ## 0.13.0
 
 - feat: `chat` command, which is a simple user interface for communicating with AI chat bots via [Ollama](https://ollama.com) or [ChatGPT / OpenAI](https://platform.openai.com/docs/api-reference)

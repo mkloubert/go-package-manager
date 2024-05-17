@@ -18,6 +18,7 @@
     - [Audit dependencies](#audit-dependencies-)
     - [Build and install executable](#build-and-install-executable-)
     - [Build project](#build-project-)
+    - [Bump version](#bump-version-)
     - [Checkout branch](#checkout-branch-)
     - [Cleanup project](#cleanup-project-)
     - [Execute shell command](#execute-shell-command-)
@@ -216,6 +217,21 @@ gpm build
 ```
 
 will run `go build .` in the current directory or the `build` script in [gpm.yaml](#gpmyaml-), if defined.
+
+#### Bump version [<a href="#commands-">↑</a>]
+
+The simple execution of
+
+```bash
+gpm bump version
+```
+
+will detect the latest version of the underlying repository from [Git tags](https://git-scm.com/book/en/v2/Git-Basics-Tagging) and then upgrade the minor part only, e.g. `1.2.4` => `1.3.4`. Finally a new Git tag is created in the format `v1.3.4`.
+
+You also can use at least one of the following flags to increase parts of the current version number as well:
+- `--breaking`: `1.2.4` => `2.2.4`
+- `--feature`: `1.2.4` => `1.3.4`
+- `--fix`: `1.2.4` => `1.2.5`
 
 #### Checkout branch [<a href="#commands-">↑</a>]
 
