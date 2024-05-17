@@ -9,7 +9,7 @@
 - feat: `open project` command, which opens the URL of a project  from `projects.yaml` file in `$HOME/.gpm/bin` folder
 - feat: `import aliases` command, which loads aliases from a local or web source and merge them with `alias.yaml` file in `$HOME/.gpm` folder
 - feat: `import projects` command, which loads projects from a local or web source and merge them with `projects.yaml` file in `$HOME/.gpm` folder
-- feat: implement `postinstall` script
+- feat: implement `postinstall`, `postpack` and `prepack` scripts for `gpm.yaml` files
 
 ## 0.12.0
 

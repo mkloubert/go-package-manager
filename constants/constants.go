@@ -33,5 +33,7 @@ const WindowsExecutableExt = ".exe"
 
 // scripts
 const PostInstallScriptName = "postinstall"
+const PostPackScriptName = "postpack"
 const PreInstallScriptName = "preinstall"
+const PrePackScriptName = "prepack"
 const TidyScriptName = "tidy"
