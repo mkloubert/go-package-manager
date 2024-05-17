@@ -22,11 +22,16 @@
 
 package constants
 
+// AI APIs
 const AIApiOllama = "ollama"
 const AIApiOpenAI = "openai"
 
+// operating system
 const DefaultDirMode = 0750
 const DefaultFileMode = 0750
 const WindowsExecutableExt = ".exe"
 
+// scripts
+const PostInstallScriptName = "postinstall"
+const PreInstallScriptName = "preinstall"
 const TidyScriptName = "tidy"

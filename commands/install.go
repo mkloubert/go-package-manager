@@ -29,9 +29,6 @@ import (
 	"github.com/mkloubert/go-package-manager/types"
 )
 
-const postInstallScriptName = "postinstall"
-const preInstallScriptName = "preinstall"
-
 func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var noPostScript bool
 	var noPreScript bool
@@ -48,9 +45,9 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			if !noPreScript {
-				_, ok := app.GpmFile.Scripts[preInstallScriptName]
+				_, ok := app.GpmFile.Scripts[constants.PreInstallScriptName]
 				if ok {
-					app.RunScript(preInstallScriptName)
+					app.RunScript(constants.PreInstallScriptName)
 				}
 			}
 
@@ -66,6 +63,13 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				}
 			}
 
+			if !noPostScript {
+				_, ok := app.GpmFile.Scripts[constants.PostInstallScriptName]
+				if ok {
+					app.RunScript(constants.PostInstallScriptName)
+				}
+			}
+
 			if tidy {
 				app.TidyUp(types.TidyUpOptions{
 					Arguments: &tidyArgs,
@@ -75,8 +79,8 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
-	installCmd.Flags().BoolVarP(&noPostScript, "no-post-script", "", false, "do not handle '"+postInstallScriptName+"' script")
-	installCmd.Flags().BoolVarP(&noPreScript, "no-pre-script", "", false, "do not handle '"+preInstallScriptName+"' script")
+	installCmd.Flags().BoolVarP(&noPostScript, "no-post-script", "", false, "do not handle '"+constants.PostInstallScriptName+"' script")
+	installCmd.Flags().BoolVarP(&noPreScript, "no-pre-script", "", false, "do not handle '"+constants.PreInstallScriptName+"' script")
 	installCmd.Flags().BoolVarP(&noPreScript, "no-tidy-script", "", false, "do not handle '"+constants.TidyScriptName+"' script")
 	installCmd.Flags().BoolVarP(&noUpdate, "no-update", "n", false, "do not update modules")
 	installCmd.Flags().BoolVarP(&tidy, "tidy", "", false, "tidy up project after install")
