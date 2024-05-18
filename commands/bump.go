@@ -36,6 +36,7 @@ func init_bump_version_command(parentCmd *cobra.Command, app *types.AppContext) 
 	var breaking bool
 	var feature bool
 	var fix bool
+	var force bool
 	var major int64
 	var minor int64
 	var message string
@@ -75,17 +76,28 @@ func init_bump_version_command(parentCmd *cobra.Command, app *types.AppContext) 
 			}
 
 			if !breaking && !feature && !fix {
-				// default is increase minor
+				// default: 1.2.3 => 1.3.0
+
 				newMinor++
+				newPatch = 0
 			} else {
 				if breaking {
-					newMajor++
+					newMajor++ // by default e.g.: 1.2.3 => 2.0.0
+					if !feature {
+						newMinor = 0
+					}
+					if !fix {
+						newPatch = 0
+					}
 				}
 				if feature {
-					newMinor++
+					newMinor++ // by default e.g.: 1.2.3 => 1.3.0
+					if !fix {
+						newPatch = 0
+					}
 				}
 				if fix {
-					newPatch++
+					newPatch++ // e.g. 1.2.3 => 1.2.4
 				}
 			}
 
@@ -99,7 +111,7 @@ func init_bump_version_command(parentCmd *cobra.Command, app *types.AppContext) 
 				utils.CloseWithError(err)
 			}
 
-			if nextVersion.LessThanOrEqual(latestVersion) {
+			if !force && nextVersion.LessThanOrEqual(latestVersion) {
 				utils.CloseWithError(fmt.Errorf("new version is not greater than latest one"))
 			}
 
@@ -109,6 +121,7 @@ func init_bump_version_command(parentCmd *cobra.Command, app *types.AppContext) 
 			}
 
 			tagName := fmt.Sprintf("v%v", nextVersion.String())
+			fmt.Println(tagName)
 
 			app.RunShellCommandByArgs("git", "tag", "-a", tagName, "-m", gitMessage)
 		},
@@ -117,6 +130,7 @@ func init_bump_version_command(parentCmd *cobra.Command, app *types.AppContext) 
 	versionCmd.Flags().BoolVarP(&breaking, "breaking", "", false, "increase major part by 1")
 	versionCmd.Flags().BoolVarP(&feature, "feature", "", false, "increase minor part by 1")
 	versionCmd.Flags().BoolVarP(&fix, "fix", "", false, "increase patch part by 1")
+	versionCmd.Flags().BoolVarP(&force, "force", "", false, "ignore value of previous version")
 	versionCmd.Flags().Int64VarP(&major, "major", "", -1, "set major part")
 	versionCmd.Flags().StringVarP(&message, "message", "", "", "custom git message")
 	versionCmd.Flags().Int64VarP(&minor, "minor", "", -1, "set minor part")
