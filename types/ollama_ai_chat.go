@@ -36,6 +36,7 @@ import (
 type OllamaAIChat struct {
 	Conversation []OllamaAIChatMessage // the conversation
 	Model        string                // the current model
+	Temperature  float32               // the current temperature
 	Verbose      bool                  // running in verbose mode or not
 }
 
@@ -59,12 +60,16 @@ func (c *OllamaAIChat) GetModel() string {
 	return c.Model
 }
 
-func (c *OllamaAIChat) GetProvider() string {
-	return "ollama"
+func (c *OllamaAIChat) GetMoreInfo() string {
+	return ""
 }
 
-func (c *OllamaAIChat) MoreInfo() string {
+func (c *OllamaAIChat) GetPromptSuffix() string {
 	return ""
+}
+
+func (c *OllamaAIChat) GetProvider() string {
+	return "ollama"
 }
 
 func (c *OllamaAIChat) SendMessage(message string, onUpdate ChatAIMessageChunkReceiver) error {
@@ -80,9 +85,10 @@ func (c *OllamaAIChat) SendMessage(message string, onUpdate ChatAIMessageChunkRe
 	messages = append(messages, userMessage)
 
 	body := map[string]interface{}{
-		"model":    c.Model,
-		"messages": messages,
-		"stream":   false,
+		"model":       c.Model,
+		"messages":    messages,
+		"stream":      false,
+		"temperature": c.Temperature,
 	}
 
 	jsonData, err := json.Marshal(&body)
@@ -145,4 +151,8 @@ func (c *OllamaAIChat) UpdateSystem(systemPrompt string) {
 			Content: systemPrompt,
 		},
 	}
+}
+
+func (c *OllamaAIChat) UpdateTemperature(newValue float32) {
+	c.Temperature = newValue
 }

@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/alecthomas/chroma v0.10.0
 	github.com/briandowns/spinner v1.23.0
+	github.com/c-bata/go-prompt v0.2.6
 	github.com/fatih/color v1.17.0
 	github.com/goccy/go-yaml v1.11.3
 	github.com/hashicorp/go-version v1.6.0
@@ -19,6 +20,8 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
+	github.com/mattn/go-tty v0.0.5 // indirect
+	github.com/pkg/term v1.2.0-beta.2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/crypto v0.23.0 // indirect

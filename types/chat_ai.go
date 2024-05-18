@@ -29,10 +29,12 @@ type ChatAI interface {
 	ClearHistory()
 	// ChatAI.GetModel() - get the name of the chat model
 	GetModel() string
+	// ChatAI.GetMoreInfo() - returns additional information, if available
+	GetMoreInfo() string
+	// ChatAI.GetPromptSuffix() - returns additional suffix for an input prompt, if available
+	GetPromptSuffix() string
 	// ChatAI.GetProvider() - get the name of the chat provider
 	GetProvider() string
-	// ChatAI.MoreInfo() - returns additional information, if available
-	MoreInfo() string
 	// ChatAI.SendMessage() - sends a new message
 	// to the API for the current chat conversation
 	SendMessage(message string, onUpdate ChatAIMessageChunkReceiver) error
@@ -41,6 +43,8 @@ type ChatAI interface {
 	// ChatAI.UpdateSystem() - clears chat history and sets the
 	// system prompt
 	UpdateSystem(systemPromt string)
+	// ChatAI.UpdateSystem() - sets up new temperature value
+	UpdateTemperature(newValue float32)
 }
 
 type ChatAIMessageChunkReceiver = func(messageChunk string) error

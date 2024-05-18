@@ -23,20 +23,24 @@
 package commands
 
 import (
-	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/alecthomas/chroma/quick"
 	"github.com/briandowns/spinner"
+	"github.com/c-bata/go-prompt"
+	"github.com/fatih/color"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 	"github.com/spf13/cobra"
 )
 
 func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var temperature float32
+
 	var chatCmd = &cobra.Command{
 		Use:     "chat",
 		Aliases: []string{"ct"},
@@ -50,6 +54,8 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			if !app.NoSystemPrompt {
 				systemPrompt = app.GetSystemAIPrompt("")
 			}
+
+			currentTemperature := temperature
 
 			apiOptions := types.CreateAIChatOptions{
 				SystemPrompt: &systemPrompt,
@@ -75,45 +81,98 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 			setupResetConversation()
 
-			printHelp := func() {
-				fmt.Println("Following commands are supported:")
-				fmt.Println("\t/cls               clear screen")
-				fmt.Println("\t/exit              exit")
-				fmt.Println("\t/format <name>     formatter for console output")
-				fmt.Println("\t/help              print this help")
-				fmt.Println("\t/info              print information about current chat settings")
-				fmt.Println("\t/model <name>      switch to another model")
-				fmt.Println("\t/reset             reset conversation")
-				fmt.Println("\t/style <name>      console style")
-				fmt.Println("\t/system <text>     reset conversation and update system prompt")
-			}
-
 			printAIInfo := func() {
-				fmt.Printf("AI: %v (%v)%v", api.GetProvider(), api.GetModel(), fmt.Sprintln())
-				fmt.Printf("System prompt: %v", systemPrompt)
-				fmt.Println(api.MoreInfo())
+				systemPromptToDisplay := systemPrompt
+				if systemPromptToDisplay == "" {
+					systemPromptToDisplay = "(none)"
+				} else {
+					systemPromptToDisplay = color.New(color.FgWhite, color.Bold).Sprint(systemPromptToDisplay)
+				}
+
+				fmt.Printf("System prompt: %v%v", systemPromptToDisplay, fmt.Sprintln())
+				fmt.Printf("Temperature: %v", currentTemperature)
+				fmt.Println(api.GetMoreInfo())
 			}
 
 			printInitialScreen := func() {
 				printAIInfo()
 				fmt.Println()
-				printHelp()
 			}
 
 			utils.ClearConsole()
 			printInitialScreen()
 
-			scanner := bufio.NewScanner(os.Stdin)
+			history := []string{}
+			addInputToHistory := func(input string) {
+				if strings.TrimSpace(input) == "" {
+					return
+				}
+
+				history = append(history, input)
+			}
+
+			completer := func(in prompt.Document) []prompt.Suggest {
+				w := strings.TrimSpace(in.GetWordBeforeCursorWithSpace())
+				if w != "" {
+					return []prompt.Suggest{}
+				}
+
+				s := []prompt.Suggest{
+					{Text: "/cls", Description: "clear screen"},
+					{Text: "/exit", Description: "exit application"},
+					{Text: "/format <name>", Description: "formatter for console output"},
+					{Text: "/info", Description: "print information about current chat settings and status"},
+					{Text: "/model <name>", Description: "switch to another model"},
+					{Text: "/nosystem", Description: "delete system prompt"},
+					{Text: "/reset", Description: "reset conversation"},
+					{Text: "/style <name>", Description: "console style"},
+					{Text: "/system <text>", Description: "reset conversation and update system prompt"},
+					{Text: "/temp <value>", Description: "custom temperature value"},
+				}
+				return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
+			}
+
+			reset := func() {
+				resetConversation()
+
+				utils.ClearConsole()
+				printInitialScreen()
+			}
+
+			showCompletionAtStart := true
 			for {
-				fmt.Print(">>> ")
+				fmt.Printf(
+					"%v@%v%v",
+					api.GetModel(), api.GetProvider(),
+					api.GetPromptSuffix(),
+				)
 
-				scanner.Scan()
+				userInputOptions := []prompt.Option{
+					prompt.OptionPrefixTextColor(prompt.Yellow),
+					prompt.OptionHistory(history),
+					prompt.OptionPreviewSuggestionTextColor(prompt.Blue),
+					prompt.OptionSelectedSuggestionBGColor(prompt.LightGray),
+					prompt.OptionSuggestionBGColor(prompt.DarkGray),
+					prompt.OptionCompletionOnDown(),
+					prompt.OptionMaxSuggestion(10),
+				}
+				if showCompletionAtStart {
+					userInputOptions = append(userInputOptions, prompt.OptionShowCompletionAtStart())
+				}
 
-				userInput := strings.TrimSpace(scanner.Text())
+				userInput := strings.TrimSpace(
+					prompt.Input(
+						" >>> ",
+						completer,
+						userInputOptions...,
+					),
+				)
 				if userInput == "" {
 					fmt.Printf("[INPUT ERROR] Please submit input%v", fmt.Sprintln())
 					continue
 				}
+
+				showCompletionAtStart = false
 
 				lowerUserInput := strings.ToLower(userInput)
 
@@ -131,9 +190,6 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					}
 
 					continue
-				} else if lowerUserInput == "/help" {
-					printHelp()
-					continue
 				} else if lowerUserInput == "/info" {
 					printAIInfo()
 					continue
@@ -148,12 +204,13 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					}
 
 					continue
+				} else if lowerUserInput == "/nosystem" {
+					systemPrompt = ""
+
+					reset()
+					continue
 				} else if lowerUserInput == "/reset" {
-					resetConversation()
-
-					utils.ClearConsole()
-					printInitialScreen()
-
+					reset()
 					continue
 				} else if strings.HasPrefix(lowerUserInput, "/style ") {
 					newStyle := strings.TrimSpace(lowerUserInput[7:])
@@ -173,6 +230,22 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 						setupResetConversation()
 
 						resetConversation()
+					}
+
+					continue
+				} else if strings.HasPrefix(lowerUserInput, "/temp ") {
+					newTempValue := strings.TrimSpace(userInput[6:])
+					if newTempValue == "" {
+						fmt.Printf("[INPUT ERROR] Please define a temperature value%v", fmt.Sprintln())
+					} else {
+						value64, err := strconv.ParseFloat(newTempValue, 32)
+						if err != nil {
+							fmt.Printf("[INPUT ERROR] Could not parse input value to number: %v%v", err, fmt.Sprintln())
+						} else {
+							currentTemperature = float32(value64)
+
+							api.UpdateTemperature(currentTemperature)
+						}
 					}
 
 					continue
@@ -197,6 +270,8 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				s.Stop()
 
 				if err == nil {
+					addInputToHistory(userInput)
+
 					err := quick.Highlight(os.Stdout, answer, "markdown", consoleFormatter, consoleStyle)
 					if err != nil {
 						fmt.Print(answer)
@@ -208,6 +283,8 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			}
 		},
 	}
+
+	chatCmd.Flags().Float32VarP(&temperature, "temperature", "", utils.GetAIChatTemperature(0.3), "custom temperature value")
 
 	parentCmd.AddCommand(
 		chatCmd,

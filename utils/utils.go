@@ -32,6 +32,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -126,6 +127,19 @@ func DownloadFromUrl(url string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+// GetAIChatTemperature() - returns the value for AI chat conversation temperature
+func GetAIChatTemperature(defaultValue float32) float32 {
+	GPM_AI_CHAT_TEMPERATURE := strings.TrimSpace(os.Getenv("GPM_AI_CHAT_TEMPERATURE"))
+	if GPM_AI_CHAT_TEMPERATURE != "" {
+		value64, err := strconv.ParseFloat(GPM_AI_CHAT_TEMPERATURE, 32)
+		if err == nil {
+			return float32(value64)
+		}
+	}
+
+	return defaultValue
 }
 
 // GetBestChromaFormatterName() - returns the best syntax highlight formatter for the console

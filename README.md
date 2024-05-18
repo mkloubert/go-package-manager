@@ -163,7 +163,7 @@ the repository will be cloned to `react-spa-template` subfolder, then its `.git`
 
 #### AI chat [<a href="#commands-">↑</a>]
 
-![AI Chat Demo 1](./img/demos/chat-ai-demo-1.gif)
+![AI Chat Demo 1](./img/demos/ai-chat-demo-1.gif)
 
 #### Audit dependencies [<a href="#commands-">↑</a>]
 
@@ -599,6 +599,7 @@ Environment variables can be loaded from external files, which are handled in th
 |-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
 | `GPM_AI_API`                  | ID of the AI API to use. Possible values are `ollama` or `openai`.                                                                                             | `openai`                                                                     |
 | `GPM_AI_CHAT_MODEL`           | ID of the AI chat model to use. Possible values are models by [OpenAI](https://platform.openai.com/docs/models) or [Ollama](https://ollama.com/library).       | `gpt-4o`                                                                     |
+| `GPM_AI_CHAT_TEMPERATURE`     | Temperature value for an AI chat (operation)                                                                                                                   | `0`                                                                          |
 | `GPM_AI_PROMPT`               | Custom prompt for operations which are using chat completion operations, like [checkout command](#build-project-).                                             |                                                                              |
 | `GPM_AI_SYSTEM_PROMPT`        | Custom (initial) system prompt for AI chat operations.                                                                                                         | `You are a helpful AI assistant. You always answer in a very sarcastic way.` |
 | `GPM_BIN_PATH`                | Custom folder for binaries installed by [make command](#build-and-install-executable-). Default is `$HOME/.gpm/bin`.                                           | `/my/custom/bin/path`                                                        |
@@ -628,6 +629,7 @@ The project is licensed under the [MIT](./LICENSE).
 - [asciinema](https://github.com/asciinema/asciinema) + [agg](https://github.com/asciinema/agg) by [asciinema team](https://github.com/asciinema)
 - [chroma](https://github.com/alecthomas/chroma) by [Alec Thomas](https://github.com/sponsors/alecthomas)
 - [cobra](https://github.com/spf13/cobra) by [Steve Francia](https://github.com/spf13)
+- [go-prompt](https://github.com/c-bata/go-prompt) by [c-bata](https://github.com/sponsors/c-bata)
 - [go-version](https://github.com/hashicorp/go-version) by [HashiCorp](https://github.com/hashicorp)
 - [go-yaml](https://github.com/goccy/go-yaml) by [Masaaki Goshima](https://github.com/sponsors/goccy)
 - [godotenv](https://github.com/joho/godotenv) by [John Barton](https://github.com/joho)

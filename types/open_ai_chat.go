@@ -37,6 +37,7 @@ type OpenAIChat struct {
 	ApiKey       string              // the API key to use
 	Conversation []OpenAIChatMessage // the conversation
 	Model        string              // the current model
+	Temperature  float32             // the current temperature
 	TotalTokens  int32               // number of total used tokens in this session
 	Verbose      bool                // running in verbose mode or not
 }
@@ -56,16 +57,24 @@ func (c *OpenAIChat) GetModel() string {
 	return c.Model
 }
 
-func (c *OpenAIChat) GetProvider() string {
-	return "openai"
-}
-
-func (c *OpenAIChat) MoreInfo() string {
+func (c *OpenAIChat) GetMoreInfo() string {
 	return fmt.Sprintf(
 		"%vTotal tokens: %v",
 		fmt.Sprintln(),
 		c.TotalTokens,
 	)
+}
+
+func (c *OpenAIChat) GetPromptSuffix() string {
+	if c.Verbose {
+		return fmt.Sprintf(" (%v)", c.TotalTokens)
+	}
+
+	return ""
+}
+
+func (c *OpenAIChat) GetProvider() string {
+	return "openai"
 }
 
 func (c *OpenAIChat) SendMessage(message string, onUpdate ChatAIMessageChunkReceiver) error {
@@ -91,9 +100,10 @@ func (c *OpenAIChat) SendMessage(message string, onUpdate ChatAIMessageChunkRece
 	messages = append(messages, userMessage)
 
 	body := map[string]interface{}{
-		"model":    model,
-		"messages": messages,
-		"stream":   false,
+		"model":       model,
+		"messages":    messages,
+		"stream":      false,
+		"temperature": c.Temperature,
 	}
 
 	jsonData, err := json.Marshal(&body)
@@ -154,16 +164,6 @@ func (c *OpenAIChat) SendMessage(message string, onUpdate ChatAIMessageChunkRece
 
 	c.TotalTokens += chatResponse.Usage.TotalTokens
 
-	if c.Verbose {
-		// additionally output total tokens
-		// in this session
-		onUpdate(fmt.Sprintf(
-			"%v%v",
-			fmt.Sprintln(),
-			c.MoreInfo(),
-		))
-	}
-
 	return nil
 }
 
@@ -178,4 +178,8 @@ func (c *OpenAIChat) UpdateSystem(systemPrompt string) {
 			Content: systemPrompt,
 		},
 	}
+}
+
+func (c *OpenAIChat) UpdateTemperature(newValue float32) {
+	c.Temperature = newValue
 }

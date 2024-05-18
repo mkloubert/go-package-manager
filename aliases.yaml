@@ -14,6 +14,8 @@ aliases:
   - https://github.com/jedib0t/go-pretty/v6/progress
   - https://github.com/jedib0t/go-pretty/v6/table
   - https://github.com/jedib0t/go-pretty/v6/text
+  prompt:
+  - https://github.com/c-bata/go-prompt
   spinner:
   - https://github.com/briandowns/spinner
   tview:
