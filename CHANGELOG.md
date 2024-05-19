@@ -4,6 +4,7 @@
 
 - **BREAKING CHANGE**: `audit` command now uses spinners and pretty tables for output
 - feat: `bump version` command, which upgrades the current version of the underlying repository by setting up a new Git tag locally
+- feat: `diff` command, which displays changes between version (or the current HEAD) as pretty diff output
 - feat: add `GPM_AI_CHAT_TEMPERATURE` environment variable, which defines the custom temperature value for AI chat (operations)
 - feat: add `--temperature` flag to `chat` command, which can define the initial temperature value for the command
 - refactor: improve prompting in `chat` command

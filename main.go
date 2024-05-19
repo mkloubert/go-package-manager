@@ -80,6 +80,7 @@ func main() {
 	commands.Init_Bump_Command(rootCmd, &app)
 	commands.Init_Chat_Command(rootCmd, &app)
 	commands.Init_Checkout_Command(rootCmd, &app)
+	commands.Init_Diff_Command(rootCmd, &app)
 	commands.Init_Exec_Command(rootCmd, &app)
 	commands.Init_Import_Command(rootCmd, &app)
 	commands.Init_Install_Command(rootCmd, &app)
