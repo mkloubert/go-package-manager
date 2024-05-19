@@ -86,6 +86,12 @@ The following [curl operation(s)](https://curl.se/) will download the latest ver
 curl -s https://api.github.com/repos/mkloubert/go-package-manager/releases/latest | jq -r '.assets[].browser_download_url | select(contains("<!!!OS!!!>") and contains("<!!!CPU!!!>") and (. | tostring | contains("sha256") | not))' | xargs curl -sL | tar xzOf - gpm | sudo tee /usr/local/bin/gpm > /dev/null && sudo chmod +x /usr/local/bin/gpm
 ```
 
+Later, you can also execute the following command, which will install a script named `gpm-update` in `$HOME/.gpm/bin` folder:
+
+```bash
+gpm setup updater
+```
+
 ### MacOS [<a href="#installation-">↑</a>]
 
 The following [curl operation(s)](https://formulae.brew.sh/formula/curl) will download the latest version [from GitHub](https://github.com/mkloubert/go-package-manager/releases) and extract it to `/usr/local/bin` as `gpm` executable, which should be part of the `$PATH` environment variable (this also requires [jq tool](https://formulae.brew.sh/formula/jq)):
@@ -96,6 +102,12 @@ curl -s https://api.github.com/repos/mkloubert/go-package-manager/releases/lates
 
 # use the following commands if you use a legacy Intel 64-bit system
 # curl -s https://api.github.com/repos/mkloubert/go-package-manager/releases/latest | jq -r '.assets[].browser_download_url | select(contains("darwin") and contains("amd64") and (. | tostring | contains("sha256") | not))' | xargs curl -sL | tar xzOf - gpm | sudo tee /usr/local/bin/gpm > /dev/null && sudo chmod +x /usr/local/bin/gpm
+```
+
+Later, you can also execute the following command, which will install a script named `gpm-update` in `$HOME/.gpm/bin` folder:
+
+```bash
+gpm setup updater
 ```
 
 ### Windows [<a href="#installation-">↑</a>]
