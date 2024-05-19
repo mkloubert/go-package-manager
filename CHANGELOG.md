@@ -8,6 +8,7 @@
 - feat: add `GPM_AI_CHAT_TEMPERATURE` environment variable, which defines the custom temperature value for AI chat (operations)
 - feat: add `--temperature` flag to `chat` command, which can define the initial temperature value for the command
 - refactor: improve prompting in `chat` command
+- refactor: `pack` command now outputs progress with pretty bars
 
 ## 0.13.0
 

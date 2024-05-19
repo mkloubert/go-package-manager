@@ -38,6 +38,7 @@ import (
 	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 )
 
@@ -142,7 +143,7 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 			app.Debug(fmt.Sprintf("Will handle following output formats: %v", outputFormats))
 
-			for _, format := range outputFormats {
+			for fi, format := range outputFormats {
 				func() {
 					parts := strings.SplitN(format, "/", 2)
 
@@ -224,6 +225,26 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 						utils.CloseWithError(err)
 					}
 
+					bar := progressbar.NewOptions(len(filesToPack),
+						// progressbar.OptionSetWriter(ansi.NewAnsiStdout()), //you should install "github.com/k0kubun/go-ansi"
+						progressbar.OptionEnableColorCodes(true),
+						// progressbar.OptionShowBytes(true),
+						progressbar.OptionSetWidth(15),
+						progressbar.OptionSetDescription(
+							fmt.Sprintf(
+								"[cyan][%v/%v][reset] Packing file for '%v/%v' ...",
+								fi+1, len(outputFormats),
+								goos, goarch,
+							),
+						),
+						progressbar.OptionSetTheme(progressbar.Theme{
+							Saucer:        "[green]=[reset]",
+							SaucerHead:    "[green]>[reset]",
+							SaucerPadding: " ",
+							BarStart:      "[",
+							BarEnd:        "]",
+						}))
+
 					for _, f := range filesToPack {
 						func() {
 							fileReader, err := os.Open(f)
@@ -257,7 +278,11 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 							app.Debug(fmt.Sprintf("Packing file '%v' into '%v' ...", relPath, zipFilePath))
 							io.Copy(fileWriter, fileReader)
 						}()
+
+						bar.Add64(1)
 					}
+
+					fmt.Println()
 				}()
 			}
 

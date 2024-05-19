@@ -368,21 +368,7 @@ will open this URL usually in the browser.
 
 #### Pack project [<a href="#commands-">↑</a>]
 
-If you run
-
-```bash
-gpm pack
-```
-
-all files as defined in [files section of gpm.yaml](#gpmyaml-) will be written to a `.zip` file for the current CPU architecture and operating system.
-
-Running with arguments like
-
-```bash
-gpm pack ^windows
-```
-
-will create packages for all supported CPU architectures supported by Microsoft Windows and the Go compiler.
+![AI Chat Demo 1](./img/demos/pack-demo-1.gif)
 
 #### Pull from Git remotes [<a href="#commands-">↑</a>]
 
@@ -633,4 +619,5 @@ The project is licensed under the [MIT](./LICENSE).
 - [go-version](https://github.com/hashicorp/go-version) by [HashiCorp](https://github.com/hashicorp)
 - [go-yaml](https://github.com/goccy/go-yaml) by [Masaaki Goshima](https://github.com/sponsors/goccy)
 - [godotenv](https://github.com/joho/godotenv) by [John Barton](https://github.com/joho)
+- [progressbar](https://github.com/schollz/progressbar) by [Zack](https://github.com/sponsors/schollz)
 - [spinner](https://github.com/sponsors/briandowns) by [Brian Downs](https://github.com/sponsors/briandowns)
