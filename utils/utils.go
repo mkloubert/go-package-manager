@@ -335,11 +335,13 @@ func Slugify(str string, rx ...string) string {
 	return str
 }
 
-func SplitTextOptions(text string, options ...SpliTextOptions) []string {
+// SplitText() - splits text into chunks of a maximum size
+func SplitText(text string, options ...SpliTextOptions) []string {
 	maxChunkSize := 3000
 	maxOverheadWords := 15
 	maxOverheadChars := 100
 
+	// collect options
 	for _, o := range options {
 		if o.MaxChunkSize != nil {
 			maxChunkSize = *o.MaxChunkSize
@@ -353,45 +355,47 @@ func SplitTextOptions(text string, options ...SpliTextOptions) []string {
 	}
 
 	var chunks []string
-	words := strings.Fields(text)
+	var overhead string
 
-	currentChunk := ""
-	for len(words) > 0 {
-		if len(currentChunk)+len(words[0])+1 <= maxChunkSize {
-			// If adding the next word stays within the limit
-			if currentChunk == "" {
-				currentChunk = words[0]
-			} else {
-				currentChunk += " " + words[0]
-			}
-			words = words[1:]
-		} else {
-			// Try to add the overhead
-			tempChunk := currentChunk
-			overheadCount := 0
-			overheadChars := 0
-			for overheadCount < maxOverheadWords && overheadChars < maxOverheadChars && len(words) > 0 {
-				if len(tempChunk)+len(words[0])+1 <= maxChunkSize+maxOverheadChars {
-					tempChunk += " " + words[0]
-					overheadCount++
-					overheadChars += len(words[0]) + 1
-					words = words[1:]
-				} else {
-					break
-				}
-			}
-			// If the chunk is still too long, do a hard cut
-			if len(tempChunk) > maxChunkSize+maxOverheadChars {
-				chunks = append(chunks, currentChunk)
-			} else {
-				chunks = append(chunks, tempChunk)
-			}
-			currentChunk = ""
+	for len(text) > 0 {
+		if len(text) <= maxChunkSize {
+			// we have no overhead (anymore)
+			chunks = append(chunks, overhead+text)
+			break
 		}
-	}
 
-	if currentChunk != "" {
-		chunks = append(chunks, currentChunk)
+		// determine end position of current chunk
+		end := maxChunkSize
+		for end < len(text) && (text[end] != ' ' && text[end] != '\n') {
+			end++
+		}
+
+		// temp chunk before adjusting for overhead
+		chunk := text[:end]
+		remainingText := text[end:]
+
+		words := strings.Fields(chunk)
+		wordCount := len(words)
+
+		if wordCount > maxOverheadWords {
+			// overhead of words
+			overheadWords := words[wordCount-maxOverheadWords:]
+
+			overhead = strings.Join(overheadWords, " ")
+			chunk = strings.Join(words[:wordCount-maxOverheadWords], " ")
+		} else if len(chunk) > maxChunkSize-maxOverheadChars {
+			// overhead of chunk size
+			overhead = chunk[maxChunkSize-maxOverheadChars:]
+			chunk = chunk[:maxChunkSize-maxOverheadChars]
+		} else {
+			overhead = "" // no overhead
+		}
+
+		chunks = append(chunks, overhead+chunk)
+
+		// prepare the remaining text for next iteration
+		text = overhead + remainingText
+		overhead = ""
 	}
 
 	return chunks

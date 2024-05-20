@@ -22,31 +22,7 @@
 
 package types
 
-// ChatAI describes an object that provides abstract
-// methods to interaction with a chat API
-type ChatAI interface {
-	// ChatAI.ClearHistory() - clears chat history
-	ClearHistory()
-	// ChatAI.GetModel() - get the name of the chat model
-	GetModel() string
-	// ChatAI.GetMoreInfo() - returns additional information, if available
-	GetMoreInfo() string
-	// ChatAI.GetPromptSuffix() - returns additional suffix for an input prompt, if available
-	GetPromptSuffix() string
-	// ChatAI.GetProvider() - get the name of the chat provider
-	GetProvider() string
-	// ChatAI.SendMessage() - sends a new message
-	// to the API for the current chat conversation
-	SendMessage(message string, onUpdate ChatAIMessageChunkReceiver) error
-	// ChatAI.SendPrompt() - sends a single completion prompt
-	SendPrompt(prompt string) (string, error)
-	// ChatAI.SendMessage() - switches the model
-	UpdateModel(modelName string)
-	// ChatAI.UpdateSystem() - clears chat history and sets the
-	// system prompt
-	UpdateSystem(systemPromt string)
-	// ChatAI.UpdateSystem() - sets up new temperature value
-	UpdateTemperature(newValue float32)
+// OllamaApiCompletionResponse is the data of a successful completion response
+type OllamaApiCompletionResponse struct {
+	Response string `json:"response,omitempty"` // the message
 }
-
-type ChatAIMessageChunkReceiver = func(messageChunk string) error

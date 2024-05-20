@@ -36,6 +36,7 @@ import (
 type OllamaAIChat struct {
 	Conversation []OllamaAIChatMessage // the conversation
 	Model        string                // the current model
+	SystemPrompt string                // the current system prompt
 	Temperature  float32               // the current temperature
 	Verbose      bool                  // running in verbose mode or not
 }
@@ -47,7 +48,7 @@ type OllamaAIChatMessage struct {
 	Role    string `json:"role,omitempty"`    // the role like user, assistant or system
 }
 
-// OllamaApiResponse is the data of a successful
+// OllamaApiResponse is the data of a successful chat conversation response
 type OllamaApiChatCompletionResponse struct {
 	Message OllamaAIChatMessage `json:"message,omitempty"` // the message
 }
@@ -140,11 +141,69 @@ func (c *OllamaAIChat) SendMessage(message string, onUpdate ChatAIMessageChunkRe
 	return onUpdate(assistantMessage.Content)
 }
 
+func (c *OllamaAIChat) SendPrompt(prompt string) (string, error) {
+	var systemMessage *string
+	if c.SystemPrompt != "" {
+		systemMessage = &c.SystemPrompt
+	}
+
+	url := "http://localhost:11434/api/generate"
+
+	body := map[string]interface{}{
+		"model":       c.Model,
+		"prompt":      prompt,
+		"stream":      false,
+		"temperature": c.Temperature,
+	}
+	if systemMessage != nil {
+		body["system"] = *systemMessage
+	}
+
+	jsonData, err := json.Marshal(&body)
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonData)))
+	if err != nil {
+		return "", err
+	}
+
+	// setup ...
+	req.Header.Set("Content-Type", "application/json")
+	// ... and finally send the JSON data
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("unexpected response: %v", resp.StatusCode)
+	}
+
+	// load the response
+	responseData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var completionResponse OllamaApiCompletionResponse
+	err = json.Unmarshal(responseData, &completionResponse)
+	if err != nil {
+		return "", err
+	}
+	return completionResponse.Response, nil
+}
+
 func (c *OllamaAIChat) UpdateModel(modelName string) {
 	c.Model = strings.TrimSpace(modelName)
 }
 
 func (c *OllamaAIChat) UpdateSystem(systemPrompt string) {
+	c.SystemPrompt = systemPrompt
+
 	c.Conversation = []OllamaAIChatMessage{
 		{
 			Role:    "system",
