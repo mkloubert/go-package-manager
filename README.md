@@ -212,8 +212,8 @@ gpm bump version
 will detect the latest version of the underlying repository from [Git tags](https://git-scm.com/book/en/v2/Git-Basics-Tagging) and then upgrade the minor part only, e.g. `1.2.4` => `1.3.4`. Finally a new Git tag is created in the format `v1.3.4`.
 
 You also can use at least one of the following flags to increase parts of the current version number as well:
-- `--breaking`: `1.2.4` => `2.2.4`
-- `--feature`: `1.2.4` => `1.3.4`
+- `--breaking`: `1.2.4` => `2.0.0` by default
+- `--feature`: `1.2.4` => `1.3.0` by default
 - `--fix`: `1.2.4` => `1.2.5`
 
 #### Checkout branch [<a href="#commands-">↑</a>]

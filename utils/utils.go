@@ -38,6 +38,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type SpliTextOptions struct {
+	MaxChunkSize     *int // default 3000
+	MaxOverheadWords *int // default 15
+	MaxOverheadChars *int // default 100
+}
+
 // CleanupModuleName() - cleans up a module name
 func CleanupModuleName(moduleName string) string {
 	moduleName = strings.TrimSpace(moduleName)
@@ -327,6 +333,68 @@ func Slugify(str string, rx ...string) string {
 	str = strings.Trim(str, "-")
 
 	return str
+}
+
+func SplitTextOptions(text string, options ...SpliTextOptions) []string {
+	maxChunkSize := 3000
+	maxOverheadWords := 15
+	maxOverheadChars := 100
+
+	for _, o := range options {
+		if o.MaxChunkSize != nil {
+			maxChunkSize = *o.MaxChunkSize
+		}
+		if o.MaxOverheadWords != nil {
+			maxOverheadWords = *o.MaxOverheadWords
+		}
+		if o.MaxOverheadChars != nil {
+			maxOverheadChars = *o.MaxOverheadChars
+		}
+	}
+
+	var chunks []string
+	words := strings.Fields(text)
+
+	currentChunk := ""
+	for len(words) > 0 {
+		if len(currentChunk)+len(words[0])+1 <= maxChunkSize {
+			// If adding the next word stays within the limit
+			if currentChunk == "" {
+				currentChunk = words[0]
+			} else {
+				currentChunk += " " + words[0]
+			}
+			words = words[1:]
+		} else {
+			// Try to add the overhead
+			tempChunk := currentChunk
+			overheadCount := 0
+			overheadChars := 0
+			for overheadCount < maxOverheadWords && overheadChars < maxOverheadChars && len(words) > 0 {
+				if len(tempChunk)+len(words[0])+1 <= maxChunkSize+maxOverheadChars {
+					tempChunk += " " + words[0]
+					overheadCount++
+					overheadChars += len(words[0]) + 1
+					words = words[1:]
+				} else {
+					break
+				}
+			}
+			// If the chunk is still too long, do a hard cut
+			if len(tempChunk) > maxChunkSize+maxOverheadChars {
+				chunks = append(chunks, currentChunk)
+			} else {
+				chunks = append(chunks, tempChunk)
+			}
+			currentChunk = ""
+		}
+	}
+
+	if currentChunk != "" {
+		chunks = append(chunks, currentChunk)
+	}
+
+	return chunks
 }
 
 // ToUrlForOpenHandler() - converts an input URL to a URL which
