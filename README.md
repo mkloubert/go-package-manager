@@ -527,6 +527,14 @@ The idea of an `gpm.yaml` file is very similar to `package.json` file for Node /
 
 An [example can be found here](./gpm.yaml).
 
+If you want to initialize an empty one, you only need to execute
+
+```bash
+gpm init
+```
+
+in your terminal.
+
 ### Files [<a href="#gpmyaml-">↑</a>]
 
 The `files` section contains a list of regular expressions of files which is used by [pack command](#pack-project-):

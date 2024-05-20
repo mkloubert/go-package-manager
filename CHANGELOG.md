@@ -3,13 +3,16 @@
 ## 0.14.0
 
 - **BREAKING CHANGE**: `audit` command now uses spinners and pretty tables for output
+- **BREAKING CHANGE**: if `GPM_BIN_PATH` is relative, it will be mapped to `$HOME/.gpm` instead
 - feat: `bump version` command, which upgrades the current version of the underlying repository by setting up a new Git tag locally
 - feat: `diff` command, which displays changes between version (or the current HEAD) as pretty diff output
+- feat: `init` command, which currently can initialize a `gpm.yaml` file
 - feat: add `GPM_AI_CHAT_TEMPERATURE` environment variable, which defines the custom temperature value for AI chat (operations)
 - feat: add `--temperature` flag to `chat` command, which can define the initial temperature value for the command
 - feat: `setup updater` command, which installs a shell script called `gpm-update` in `$HOME/.gpm/bin` folder of a UNIX environment, like *BSD, Linux or MacOS
 - refactor: improve prompting in `chat` command
 - refactor: `pack` command now outputs progress with pretty bars
+- refactor: code cleanups and improvements
 
 ## 0.13.0
 

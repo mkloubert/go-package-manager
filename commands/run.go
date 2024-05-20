@@ -31,40 +31,58 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func run_scripts(app *types.AppContext, args []string) {
+	scriptsToExecute := []string{}
+
+	for _, scriptName := range args {
+		scriptName = strings.TrimSpace(scriptName)
+		if scriptName == "" {
+			continue
+		}
+
+		_, ok := app.GpmFile.Scripts[scriptName]
+		if !ok {
+			utils.CloseWithError(fmt.Errorf("script '%v' not found", scriptName))
+		}
+
+		scriptsToExecute = append(scriptsToExecute, scriptName)
+	}
+
+	if len(scriptsToExecute) == 0 {
+		app.RunCurrentProject()
+	} else {
+		// run scripts
+
+		for _, scriptName := range scriptsToExecute {
+			app.RunScript(scriptName)
+		}
+	}
+}
+
 func Init_Run_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var mode string
+
 	var runCmd = &cobra.Command{
-		Use:     "run",
+		Use:     "run [resource]",
 		Aliases: []string{"r"},
-		Short:   "Runs a command by name",
-		Long:    `Runs a command by name which is defined in gpm.ya(m)l file.`,
+		Short:   "Run resource",
+		Long:    `Runs resources like scripts by name.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			scriptsToExecute := []string{}
+			m := strings.TrimSpace(strings.ToLower(mode))
 
-			for _, scriptName := range args {
-				scriptName = strings.TrimSpace(scriptName)
-				if scriptName == "" {
-					continue
-				}
-
-				_, ok := app.GpmFile.Scripts[scriptName]
-				if !ok {
-					utils.CloseWithError(fmt.Errorf("script '%v' not found", scriptName))
-				}
-
-				scriptsToExecute = append(scriptsToExecute, scriptName)
-			}
-
-			if len(scriptsToExecute) == 0 {
-				app.RunCurrentProject()
-			} else {
-				// run scripts
-
-				for _, scriptName := range scriptsToExecute {
-					app.RunScript(scriptName)
-				}
+			switch m {
+			case "":
+			case "s":
+			case "script":
+			case "scripts":
+				run_scripts(app, args)
+			default:
+				utils.CloseWithError(fmt.Errorf("invalid value '%v' for mode", m))
 			}
 		},
 	}
+
+	runCmd.Flags().StringVarP(&mode, "mode", "m", "", "the mode like scripts or workflows")
 
 	parentCmd.AddCommand(
 		runCmd,

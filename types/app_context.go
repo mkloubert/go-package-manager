@@ -457,22 +457,41 @@ func (app *AppContext) GetAliasesFilePath() (string, error) {
 func (app *AppContext) GetBinFolderPath() (string, error) {
 	homeDir, err := os.UserHomeDir()
 	if err == nil {
+		gpmDirPath := path.Join(homeDir, ".gpm")
+
 		var binPath string
 
 		GPM_BIN_PATH := strings.TrimSpace(os.Getenv("GPM_BIN_PATH"))
 		if GPM_BIN_PATH != "" {
 			binPath = GPM_BIN_PATH
 		} else {
-			binPath = path.Join(homeDir, ".gpm/bin")
+			binPath = path.Join(gpmDirPath, "bin")
 		}
 
 		if !path.IsAbs(binPath) {
-			binPath = path.Join(app.Cwd, binPath)
+			binPath = path.Join(gpmDirPath, binPath)
 		}
 
 		return binPath, nil
 	}
 	return "", nil
+}
+
+// app.GetCurrentGitBranch() - returns the name of the current branch using git command
+func (app *AppContext) GetCurrentGitBranch() (string, error) {
+	p := exec.Command("git", "symbolic-ref", "--short", "HEAD")
+	p.Dir = app.Cwd
+
+	var output bytes.Buffer
+	p.Stdout = &output
+
+	err := p.Run()
+	if err != nil {
+		return "", err
+	}
+	defer output.Reset()
+
+	return strings.TrimSpace(output.String()), nil
 }
 
 // app.GetEnvFilePaths() - returns possible paths of .env* files
@@ -502,23 +521,6 @@ func (app *AppContext) GetEnvFilePaths() ([]string, error) {
 	} else {
 		return []string{}, err
 	}
-}
-
-// app.GetCurrentGitBranch() - returns the name of the current branch using git command
-func (app *AppContext) GetCurrentGitBranch() (string, error) {
-	p := exec.Command("git", "symbolic-ref", "--short", "HEAD")
-	p.Dir = app.Cwd
-
-	var output bytes.Buffer
-	p.Stdout = &output
-
-	err := p.Run()
-	if err != nil {
-		return "", err
-	}
-	defer output.Reset()
-
-	return strings.TrimSpace(output.String()), nil
 }
 
 // app.GetGitBranches() - returns the list of branches using git command
