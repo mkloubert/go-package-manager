@@ -56,15 +56,11 @@ func Init_Make_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 					// get `$HOME/.gpm/bin` folder
 					binPath, err := app.EnsureBinFolder()
-					if err != nil {
-						utils.CloseWithError(err)
-					}
+					utils.CheckForError(err)
 
 					// current executable path
 					selfPath, err := os.Executable()
-					if err != nil {
-						utils.CloseWithError(err)
-					}
+					utils.CheckForError(err)
 
 					// get project name from git resource
 					projectName := strings.TrimSuffix(
@@ -74,9 +70,7 @@ func Init_Make_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					// create temp folder where to clone
 					// git repo to
 					tempDir, err := os.MkdirTemp("", "*-"+projectName)
-					if err != nil {
-						utils.CloseWithError(err)
-					}
+					utils.CheckForError(err)
 					defer func() {
 						app.Debug(fmt.Sprintf("Removing folder '%v' ...", tempDir))
 						os.RemoveAll(tempDir)
@@ -114,9 +108,7 @@ func Init_Make_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					outExecutableFilePathByTempDir := path.Join(tempDir, outExecutableFilenameByTempDir)
 
 					isOutExecutableFileByProjectExisting, err := utils.IsFileExisting(outExecutableFilePathByProject)
-					if err != nil {
-						utils.CloseWithError(err)
-					}
+					utils.CheckForError(err)
 
 					var buildExecutableFilePath string
 
@@ -127,9 +119,7 @@ func Init_Make_Command(parentCmd *cobra.Command, app *types.AppContext) {
 						// try to find executable by name of temp directory instead
 
 						isOutExecutableFileByTempDirNameExisting, err := utils.IsFileExisting(outExecutableFilenameByTempDir)
-						if err != nil {
-							utils.CloseWithError(err)
-						}
+						utils.CheckForError(err)
 
 						if isOutExecutableFileByTempDirNameExisting {
 							buildExecutableFilePath = outExecutableFilePathByTempDir
@@ -149,28 +139,22 @@ func Init_Make_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					executableFileInBinFolder := path.Join(binPath, executableNameInBinFolder)
 
 					isExecutableFileInBinFolderExisting, err := utils.IsFileExisting(executableFileInBinFolder)
-					if err == nil {
-						if isExecutableFileInBinFolderExisting {
-							app.Debug(fmt.Sprintf("Removing executable '%v' ...", executableFileInBinFolder))
-							os.Remove(executableFileInBinFolder)
-						}
-					} else {
-						utils.CloseWithError(err)
+					utils.CheckForError(err)
+
+					if isExecutableFileInBinFolderExisting {
+						app.Debug(fmt.Sprintf("Removing executable '%v' ...", executableFileInBinFolder))
+						os.Remove(executableFileInBinFolder)
 					}
 
 					// move build executable to ${HOME}/.gpm/bin folder
 					app.Debug(fmt.Sprintf("Moving build executable '%v' to '%v' ...", buildExecutableFilePath, executableFileInBinFolder))
 					err = os.Rename(buildExecutableFilePath, executableFileInBinFolder)
-					if err != nil {
-						utils.CloseWithError(err)
-					}
+					utils.CheckForError(err)
 
 					// make file in ${HOME}/.gpm/bin folder executable
 					app.Debug(fmt.Sprintf("Setting up permissions for '%v' executable ...", executableFileInBinFolder))
 					err = os.Chmod(executableFileInBinFolder, constants.DefaultDirMode)
-					if err != nil {
-						utils.CloseWithError(err)
-					}
+					utils.CheckForError(err)
 				}()
 			}
 		},

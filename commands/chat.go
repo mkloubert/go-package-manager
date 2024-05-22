@@ -62,9 +62,7 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			}
 
 			api, err := app.CreateAIChat(apiOptions)
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			var resetConversation func()
 			setupResetConversation := func() {

@@ -49,18 +49,14 @@ func Init_Checkout_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			branchNameOrDescription := strings.TrimSpace(args[0])
 
 			branches, err := app.GetGitBranches()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			if suggest {
 				// suggest branch name by AI from description
 				branchDescription := strings.Join(args, " ")
 
 				jsonStr, err := json.Marshal(branchDescription)
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 
 				aiPrompts := app.GetAIPromptSettings(
 					fmt.Sprintf(`I need the name for a git branch of maximum 48 characters.
@@ -80,9 +76,7 @@ Your full name for the branch without your explanation:`, string(jsonStr)),
 				answer, err := app.ChatWithAI(aiPrompts.Prompt, types.ChatWithAIOption{
 					SystemPrompt: aiPrompts.SystemPrompt,
 				})
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 
 				branchName := utils.Slugify(answer, branchSlugRegex)
 

@@ -45,9 +45,7 @@ var rootCmd = &cobra.Command{
 
 func main() {
 	cwd, err := os.Getwd()
-	if err != nil {
-		utils.CloseWithError(err)
-	}
+	utils.CheckForError(err)
 
 	var app types.AppContext
 	app.L = log.Default()

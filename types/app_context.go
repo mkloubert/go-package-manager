@@ -801,36 +801,26 @@ func (app *AppContext) LoadAliasesFileIfExist() bool {
 	}()
 
 	aliasesFilePath, err := app.GetAliasesFilePath()
-	if err == nil {
-		isExisting, err := utils.IsFileExisting(aliasesFilePath)
-		if err != nil {
-			utils.CloseWithError(err)
-		}
+	utils.CheckForError(err)
 
-		if !isExisting {
-			return false
-		}
+	isExisting, err := utils.IsFileExisting(aliasesFilePath)
+	utils.CheckForError(err)
 
-		app.Debug(fmt.Sprintf("Loading '%v' file ...", aliasesFilePath))
-
-		yamlData, err := os.ReadFile(aliasesFilePath)
-		if err != nil {
-			utils.CloseWithError(err)
-		}
-
-		var aliases AliasesFile
-		err = yaml.Unmarshal(yamlData, &aliases)
-		if err != nil {
-			utils.CloseWithError(err)
-		}
-
-		app.AliasesFile = aliases
-		return true
-	} else {
-		utils.CloseWithError(err)
+	if !isExisting {
+		return false
 	}
 
-	return false
+	app.Debug(fmt.Sprintf("Loading '%v' file ...", aliasesFilePath))
+
+	yamlData, err := os.ReadFile(aliasesFilePath)
+	utils.CheckForError(err)
+
+	var aliases AliasesFile
+	err = yaml.Unmarshal(yamlData, &aliases)
+	utils.CheckForError(err)
+
+	app.AliasesFile = aliases
+	return true
 }
 
 // app.LoadDataFrom() - loads binary data from a source like
@@ -857,34 +847,29 @@ func (app *AppContext) LoadDataFrom(source string) ([]byte, error) {
 
 func (app *AppContext) loadEnvFile(envFilePath string) {
 	app.Debug(fmt.Sprintf("Loading env file '%v' ...", envFilePath))
+
 	err := godotenv.Overload(envFilePath)
-	if err != nil {
-		utils.CloseWithError(err)
-	}
+	utils.CheckForError(err)
 }
 
 // app.LoadEnvFilesIfExist() - Loads .env* files if they exist
 // and return `true` if file has been loaded successfully.
 func (app *AppContext) LoadEnvFilesIfExist() {
 	envFilePaths, err := app.GetEnvFilePaths()
-	if err == nil {
-		for _, envFilePath := range envFilePaths {
-			isExisting, err := utils.IsFileExisting(envFilePath)
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+	utils.CheckForError(err)
 
-			if isExisting {
-				app.loadEnvFile(envFilePath)
-			}
-		}
+	for _, envFilePath := range envFilePaths {
+		isExisting, err := utils.IsFileExisting(envFilePath)
+		utils.CheckForError(err)
 
-		// now from `--env-file` flags
-		for _, envFilePath := range app.EnvFiles {
+		if isExisting {
 			app.loadEnvFile(envFilePath)
 		}
-	} else {
-		utils.CloseWithError(err)
+	}
+
+	// now from `--env-file` flags
+	for _, envFilePath := range app.EnvFiles {
+		app.loadEnvFile(envFilePath)
 	}
 }
 
@@ -892,14 +877,10 @@ func (app *AppContext) LoadEnvFilesIfExist() {
 // and return `true` if file has been loaded successfully.
 func (app *AppContext) LoadGpmFileIfExist() bool {
 	gpmFilePath, err := app.GetGpmFilePath()
-	if err != nil {
-		utils.CloseWithError(err)
-	}
+	utils.CheckForError(err)
 
 	isExisting, err := utils.IsFileExisting(gpmFilePath)
-	if err != nil {
-		utils.CloseWithError(err)
-	}
+	utils.CheckForError(err)
 
 	if !isExisting {
 		return false
@@ -908,9 +889,7 @@ func (app *AppContext) LoadGpmFileIfExist() bool {
 	app.Debug(fmt.Sprintf("Loading '%v' file ...", gpmFilePath))
 
 	gpm, err := LoadGpmFile(gpmFilePath)
-	if err != nil {
-		utils.CloseWithError(err)
-	}
+	utils.CheckForError(err)
 
 	app.GpmFile = gpm
 
@@ -927,36 +906,26 @@ func (app *AppContext) LoadProjectsFileIfExist() bool {
 	}()
 
 	projectsFilePath, err := app.GetProjectsFilePath()
-	if err == nil {
-		isExisting, err := utils.IsFileExisting(projectsFilePath)
-		if err != nil {
-			utils.CloseWithError(err)
-		}
+	utils.CheckForError(err)
 
-		if !isExisting {
-			return false
-		}
+	isExisting, err := utils.IsFileExisting(projectsFilePath)
+	utils.CheckForError(err)
 
-		app.Debug(fmt.Sprintf("Loading '%v' file ...", projectsFilePath))
-
-		yamlData, err := os.ReadFile(projectsFilePath)
-		if err != nil {
-			utils.CloseWithError(err)
-		}
-
-		var projects ProjectsFile
-		err = yaml.Unmarshal(yamlData, &projects)
-		if err != nil {
-			utils.CloseWithError(err)
-		}
-
-		app.ProjectsFile = projects
-		return true
-	} else {
-		utils.CloseWithError(err)
+	if !isExisting {
+		return false
 	}
 
-	return false
+	app.Debug(fmt.Sprintf("Loading '%v' file ...", projectsFilePath))
+
+	yamlData, err := os.ReadFile(projectsFilePath)
+	utils.CheckForError(err)
+
+	var projects ProjectsFile
+	err = yaml.Unmarshal(yamlData, &projects)
+	utils.CheckForError(err)
+
+	app.ProjectsFile = projects
+	return true
 }
 
 // app.RunCurrentProject() - runs the current go project
@@ -1033,9 +1002,7 @@ func (app *AppContext) UpdateAliasesFile() error {
 	}
 
 	yamlData, err := yaml.Marshal(&app.AliasesFile)
-	if err != nil {
-		utils.CloseWithError(err)
-	}
+	utils.CheckForError(err)
 
 	app.Debug(fmt.Sprintf("Updating alias file '%v' ...", aliasesFilePath))
 	return os.WriteFile(aliasesFilePath, yamlData, constants.DefaultFileMode)
@@ -1065,9 +1032,7 @@ func (app *AppContext) UpdateProjectsFile() error {
 	}
 
 	yamlData, err := yaml.Marshal(&app.ProjectsFile)
-	if err != nil {
-		utils.CloseWithError(err)
-	}
+	utils.CheckForError(err)
 
 	app.Debug(fmt.Sprintf("Updating project file '%v' ...", projectsFilePath))
 	return os.WriteFile(projectsFilePath, yamlData, constants.DefaultFileMode)

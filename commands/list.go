@@ -63,23 +63,17 @@ func init_list_binaries_command(parentCmd *cobra.Command, app *types.AppContext)
 		Long:    `Lists (all) binaries installed inside home directory.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			binPath, err := app.GetBinFolderPath()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			isBinPathExisting, err := utils.IsDirExisting(binPath)
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			if !isBinPathExisting {
 				return
 			}
 
 			binEntries, err := os.ReadDir(binPath)
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			sort.Slice(binEntries, func(indexX, indexY int) bool {
 				return strings.ToLower(binEntries[indexX].Name()) < strings.ToLower(binEntries[indexY].Name())

@@ -45,9 +45,7 @@ func init_import_alias_command(parentCmd *cobra.Command, app *types.AppContext) 
 			importFromYaml := func(yamlData []byte) {
 				var aliasFile types.AliasesFile
 				err := yaml.Unmarshal(yamlData, &aliasFile)
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 
 				if aliasFile.Aliases == nil {
 					return
@@ -71,17 +69,13 @@ func init_import_alias_command(parentCmd *cobra.Command, app *types.AppContext) 
 				}
 
 				yamlData, err := app.LoadDataFrom(alias)
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 
 				importFromYaml(yamlData)
 			}
 
 			stdin, err := utils.LoadFromSTDINIfAvailable()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 			if stdin != nil {
 				app.Debug("Updating projects from STDIN ...")
 				importFromYaml(*stdin)
@@ -89,9 +83,7 @@ func init_import_alias_command(parentCmd *cobra.Command, app *types.AppContext) 
 
 			// ... finally update aliases file
 			err = app.UpdateAliasesFile()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 		},
 	}
 
@@ -114,9 +106,7 @@ func init_import_project_command(parentCmd *cobra.Command, app *types.AppContext
 			importFromYaml := func(yamlData []byte) {
 				var projectFile types.ProjectsFile
 				err := yaml.Unmarshal(yamlData, &projectFile)
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 
 				if projectFile.Projects == nil {
 					return
@@ -140,17 +130,13 @@ func init_import_project_command(parentCmd *cobra.Command, app *types.AppContext
 				}
 
 				yamlData, err := app.LoadDataFrom(source)
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 
 				importFromYaml(yamlData)
 			}
 
 			stdin, err := utils.LoadFromSTDINIfAvailable()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 			if stdin != nil {
 				app.Debug("Updating projects from STDIN ...")
 				importFromYaml(*stdin)
@@ -158,9 +144,7 @@ func init_import_project_command(parentCmd *cobra.Command, app *types.AppContext
 
 			// ... finally update projects file
 			err = app.UpdateProjectsFile()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 		},
 	}
 

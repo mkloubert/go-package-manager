@@ -75,15 +75,10 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			var err error
 			if customVersion == "" {
 				latestVersion, err = app.GetLatestVersion()
-
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 			} else {
 				latestVersion, err = ver.NewVersion(customVersion)
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 			}
 
 			if latestVersion == nil {
@@ -95,9 +90,7 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			if all || len(args) > 0 {
 				app.Debug(fmt.Sprintf("Running '%v' ...", "go tool dist list"))
 				output, err := exec.Command("go", "tool", "dist", "list").Output()
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 
 				// collect all possible targets from output
 				var allSupportedArchitecture []string
@@ -170,9 +163,7 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					app.Debug(fmt.Sprintf("Will pack to '%v' ...", zipFilePath))
 
 					zipFile, err := os.Create(zipFilePath)
-					if err != nil {
-						utils.CloseWithError(err)
-					}
+					utils.CheckForError(err)
 					defer func() {
 						app.Debug(fmt.Sprintf("Finish and close zip file '%v' ...", zipFilePath))
 						zipFile.Close()
@@ -182,22 +173,16 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					zipWriter := zip.NewWriter(zipFile)
 					defer func() {
 						err := zipWriter.Close()
-						if err != nil {
-							utils.CloseWithError(err)
-						}
+						utils.CheckForError(err)
 					}()
 
 					if !noComment {
 						err = zipWriter.SetComment("created with gpm - Go Package Manager (https://gpm.kloubert.dev)")
-						if err != nil {
-							utils.CloseWithError(err)
-						}
+						utils.CheckForError(err)
 					}
 
 					err = zipWriter.Flush()
-					if err != nil {
-						utils.CloseWithError(err)
-					}
+					utils.CheckForError(err)
 
 					executableFilename := strings.TrimSpace(name)
 					if executableFilename == "" {
@@ -221,9 +206,7 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					utils.RunCommand(p)
 
 					filesToPack, err := app.ListFiles()
-					if err != nil {
-						utils.CloseWithError(err)
-					}
+					utils.CheckForError(err)
 
 					bar := progressbar.NewOptions(len(filesToPack),
 						// progressbar.OptionSetWriter(ansi.NewAnsiStdout()), //you should install "github.com/k0kubun/go-ansi"
@@ -248,32 +231,22 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					for _, f := range filesToPack {
 						func() {
 							fileReader, err := os.Open(f)
-							if err != nil {
-								utils.CloseWithError(err)
-							}
+							utils.CheckForError(err)
 							defer fileReader.Close()
 
 							fileInfo, err := os.Stat(f)
-							if err != nil {
-								utils.CloseWithError(err)
-							}
+							utils.CheckForError(err)
 
 							relPath, err := filepath.Rel(app.Cwd, f)
-							if err != nil {
-								utils.CloseWithError(err)
-							}
+							utils.CheckForError(err)
 
 							header, err := zip.FileInfoHeader(fileInfo)
-							if err != nil {
-								utils.CloseWithError(err)
-							}
+							utils.CheckForError(err)
 							header.Name = relPath
 							header.Modified = fileInfo.ModTime()
 
 							fileWriter, err := zipWriter.CreateHeader(header)
-							if err != nil {
-								utils.CloseWithError(err)
-							}
+							utils.CheckForError(err)
 
 							app.Debug(fmt.Sprintf("Packing file '%v' into '%v' ...", relPath, zipFilePath))
 							io.Copy(fileWriter, fileReader)

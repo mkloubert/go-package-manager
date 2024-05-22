@@ -45,9 +45,7 @@ func init_setup_updater_command(parentCmd *cobra.Command, app *types.AppContext)
 		Long:    `Sets up a an updater script for this tool.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			binPath, err := app.GetBinFolderPath()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			consoleFormatter := utils.GetBestChromaFormatterName()
 			consoleStyle := utils.GetBestChromaStyleName()

@@ -66,9 +66,7 @@ func Init_New_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 			app.Debug(fmt.Sprintf("Removing '%v' folder ...", gitDir))
 			err := os.RemoveAll(gitDir)
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			if !noInit {
 				p := utils.CreateShellCommandByArgs("git", "init")

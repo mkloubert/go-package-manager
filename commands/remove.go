@@ -49,9 +49,7 @@ func init_remove_alias_command(parentCmd *cobra.Command, app *types.AppContext) 
 			}
 
 			err := app.UpdateAliasesFile()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 		},
 	}
 
@@ -80,16 +78,12 @@ func init_remove_binary_command(parentCmd *cobra.Command, app *types.AppContext)
 				}
 
 				binPath, err := app.EnsureBinFolder()
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 
 				executableFilePath := path.Join(binPath, binFilename)
 
 				isExecutableFileExisting, err := utils.IsFileExisting(executableFilePath)
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 				if !isExecutableFileExisting {
 					app.Debug(fmt.Sprintf("Executable file '%v' not found", executableFilePath))
 					return
@@ -97,9 +91,7 @@ func init_remove_binary_command(parentCmd *cobra.Command, app *types.AppContext)
 
 				app.Debug(fmt.Sprintf("Removing executable file '%v' ...", executableFilePath))
 				err = os.Remove(executableFilePath)
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 			}
 		},
 	}
@@ -126,9 +118,7 @@ func init_remove_project_command(parentCmd *cobra.Command, app *types.AppContext
 			}
 
 			err := app.UpdateProjectsFile()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 		},
 	}
 

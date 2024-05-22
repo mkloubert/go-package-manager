@@ -47,9 +47,7 @@ func Init_Diff_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			consoleStyle := utils.GetBestChromaStyleName()
 
 			version1, err := version.NewVersion(strings.TrimSpace(args[0]))
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			tag1 := "v" + version1.String()
 			var tag2 string
@@ -58,9 +56,7 @@ func Init_Diff_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				tag2 = "HEAD"
 			} else {
 				version2, err := version.NewVersion(strings.TrimSpace(args[1]))
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 
 				tag2 = "v" + version2.String()
 			}
@@ -69,9 +65,7 @@ func Init_Diff_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			p.Dir = app.Cwd
 
 			diff, err := p.Output()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			err = quick.Highlight(os.Stdout, string(diff), "diff", consoleFormatter, consoleStyle)
 			if err != nil {

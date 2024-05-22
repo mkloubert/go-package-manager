@@ -49,9 +49,7 @@ func init_bump_version_command(parentCmd *cobra.Command, app *types.AppContext) 
 		Long:    `Bumps a version number.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			latestVersion, err := app.GetLatestVersion()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			if latestVersion == nil {
 				latestVersion, _ = version.NewVersion("0.0.0")
@@ -107,9 +105,7 @@ func init_bump_version_command(parentCmd *cobra.Command, app *types.AppContext) 
 					newMajor, newMinor, newPatch,
 				),
 			)
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			if !force && nextVersion.LessThanOrEqual(latestVersion) {
 				utils.CloseWithError(fmt.Errorf("new version is not greater than latest one"))

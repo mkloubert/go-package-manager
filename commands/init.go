@@ -50,9 +50,7 @@ func Init_Init_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			app.Debug(fmt.Sprintf("Will initialize '%v' file in '%v' directory ...", gpmFileName, gpmDirPath))
 
 			isGpmFileExisting, err := utils.IsFileExisting(gpmFilePath)
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			if isGpmFileExisting {
 				app.Debug(fmt.Sprintf("Found %v file in '%v'", gpmFileName, gpmDirPath))
@@ -72,15 +70,11 @@ func Init_Init_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 			app.Debug(fmt.Sprintf("Serializing content of '%v' file to YAML ...", gpmFileName))
 			yamlData, err := yaml.Marshal(&initialGpmFile)
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			app.Debug(fmt.Sprintf("Writing content to '%v' file of '%v' directory ...", gpmFileName, gpmDirPath))
 			err = os.WriteFile(gpmFilePath, yamlData, constants.DefaultFileMode)
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			fmt.Printf("✅ '%v' has been initialized%v", gpmFileName, fmt.Sprintln())
 		},

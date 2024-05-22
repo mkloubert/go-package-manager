@@ -1,5 +1,10 @@
 # Change Log (go-package-manager)
 
+## 0.15.0
+
+- refactor: using new and shorter `CheckForError()` function instead of `CloseWithError()` in most cases
+- refactor: improve logging
+
 ## 0.14.0
 
 - **BREAKING CHANGE**: `audit` command now uses spinners and pretty tables for output

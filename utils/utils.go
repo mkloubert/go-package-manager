@@ -44,6 +44,13 @@ type SpliTextOptions struct {
 	MaxOverheadChars *int // default 100
 }
 
+// CheckForError() - exits with code 1 and output an error (if there is an error)
+func CheckForError(err error) {
+	if err != nil {
+		CloseWithError(err)
+	}
+}
+
 // CleanupModuleName() - cleans up a module name
 func CleanupModuleName(moduleName string) string {
 	moduleName = strings.TrimSpace(moduleName)

@@ -61,9 +61,7 @@ func init_add_alias_command(parentCmd *cobra.Command, app *types.AppContext) {
 			app.AliasesFile.Aliases[alias] = sources
 
 			err := app.UpdateAliasesFile()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 		},
 	}
 
@@ -88,9 +86,7 @@ func init_add_project_command(parentCmd *cobra.Command, app *types.AppContext) {
 			app.ProjectsFile.Projects[alias] = gitResource
 
 			err := app.UpdateProjectsFile()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 		},
 	}
 

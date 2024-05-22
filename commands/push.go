@@ -45,9 +45,7 @@ func Init_Push_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			var remotes []string
 			if len(args) == 0 {
 				listOfRemotes, err := app.GetGitRemotes()
-				if err != nil {
-					utils.CloseWithError(err)
-				}
+				utils.CheckForError(err)
 
 				remotes = append(remotes, listOfRemotes...)
 			} else {

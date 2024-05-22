@@ -49,9 +49,7 @@ func Init_Audit_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			tHeadColor := color.New(color.FgWhite, color.Bold).SprintFunc()
 
 			modules, err := app.GetGoModules()
-			if err != nil {
-				utils.CloseWithError(err)
-			}
+			utils.CheckForError(err)
 
 			for i, m := range modules {
 				func() {
