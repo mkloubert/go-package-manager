@@ -249,7 +249,7 @@ is a short form of `go mod tidy`.
 
 #### Compare code changes [<a href="#commands-">↑</a>]
 
-![Diff demo 1](./img/demos/ai-chat-demo-1.gif)
+![Diff demo 1](./img/demos/diff-demo-1.gif)
 
 #### Execute shell command [<a href="#commands-">↑</a>]
 
