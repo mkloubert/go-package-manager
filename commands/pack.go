@@ -24,6 +24,8 @@ package commands
 
 import (
 	"archive/zip"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -38,7 +40,6 @@ import (
 	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
-	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 )
 
@@ -46,6 +47,7 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var all bool
 	var name string
 	var noArch bool
+	var noChecksum bool
 	var noComment bool
 	var noOs bool
 	var noPostScript bool
@@ -145,19 +147,21 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 					app.Debug(fmt.Sprintf("Will pack for '%v/%v' ...", goos, goarch))
 
-					zipFileName := projectName
+					fileBaseName := projectName
 					if !noTag {
 						if latestVersion != nil {
-							zipFileName += "-v" + latestVersion.String()
+							fileBaseName += "-v" + latestVersion.String()
 						}
 					}
 					if !noOs {
-						zipFileName += "-" + goos
+						fileBaseName += "-" + goos
 					}
 					if !noArch {
-						zipFileName += "-" + goarch
+						fileBaseName += "-" + goarch
 					}
-					zipFileName += ".zip"
+
+					zipFileName := fileBaseName + ".zip"
+					checksumFileName := zipFileName + ".sha256"
 
 					zipFilePath := path.Join(app.Cwd, zipFileName)
 					app.Debug(fmt.Sprintf("Will pack to '%v' ...", zipFilePath))
@@ -208,26 +212,14 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					filesToPack, err := app.ListFiles()
 					utils.CheckForError(err)
 
-					bar := progressbar.NewOptions(len(filesToPack),
-						// progressbar.OptionSetWriter(ansi.NewAnsiStdout()), //you should install "github.com/k0kubun/go-ansi"
-						progressbar.OptionEnableColorCodes(true),
-						// progressbar.OptionShowBytes(true),
-						progressbar.OptionSetWidth(15),
-						progressbar.OptionSetDescription(
-							fmt.Sprintf(
-								"[cyan][%v/%v][reset] Packing file for '%v/%v' ...",
-								fi+1, len(outputFormats),
-								goos, goarch,
-							),
+					packBar := utils.CreateProgressBar(
+						len(filesToPack),
+						fmt.Sprintf(
+							"[cyan][%v/%v][reset] Packing file for '%v/%v' ...",
+							fi+1, len(outputFormats),
+							goos, goarch,
 						),
-						progressbar.OptionSetTheme(progressbar.Theme{
-							Saucer:        "[green]=[reset]",
-							SaucerHead:    "[green]>[reset]",
-							SaucerPadding: " ",
-							BarStart:      "[",
-							BarEnd:        "]",
-						}))
-
+					)
 					for _, f := range filesToPack {
 						func() {
 							fileReader, err := os.Open(f)
@@ -238,7 +230,10 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 							utils.CheckForError(err)
 
 							relPath, err := filepath.Rel(app.Cwd, f)
-							utils.CheckForError(err)
+							if err != nil {
+								relPath = f
+							}
+							app.Debug(fmt.Sprintf("Packing file '%v' into '%v' ...", relPath, zipFilePath))
 
 							header, err := zip.FileInfoHeader(fileInfo)
 							utils.CheckForError(err)
@@ -248,14 +243,46 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 							fileWriter, err := zipWriter.CreateHeader(header)
 							utils.CheckForError(err)
 
-							app.Debug(fmt.Sprintf("Packing file '%v' into '%v' ...", relPath, zipFilePath))
 							io.Copy(fileWriter, fileReader)
 						}()
 
-						bar.Add64(1)
+						packBar.Add(1)
 					}
-
 					fmt.Println()
+
+					if !noChecksum {
+						checksumFilePath := path.Join(app.Cwd, checksumFileName)
+						app.Debug(fmt.Sprintf("Will hash to '%v' ...", checksumFilePath))
+
+						checksumBar := utils.CreateProgressBar(
+							1,
+							fmt.Sprintf(
+								"[cyan][%v/%v][reset] Creating checksum of packed file for '%v/%v' ...",
+								fi+1, len(outputFormats),
+								goos, goarch,
+							),
+						)
+
+						func() {
+							fileReader, err := os.Open(zipFilePath)
+							utils.CheckForError(err)
+							defer fileReader.Close()
+
+							hash := sha256.New()
+
+							_, err = io.Copy(hash, fileReader)
+							utils.CheckForError(err)
+
+							hashSum := hash.Sum(nil)
+							checksum := fmt.Sprintln(hex.EncodeToString(hashSum))
+
+							os.WriteFile(checksumFilePath, []byte(checksum), constants.DefaultFileMode)
+						}()
+
+						checksumBar.Add(1)
+
+						fmt.Println()
+					}
 				}()
 			}
 
@@ -272,6 +299,7 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	packCmd.Flags().StringVarP(&name, "name", "", "", "custom name of output executable file")
 	packCmd.Flags().BoolVarP(&noArch, "no-arch", "", false, "do not add cpu architecture to output filename")
 	packCmd.Flags().BoolVarP(&noArch, "no-comment", "", false, "do not add global comment to zip file")
+	packCmd.Flags().BoolVarP(&noChecksum, "no-checksum", "", false, "do not create checksum file")
 	packCmd.Flags().BoolVarP(&noOs, "no-os", "", false, "do not add operating system to output filename")
 	packCmd.Flags().BoolVarP(&noPostScript, "no-post-script", "", false, "do not handle '"+constants.PostPackScriptName+"' script")
 	packCmd.Flags().BoolVarP(&noPreScript, "no-pre-script", "", false, "do not handle '"+constants.PrePackScriptName+"' script")

@@ -26,7 +26,9 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"regexp"
 	"runtime"
+	"strings"
 
 	"github.com/alecthomas/chroma/quick"
 	"github.com/fatih/color"
@@ -36,6 +38,57 @@ import (
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 )
+
+func init_setup_git_command(parentCmd *cobra.Command, app *types.AppContext) {
+	var force bool
+	var local bool
+
+	var setupUpdaterCmd = &cobra.Command{
+		Use:     "git [name] [email]",
+		Aliases: []string{"g", "gt"},
+		Args:    cobra.MinimumNArgs(2),
+		Short:   "Setup git",
+		Long:    `Sets up git with minimum and required settings like name and email.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			name := strings.TrimSpace(args[0])
+			email := strings.TrimSpace(strings.ToLower(args[1]))
+
+			if !force {
+				const emailRegexPattern = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+				emailRegex := regexp.MustCompile(emailRegexPattern)
+
+				if name == "" {
+					utils.CloseWithError(fmt.Errorf("no name defined"))
+				}
+
+				if !emailRegex.MatchString(email) {
+					utils.CloseWithError(fmt.Errorf("no valid email address defined"))
+				}
+			}
+
+			app.Debug(fmt.Sprintf("Setting up user name as '%v' ...", name))
+			if local {
+				app.RunShellCommandByArgs("git", "config", "user.name", name)
+			} else {
+				app.RunShellCommandByArgs("git", "config", "--global", "user.name", name)
+			}
+
+			app.Debug(fmt.Sprintf("Setting up user email as '%v' ...", email))
+			if local {
+				app.RunShellCommandByArgs("git", "config", "user.email", email)
+			} else {
+				app.RunShellCommandByArgs("git", "config", "--global", "user.email", email)
+			}
+		},
+	}
+
+	parentCmd.Flags().BoolVarP(&force, "force", "", false, "no checks")
+	parentCmd.Flags().BoolVarP(&local, "local", "", false, "no --global flag")
+
+	parentCmd.AddCommand(
+		setupUpdaterCmd,
+	)
+}
 
 func init_setup_updater_command(parentCmd *cobra.Command, app *types.AppContext) {
 	var setupUpdaterCmd = &cobra.Command{
@@ -158,6 +211,7 @@ func Init_Setup_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
+	init_setup_git_command(setupCmd, app)
 	init_setup_updater_command(setupCmd, app)
 
 	parentCmd.AddCommand(

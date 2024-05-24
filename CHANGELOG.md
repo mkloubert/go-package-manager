@@ -2,6 +2,8 @@
 
 ## 0.15.0
 
+- **BREAKING CHANGE**: `pack` command creates `.sha256` by default
+- feat: `setup git` command, which sets up basic git features like username and email address
 - refactor: using new and shorter `CheckForError()` function instead of `CloseWithError()` in most cases
 - refactor: improve logging
 
@@ -14,7 +16,7 @@
 - feat: `init` command, which currently can initialize a `gpm.yaml` file
 - feat: add `GPM_AI_CHAT_TEMPERATURE` environment variable, which defines the custom temperature value for AI chat (operations)
 - feat: add `--temperature` flag to `chat` command, which can define the initial temperature value for the command
-- feat: `setup updater` command, which installs a shell script called `gpm-update` in `$HOME/.gpm/bin` folder of a UNIX environment, like *BSD, Linux or MacOS
+- feat: `setup updater` command, which installs a shell script called `gpm-update` in `$HOME/.gpm/bin` folder of a UNIX environment, like \*BSD, Linux or MacOS
 - refactor: improve prompting in `chat` command
 - refactor: `pack` command now outputs progress with pretty bars
 - refactor: code cleanups and improvements
@@ -25,7 +27,7 @@
 - feat: `audit` command, which uses [osv.dev API](https://google.github.io/osv.dev/api/) to scan installed modules for vulnerabilities
 - feat: `install` command now supports `--tidy` flag to run `tidy` command after successful installation
 - feat: `open alias` command, which opens the URL of an alias from `aliases.yaml` file in `$HOME/.gpm/bin` folder
-- feat: `open project` command, which opens the URL of a project  from `projects.yaml` file in `$HOME/.gpm/bin` folder
+- feat: `open project` command, which opens the URL of a project from `projects.yaml` file in `$HOME/.gpm/bin` folder
 - feat: `import aliases` command, which loads aliases from a local or web source and merge them with `aliases.yaml` file in `$HOME/.gpm` folder
 - feat: `import projects` command, which loads projects from a local or web source and merge them with `projects.yaml` file in `$HOME/.gpm` folder
 - feat: implement `postinstall`, `postpack` and `prepack` scripts for `gpm.yaml` files
@@ -37,18 +39,18 @@
 - feat: `remove binary` command, which removes binary installed with `make` command
 - feat: `list binaries` command, which lists binaries installed with `make` command
 - feat: `pack` command, which compresses files defined in `files` section of `gpm.yaml` file to zip archive
-- fix: setup `Dir` property of commands used in Git* methods of `AppContext` instance
+- fix: setup `Dir` property of commands used in Git\* methods of `AppContext` instance
 - chore: code cleanups and improvements
 
 ## 0.11.0
 
 - feat: load `.env` files from `$HOME/.gpm` and project directories, if exist, automatically
 - feat: add `--env-file` file to load environment variables from external variables
-- feat: `execute` command which runs shell commands with the environment variables loaded from .env* files
+- feat: `execute` command which runs shell commands with the environment variables loaded from .env\* files
 - fix: exit app if special files could not be loaded
 - feat: `run` command without scripts will run `go run .` now
 - feat: `postbuild`, `postinstall`, `posttest`, `prebuild`, `preinstall` and `pretest` script support
-- feat: add `--no-script` flags for `build`, `start`, `test` and `tidy` 
+- feat: add `--no-script` flags for `build`, `start`, `test` and `tidy`
 
 ## 0.10.1
 
