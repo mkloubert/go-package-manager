@@ -2,7 +2,7 @@
 
 ## 0.15.0
 
-- **BREAKING CHANGE**: `pack` command creates `.sha256` by default
+- **BREAKING CHANGE**: `pack` command creates corresponding `.sha256` file by default
 - feat: `setup git` command, which sets up basic git features like username and email address
 - refactor: using new and shorter `CheckForError()` function instead of `CloseWithError()` in most cases
 - refactor: improve logging
