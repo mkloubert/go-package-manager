@@ -6,6 +6,7 @@
 - feat: `setup git` command, which sets up basic git features like username and email address
 - refactor: using new and shorter `CheckForError()` function instead of `CloseWithError()` in most cases
 - refactor: improve logging
+- refactor: using Go template engine now to generate final content of script by `setup updater` command
 
 ## 0.14.0
 
