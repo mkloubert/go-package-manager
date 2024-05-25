@@ -7,6 +7,7 @@
 - refactor: using new and shorter `CheckForError()` function instead of `CloseWithError()` in most cases
 - refactor: improve logging
 - refactor: using Go template engine now to generate final content of script by `setup updater` command
+- chore: update `projects.yaml` with: [hugo](https://github.com/gohugoio/hugo)
 
 ## 0.14.0
 
