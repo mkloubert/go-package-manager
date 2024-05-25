@@ -55,6 +55,7 @@ type AppContext struct {
 	EnvFiles       []string     // one or more env files
 	Environment    string       // the name of the environment
 	GpmFile        GpmFile      // the gpm.y(a)ml file
+	IsCI           bool         // indicates if app runs in CI environment like GitHub action or GitLab runner
 	L              *log.Logger  // the logger to use
 	NoSystemPrompt bool         // do not use system prompt
 	Ollama         bool         // use Ollama

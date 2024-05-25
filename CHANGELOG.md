@@ -4,6 +4,7 @@
 
 - **BREAKING CHANGE**: `pack` command creates corresponding `.sha256` file by default
 - feat: `setup git` command, which sets up basic git features like username and email address
+- feat: support for `CI` environment variable, which is used by GitHub actions or GitLab runners as well
 - refactor: using new and shorter `CheckForError()` function instead of `CloseWithError()` in most cases
 - refactor: improve logging
 - refactor: using Go template engine now to generate final content of script by `setup updater` command
