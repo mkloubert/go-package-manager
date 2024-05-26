@@ -37,6 +37,7 @@ import (
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 )
 
@@ -86,6 +87,24 @@ func ClearConsole() error {
 func CloseWithError(err error) {
 	fmt.Println(err)
 	os.Exit(1)
+}
+
+// CreateProgressBar() - creates a simple progress bar with default settings
+func CreateProgressBar(totalCount int, description string) *progressbar.ProgressBar {
+	newBar := progressbar.NewOptions(
+		totalCount,
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionSetWidth(15),
+		progressbar.OptionSetDescription(description),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "[green]=[reset]",
+			SaucerHead:    "[green]>[reset]",
+			SaucerPadding: " ",
+			BarStart:      "[",
+			BarEnd:        "]",
+		}))
+
+	return newBar
 }
 
 // CreateShellCommand() - creates a new shell command based on the operating system

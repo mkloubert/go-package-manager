@@ -25,6 +25,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -50,6 +51,7 @@ func main() {
 	var app types.AppContext
 	app.L = log.Default()
 	app.Cwd = cwd
+	app.IsCI = strings.TrimSpace(strings.ToLower(os.Getenv("CI"))) == "true"
 
 	// use "environment flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.Environment, "environment", "", "", "name of the environment")

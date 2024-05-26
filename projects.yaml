@@ -1,3 +1,4 @@
 projects:
   gopass: https://github.com/gopasspw/gopass
   gpm: https://github.com/mkloubert/go-package-manager
+  hugo: https://github.com/gohugoio/hugo

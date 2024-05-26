@@ -23,19 +23,75 @@
 package commands
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path"
+	"regexp"
 	"runtime"
+	"strings"
+	"text/template"
 
 	"github.com/alecthomas/chroma/quick"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
 	"github.com/mkloubert/go-package-manager/constants"
+	"github.com/mkloubert/go-package-manager/resources"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 )
+
+func init_setup_git_command(parentCmd *cobra.Command, app *types.AppContext) {
+	var force bool
+	var local bool
+
+	var setupUpdaterCmd = &cobra.Command{
+		Use:     "git [name] [email]",
+		Aliases: []string{"g", "gt"},
+		Args:    cobra.MinimumNArgs(2),
+		Short:   "Setup git",
+		Long:    `Sets up git with minimum and required settings like name and email.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			name := strings.TrimSpace(args[0])
+			email := strings.TrimSpace(strings.ToLower(args[1]))
+
+			if !force {
+				const emailRegexPattern = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+				emailRegex := regexp.MustCompile(emailRegexPattern)
+
+				if name == "" {
+					utils.CloseWithError(fmt.Errorf("no name defined"))
+				}
+
+				if !emailRegex.MatchString(email) {
+					utils.CloseWithError(fmt.Errorf("no valid email address defined"))
+				}
+			}
+
+			app.Debug(fmt.Sprintf("Setting up user name as '%v' ...", name))
+			if local {
+				app.RunShellCommandByArgs("git", "config", "user.name", name)
+			} else {
+				app.RunShellCommandByArgs("git", "config", "--global", "user.name", name)
+			}
+
+			app.Debug(fmt.Sprintf("Setting up user email as '%v' ...", email))
+			if local {
+				app.RunShellCommandByArgs("git", "config", "user.email", email)
+			} else {
+				app.RunShellCommandByArgs("git", "config", "--global", "user.email", email)
+			}
+		},
+	}
+
+	parentCmd.Flags().BoolVarP(&force, "force", "", false, "no checks")
+	parentCmd.Flags().BoolVarP(&local, "local", "", false, "no --global flag")
+
+	parentCmd.AddCommand(
+		setupUpdaterCmd,
+	)
+}
 
 func init_setup_updater_command(parentCmd *cobra.Command, app *types.AppContext) {
 	var setupUpdaterCmd = &cobra.Command{
@@ -69,54 +125,22 @@ func init_setup_updater_command(parentCmd *cobra.Command, app *types.AppContext)
 				}
 
 				createScript = func() {
-					bashScript := fmt.Sprintf(`#!/bin/bash
+					templateData, err := resources.Templates.ReadFile("templates/gpm-update.sh")
+					utils.CheckForError(err)
 
-handle_error() {
-    echo "Error: $1"
-    exit 1
-}
+					template, err := template.New("gpm-update.sh").Parse(string(templateData))
+					utils.CheckForError(err)
 
-echo "gpm-update"
-echo ""
+					var bashScriptBuffer bytes.Buffer
+					template.Execute(&bashScriptBuffer, map[string]string{
+						"GOOS":          goos,
+						"GOARCH":        goarch,
+						"SHA256Command": sha256Command,
+					})
+					utils.CheckForError(err)
+					defer bashScriptBuffer.Reset()
 
-echo "Finding download URL and SHA256 URL ..."
-latest_release_info=$(wget -qO- https://api.github.com/repos/mkloubert/go-package-manager/releases/latest) || handle_error "Could not fetch release infos"
-download_url=$(echo "$latest_release_info" | jq -r '.assets[].browser_download_url | select(contains("gpm") and contains("%v") and contains("%v") and (. | tostring | contains("sha256") | not))') || handle_error "Could not parse download URL"
-sha256_url=$(echo "$latest_release_info" | jq -r '.assets[].browser_download_url | select(contains("gpm") and contains("%v") and contains("%v") and contains("sha256"))') || handle_error "Could not parse SHA256 URL"
-
-if [ -z "$download_url" ]; then
-  handle_error "No valid download URL found"
-fi
-
-if [ -z "$sha256_url" ]; then
-  handle_error "No valid SHA256 URL found"
-fi
-
-echo "Downloading tarball from '$download_url'..."
-wget -q "$download_url" -O gpm.tar.gz || handle_error "Failed to download tarball"
-
-echo "Downloading SHA256 file from '$sha256_url'..."
-wget -q "$sha256_url" -O gpm.tar.gz.sha256 || handle_error "Failed to download SHA256 file"
-
-echo "Verifying tarball ..."
-%v || handle_error "SHA256 verification failed"
-
-echo "Extracting binary ..."
-tar -xzOf gpm.tar.gz gpm > gpm || handle_error "Could not extract 'gpm' binary"
-
-echo "Installing 'gpm' to /usr/local/bin ..."
-sudo mv gpm /usr/local/bin/gpm || handle_error "Could not move 'gpm' to '/usr/local/bin'"
-sudo chmod +x /usr/local/bin/gpm || handle_error "Could not update permissions of 'gpm' binary"
-
-echo "Cleaning up ..."
-rm gpm.tar.gz gpm.tar.gz.sha256 || handle_error "Cleanups failed"
-
-echo "'gpm' successfully installed or updated 👍"
-`,
-						goos, goarch,
-						goos, goarch,
-						sha256Command,
-					)
+					bashScript := bashScriptBuffer.String()
 
 					app.Debug(fmt.Sprintf("Writing bash script to '%v' ...", bashScriptFilePath))
 					os.WriteFile(bashScriptFilePath, []byte(bashScript), constants.DefaultFileMode)
@@ -127,7 +151,7 @@ echo "'gpm' successfully installed or updated 👍"
 						fmt.Sprintln(), fmt.Sprintln(),
 					)
 
-					err := quick.Highlight(os.Stdout, bashScript, "shell", consoleFormatter, consoleStyle)
+					err = quick.Highlight(os.Stdout, bashScript, "shell", consoleFormatter, consoleStyle)
 					if err != nil {
 						fmt.Print(bashScript)
 					}
@@ -158,6 +182,7 @@ func Init_Setup_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
+	init_setup_git_command(setupCmd, app)
 	init_setup_updater_command(setupCmd, app)
 
 	parentCmd.AddCommand(
