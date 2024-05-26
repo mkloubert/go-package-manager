@@ -35,6 +35,8 @@ import (
 	"strconv"
 	"strings"
 
+	ui "github.com/gizak/termui/v3"
+	"github.com/gizak/termui/v3/widgets"
 	"github.com/spf13/cobra"
 )
 
@@ -112,16 +114,6 @@ func CreateShellCommandByArgs(c string, args ...string) *exec.Cmd {
 	return p
 }
 
-// GetBoolFlag() - returns a boolean command line flag value without error
-func GetBoolFlag(cmd *cobra.Command, name string, defaultValue bool) bool {
-	val, err := cmd.Flags().GetBool(name)
-	if err == nil {
-		return val
-	}
-
-	return defaultValue
-}
-
 // DownloadFromUrl() - downloads data from URL
 func DownloadFromUrl(url string) ([]byte, error) {
 	if !strings.HasPrefix(url, "http:") && !strings.HasPrefix(url, "https:") {
@@ -140,6 +132,16 @@ func DownloadFromUrl(url string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+// EnsureMaxSliceLength() - ensures that the length of an array is
+// not greater than a maximum and returns a truncated copy; otherwise
+// the input array
+func EnsureMaxSliceLength[T any](slice []T, maxLength int) []T {
+	if len(slice) > maxLength {
+		return slice[0:maxLength]
+	}
+	return slice
 }
 
 // GetAIChatTemperature() - returns the value for AI chat conversation temperature
@@ -185,6 +187,16 @@ func GetBestChromaStyleName() string {
 		return GPM_TERMINAL_STYLE
 	}
 	return "dracula"
+}
+
+// GetBoolFlag() - returns a boolean command line flag value without error
+func GetBoolFlag(cmd *cobra.Command, name string, defaultValue bool) bool {
+	val, err := cmd.Flags().GetBool(name)
+	if err == nil {
+		return val
+	}
+
+	return defaultValue
 }
 
 // GetDefaultAIChatModel() - returns the name of the default AI chat model
@@ -431,4 +443,29 @@ func ToUrlForOpenHandler(originalUrl string) (string, error) {
 		urlObj.Host, port,
 		urlObj.Path, query,
 	), nil
+}
+
+// UpdateUsageSparkline() - updates color of and
+// data of an widgets.Sparkline item
+// that represents "usage data"
+func UpdateUsageSparkline(s *widgets.Sparkline, newData []float64) {
+	newColor := ui.ColorWhite
+
+	maxVal := s.MaxVal
+
+	if maxVal != 0.0 && len(newData) > 0 {
+		firstItem := newData[0]
+		unusageValue := maxVal - firstItem
+		percentage := unusageValue / maxVal
+
+		newColor = ui.ColorGreen
+		if percentage <= 0.25 { // <= 25%?
+			newColor = ui.ColorRed
+		} else if percentage <= 0.5 { // <= 50%?
+			newColor = ui.ColorYellow
+		}
+	}
+
+	s.Data = newData
+	s.LineColor = newColor
 }

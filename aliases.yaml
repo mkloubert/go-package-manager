@@ -18,8 +18,12 @@ aliases:
   - https://github.com/schollz/progressbar/v3
   prompt:
   - https://github.com/c-bata/go-prompt
+  psutil:
+  - https://github.com/shirou/gopsutil/v3
   spinner:
   - https://github.com/briandowns/spinner
+  termui:
+  - https://github.com/gizak/termui/v3
   tview:
   - https://github.com/rivo/tview
   version:

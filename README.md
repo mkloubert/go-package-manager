@@ -29,6 +29,7 @@
     - [List aliases](#list-aliases-)
     - [List executables](#list-executables-)
     - [List projects](#list-projects-)
+    - [Monitor process](#monitor-process-)
     - [New project](#new-project-)
     - [Open alias](#open-alias-)
     - [Open project](#open-project-)
@@ -341,6 +342,10 @@ mkloubert
         git@github.com:mkloubert/mkloubert.git
 ```
 
+#### Monitor process [<a href="#commands-">↑</a>]
+
+![Monitor Demo 1](./img/demos/monitor-demo-1.gif)
+
 #### New project [<a href="#commands-">↑</a>]
 
 `gpm new <project>` is designed to setup a project via an alias defined with [Add project](#add-project-) command.
@@ -644,5 +649,7 @@ The project is licensed under the [MIT](./LICENSE).
 - [go-version](https://github.com/hashicorp/go-version) by [HashiCorp](https://github.com/hashicorp)
 - [go-yaml](https://github.com/goccy/go-yaml) by [Masaaki Goshima](https://github.com/sponsors/goccy)
 - [godotenv](https://github.com/joho/godotenv) by [John Barton](https://github.com/joho)
+- [gopsutil](https://github.com/shirou/gopsutil) by [shirou](https://github.com/sponsors/shirou)
 - [progressbar](https://github.com/schollz/progressbar) by [Zack](https://github.com/sponsors/schollz)
 - [spinner](https://github.com/sponsors/briandowns) by [Brian Downs](https://github.com/sponsors/briandowns)
+- [termui](https://github.com/gizak/termui) by [Zack Guo](https://github.com/gizak)

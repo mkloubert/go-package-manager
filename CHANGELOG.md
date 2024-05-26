@@ -2,6 +2,7 @@
 
 ## 0.15.0
 
+- feat: `monitor` command, which displays CPU and memory usage of a process in the console
 - refactor: using new and shorter `CheckForError()` function instead of `CloseWithError()` in most cases
 - refactor: improve logging
 
