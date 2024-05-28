@@ -141,7 +141,7 @@ func (c *OllamaAIChat) SendMessage(message string, onUpdate ChatAIMessageChunkRe
 	return onUpdate(assistantMessage.Content)
 }
 
-func (c *OllamaAIChat) SendPrompt(prompt string) (string, error) {
+func (c *OllamaAIChat) SendPrompt(prompt string, onUpdate ChatAIMessageChunkReceiver) error {
 	var systemMessage *string
 	if c.SystemPrompt != "" {
 		systemMessage = &c.SystemPrompt
@@ -161,12 +161,12 @@ func (c *OllamaAIChat) SendPrompt(prompt string) (string, error) {
 
 	jsonData, err := json.Marshal(&body)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonData)))
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// setup ...
@@ -175,26 +175,28 @@ func (c *OllamaAIChat) SendPrompt(prompt string) (string, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("unexpected response: %v", resp.StatusCode)
+		return fmt.Errorf("unexpected response: %v", resp.StatusCode)
 	}
 
 	// load the response
 	responseData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	var completionResponse OllamaApiCompletionResponse
 	err = json.Unmarshal(responseData, &completionResponse)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return completionResponse.Response, nil
+
+	onUpdate(completionResponse.Response)
+	return nil
 }
 
 func (c *OllamaAIChat) UpdateModel(modelName string) {

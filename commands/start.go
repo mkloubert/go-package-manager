@@ -23,11 +23,10 @@
 package commands
 
 import (
+	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/spf13/cobra"
 )
-
-const startScriptName = "start"
 
 func Init_Start_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var noScript bool
@@ -38,16 +37,16 @@ func Init_Start_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short:   "Runs current project",
 		Long:    `Runs the current project or 'start' script, if defined.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			_, ok := app.GpmFile.Scripts[startScriptName]
+			_, ok := app.GpmFile.Scripts[constants.StartScriptName]
 			if !noScript && ok {
-				app.RunScript(startScriptName, args...)
+				app.RunScript(constants.StartScriptName, args...)
 			} else {
 				app.RunCurrentProject(args...)
 			}
 		},
 	}
 
-	startCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+startScriptName+"' script")
+	startCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+constants.StartScriptName+"' script")
 
 	parentCmd.AddCommand(
 		startCmd,

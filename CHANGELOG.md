@@ -1,5 +1,10 @@
 # Change Log (go-package-manager)
 
+## 0.16.0
+
+- feat: `prompt` command which invokes an AI prompt or (continues) a chat from command line
+- refactor: code cleanups and improvements
+
 ## 0.15.0
 
 - **BREAKING CHANGE**: `pack` command creates corresponding `.sha256` file by default

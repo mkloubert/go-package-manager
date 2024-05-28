@@ -168,15 +168,15 @@ func (c *OpenAIChat) SendMessage(message string, onUpdate ChatAIMessageChunkRece
 	return nil
 }
 
-func (c *OpenAIChat) SendPrompt(prompt string) (string, error) {
+func (c *OpenAIChat) SendPrompt(prompt string, onUpdate ChatAIMessageChunkReceiver) error {
 	apiKey := strings.TrimSpace(c.ApiKey)
 	if apiKey == "" {
-		return "", fmt.Errorf("no OpenAI api key defined")
+		return fmt.Errorf("no OpenAI api key defined")
 	}
 
 	model := strings.TrimSpace(strings.ToLower(c.Model))
 	if model == "" {
-		return "", fmt.Errorf("no chat ai model defined")
+		return fmt.Errorf("no chat ai model defined")
 	}
 
 	var systemMessage *OpenAIChatMessage
@@ -209,12 +209,12 @@ func (c *OpenAIChat) SendPrompt(prompt string) (string, error) {
 
 	jsonData, err := json.Marshal(&body)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonData)))
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// setup ...
@@ -224,24 +224,24 @@ func (c *OpenAIChat) SendPrompt(prompt string) (string, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("unexpected response %v", resp.StatusCode)
+		return fmt.Errorf("unexpected response %v", resp.StatusCode)
 	}
 
 	// load the response
 	responseData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	var chatResponse OpenAIChatCompletionResponseV1
 	err = json.Unmarshal(responseData, &chatResponse)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	answer := ""
@@ -249,7 +249,8 @@ func (c *OpenAIChat) SendPrompt(prompt string) (string, error) {
 		answer = chatResponse.Choices[0].Message.Content
 	}
 
-	return answer, nil
+	onUpdate(answer)
+	return nil
 }
 
 func (c *OpenAIChat) UpdateModel(modelName string) {

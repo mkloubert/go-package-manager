@@ -39,7 +39,7 @@ type ChatAI interface {
 	// to the API for the current chat conversation
 	SendMessage(message string, onUpdate ChatAIMessageChunkReceiver) error
 	// ChatAI.SendPrompt() - sends a single completion prompt
-	SendPrompt(prompt string) (string, error)
+	SendPrompt(prompt string, onUpdate ChatAIMessageChunkReceiver) error
 	// ChatAI.SendMessage() - switches the model
 	UpdateModel(modelName string)
 	// ChatAI.UpdateSystem() - clears chat history and sets the

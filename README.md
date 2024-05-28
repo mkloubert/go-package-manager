@@ -15,6 +15,7 @@
     - [Add alias](#add-alias-)
     - [Add project](#add-project-)
     - [AI chat](#ai-chat-)
+    - [AI prompt](#ai-prompt-)
     - [Audit dependencies](#audit-dependencies-)
     - [Build and install executable](#build-and-install-executable-)
     - [Build project](#build-project-)
@@ -68,7 +69,7 @@ However, it's not only limited to Go but can also be utilized for other project 
 
 ## Installation [<a href="#table-of-contents">↑</a>]
 
-You can install `gpm` from a [pre-build binary](https://github.com/mkloubert/go-package-manager/releases) or build it by your own: 
+You can install `gpm` from a [pre-build binary](https://github.com/mkloubert/go-package-manager/releases) or build it by your own:
 
 ### Linux / UNIX [<a href="#installation-">↑</a>]
 
@@ -179,6 +180,10 @@ the repository will be cloned to `react-spa-template` subfolder, then its `.git`
 
 ![AI Chat Demo 1](./img/demos/ai-chat-demo-1.gif)
 
+#### AI prompt [<a href="#commands-">↑</a>]
+
+![AI Prompt Demo 1](./img/demos/ai-prompt-demo-1.gif)
+
 #### Audit dependencies [<a href="#commands-">↑</a>]
 
 ![Audit Demo 1](./img/demos/audit-demo-1.gif)
@@ -214,6 +219,7 @@ gpm bump version
 will detect the latest version of the underlying repository from [Git tags](https://git-scm.com/book/en/v2/Git-Basics-Tagging) and then upgrade the minor part only, e.g. `1.2.4` => `1.3.4`. Finally a new Git tag is created in the format `v1.3.4`.
 
 You also can use at least one of the following flags to increase parts of the current version number as well:
+
 - `--breaking`: `1.2.4` => `2.0.0` by default
 - `--feature`: `1.2.4` => `1.3.0` by default
 - `--fix`: `1.2.4` => `1.2.5`
@@ -260,7 +266,7 @@ For example
 gpm execute go version
 ```
 
-will run `go version` with the settings and environment variables loaded from [.env* files](#environment-variables-).
+will run `go version` with the settings and environment variables loaded from [.env\* files](#environment-variables-).
 
 #### Import aliases [<a href="#commands-">↑</a>]
 
@@ -412,7 +418,6 @@ gpm push
 
 will push to all remotes which are stored inside the current Git repository.
 
-
 #### Remove alias [<a href="#commands-">↑</a>]
 
 With
@@ -557,7 +562,6 @@ files:
   - LICENSE
   - README.md
   - ^commands/p
-
 # ...
 ```
 
@@ -585,7 +589,7 @@ From the project folder you will be able to execute `gpm run test1` or `gpm run 
 #### Predefined [<a href="#scripts-">↑</a>]
 
 | Name          | Description                                                                                 |
-|---------------|---------------------------------------------------------------------------------------------|
+| ------------- | ------------------------------------------------------------------------------------------- | --- |
 | `postbuild`   | Is executed after successful execution of [build command](#build-project-).                 |
 | `postinstall` | Is executed after successful execution of [install command](#install-dependencies-).        |
 | `posttest`    | Is executed after successful execution of [test command](#run-tests-).                      |
@@ -594,7 +598,7 @@ From the project folder you will be able to execute `gpm run test1` or `gpm run 
 | `pretest`     | Is executed before [test command](#run-tests-) is executed.                                 |
 | `start`       | Is executed by [start command](#start-project-). If not defined `go run .` is executed.     |
 | `test`        | Is executed by [test command](#run-tests-). If not defined `go test .` is executed.         |
-| `tidy`        | Is executed by [tidy command](#cleanup-project-). If not defined `go mod tidy` is executed. |                                       |
+| `tidy`        | Is executed by [tidy command](#cleanup-project-). If not defined `go mod tidy` is executed. |     |
 
 ## Environment variables [<a href="#table-of-contents">↑</a>]
 
@@ -611,18 +615,18 @@ Environment variables can be loaded from external files, which are handled in th
 
 ### Supported variables [<a href="#environment-variables-">↑</a>]
 
-| Name                          | Description                                                                                                                                                    | Example                                                                      |
-|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
-| `GPM_AI_API`                  | ID of the AI API to use. Possible values are `ollama` or `openai`.                                                                                             | `openai`                                                                     |
-| `GPM_AI_CHAT_MODEL`           | ID of the AI chat model to use. Possible values are models by [OpenAI](https://platform.openai.com/docs/models) or [Ollama](https://ollama.com/library).       | `gpt-4o`                                                                     |
-| `GPM_AI_CHAT_TEMPERATURE`     | Temperature value for an AI chat (operation)                                                                                                                   | `0`                                                                          |
-| `GPM_AI_PROMPT`               | Custom prompt for operations which are using chat completion operations, like [checkout command](#build-project-).                                             |                                                                              |
-| `GPM_AI_SYSTEM_PROMPT`        | Custom (initial) system prompt for AI chat operations.                                                                                                         | `You are a helpful AI assistant. You always answer in a very sarcastic way.` |
-| `GPM_BIN_PATH`                | Custom folder for binaries installed by [make command](#build-and-install-executable-). Default is `$HOME/.gpm/bin`.                                           | `/my/custom/bin/path`                                                        |
-| `GPM_ENV`                     | ID of the current environment. This is especially used for the [.env files](#environment-variables-).                                                          | `prod`                                                                       |
-| `GPM_TERMINAL_FORMATTER`      | Default formatter for syntax highlighting in terminal. See [chroma project](https://github.com/alecthomas/chroma/tree/master/formatters) for more information. | `terminal16m`                                                                |
-| `GPM_TERMINAL_STYLE`          | Default style for syntax highlighting in terminal. See [chroma project](https://github.com/alecthomas/chroma/tree/master/styles) for more information.         | `monokai`                                                                    |
-| `OPENAI_API_KEY`              | Key which is used for the [API by OpenAI](https://platform.openai.com/docs/api-reference).                                                                     | `sk-...`                                                                     |
+| Name                      | Description                                                                                                                                                    | Example                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `GPM_AI_API`              | ID of the AI API to use. Possible values are `ollama` or `openai`.                                                                                             | `openai`                                                                     |
+| `GPM_AI_CHAT_MODEL`       | ID of the AI chat model to use. Possible values are models by [OpenAI](https://platform.openai.com/docs/models) or [Ollama](https://ollama.com/library).       | `gpt-4o`                                                                     |
+| `GPM_AI_CHAT_TEMPERATURE` | Temperature value for an AI chat (operation)                                                                                                                   | `0`                                                                          |
+| `GPM_AI_PROMPT`           | Custom prompt for operations which are using chat completion operations, like [checkout command](#build-project-).                                             |                                                                              |
+| `GPM_AI_SYSTEM_PROMPT`    | Custom (initial) system prompt for AI chat operations.                                                                                                         | `You are a helpful AI assistant. You always answer in a very sarcastic way.` |
+| `GPM_BIN_PATH`            | Custom folder for binaries installed by [make command](#build-and-install-executable-). Default is `$HOME/.gpm/bin`.                                           | `/my/custom/bin/path`                                                        |
+| `GPM_ENV`                 | ID of the current environment. This is especially used for the [.env files](#environment-variables-).                                                          | `prod`                                                                       |
+| `GPM_TERMINAL_FORMATTER`  | Default formatter for syntax highlighting in terminal. See [chroma project](https://github.com/alecthomas/chroma/tree/master/formatters) for more information. | `terminal16m`                                                                |
+| `GPM_TERMINAL_STYLE`      | Default style for syntax highlighting in terminal. See [chroma project](https://github.com/alecthomas/chroma/tree/master/styles) for more information.         | `monokai`                                                                    |
+| `OPENAI_API_KEY`          | Key which is used for the [API by OpenAI](https://platform.openai.com/docs/api-reference).                                                                     | `sk-...`                                                                     |
 
 ## Contribution [<a href="#table-of-contents">↑</a>]
 
