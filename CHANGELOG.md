@@ -2,6 +2,7 @@
 
 ## 0.16.0
 
+- feat: `monitor` command now also displays open network and files information
 - feat: `prompt` command which invokes an AI prompt or (continues) a chat from command line
 - refactor: code cleanups and improvements
 

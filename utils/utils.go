@@ -23,6 +23,7 @@
 package utils
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"net/http"
@@ -38,6 +39,7 @@ import (
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 	"github.com/schollz/progressbar/v3"
+	"github.com/shirou/gopsutil/v3/process"
 	"github.com/spf13/cobra"
 )
 
@@ -223,6 +225,48 @@ func GetDefaultAIChatModel() string {
 	return strings.TrimSpace(os.Getenv("GPM_AI_CHAT_MODEL"))
 }
 
+// GetNumberOfOpenFilesByPid() - returns the number of open files by pid
+func GetNumberOfOpenFilesByPid(pid int32) (int64, error) {
+	proc, err := process.NewProcess(pid)
+	if err != nil {
+		return -1, err
+	}
+
+	openFiles, err := proc.OpenFiles()
+	if err == nil {
+		return int64(len(openFiles)), nil
+	}
+
+	if IsWindows() {
+		return -1, err
+	}
+
+	if IsMacOS() {
+		cmd := exec.Command("lsof", "-p", strconv.FormatInt(int64(pid), 10))
+		output, err := cmd.Output()
+		if err != nil {
+			return -1, err
+		}
+
+		scanner := bufio.NewScanner(strings.NewReader(string(output)))
+		count := 0
+		for scanner.Scan() {
+			count++
+		}
+
+		return int64(count - 1), nil
+	}
+
+	fdDir := filepath.Join("/proc", strconv.FormatInt(int64(pid), 10), "fd")
+
+	files, err := os.ReadDir(fdDir)
+	if err != nil {
+		return -1, err
+	}
+
+	return int64(len(files)), nil
+}
+
 // IndexOfString() - returns the zero-based index of a string in a string array
 // or -1 if not found
 func IndexOfString(arr []string, value string) int {
@@ -261,11 +305,6 @@ func IsFileExisting(fp string) (bool, error) {
 	}
 
 	return !info.IsDir(), nil
-}
-
-// IsWindows() - checks if current operating system is Microsoft Windows or not
-func IsWindows() bool {
-	return runtime.GOOS == "windows"
 }
 
 // LoadFromSTDINIfAvailable() - loads data from STDIN if available

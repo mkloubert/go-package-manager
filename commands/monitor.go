@@ -27,11 +27,13 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/shirou/gopsutil/v3/mem"
+	netutil "github.com/shirou/gopsutil/v3/net"
 	"github.com/shirou/gopsutil/v3/process"
 
 	ui "github.com/gizak/termui/v3"
@@ -44,9 +46,14 @@ import (
 func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var cpuDataSize int
 	var cpuZoom float64
+	var filesDataSize int
+	var filesZoom float64
 	var interval int
 	var memDataSize int
 	var memZoom float64
+	var netDataSize int
+	var netKind string
+	var netZoom float64
 
 	var monitorCmd = &cobra.Command{
 		Use:     "monitor [pid or name]",
@@ -122,7 +129,9 @@ func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 			// data
 			cpuData := []float64{0}
+			filesData := []float64{0}
 			memData := []float64{0}
+			netData := []float64{0}
 
 			// CPU diagram
 			slCpu := widgets.NewSparkline()
@@ -133,14 +142,34 @@ func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			slMem := widgets.NewSparkline()
 			slMem.Data = memData
 
+			// network diagram
+			slNet := widgets.NewSparkline()
+			slNet.Data = netData
+			slNet.MaxVal = 100 / netZoom
+
+			// files diagram
+			slFiles := widgets.NewSparkline()
+			slFiles.Data = filesData
+
 			vMem, err := mem.VirtualMemory()
 			if err == nil {
 				slMem.MaxVal = float64(vMem.Total) / memZoom
 			}
 
+			var rLimit syscall.Rlimit
+			err = syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
+			if err == nil {
+				if rLimit.Cur != 0 {
+					slFiles.MaxVal = float64(rLimit.Cur) / filesZoom
+				}
+			}
+
+			var lastError error
 			rerender := func() {
 				currentCpu := cpuData[0]
+				currentFiles := filesData[0]
 				currentMem := memData[0]
+				currentNet := netData[0]
 
 				processName, _ := processToMonitor.Name()
 				processPid := processToMonitor.Pid
@@ -155,13 +184,21 @@ func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				pTitle.SetRect(0, 0, termWidth, 3)
 				pTitle.Border = true
 
+				if lastError != nil {
+					pTitle.Text = lastError.Error()
+				}
+
+				totalGridHeight := termHeight - 3
+				gridRowHeights := []int{totalGridHeight / 2}
+				gridRowHeights = append(gridRowHeights, totalGridHeight-gridRowHeights[0])
+
 				// create a sparkline group from CPU widgets
 				slgCpu := widgets.NewSparklineGroup(slCpu)
 				slgCpu.Title = fmt.Sprintf(
 					"CPU %.2f%% (%.1fx)",
 					currentCpu, cpuZoom,
 				)
-				slgCpu.SetRect(0, 0, termWidth, termHeight-3)
+				slgCpu.SetRect(0, 0, termWidth, gridRowHeights[0])
 
 				// create a sparkline group from memory widgets
 				slgMem := widgets.NewSparklineGroup(slMem)
@@ -171,16 +208,37 @@ func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					fmt.Sprintf("%.2f", float64(vMem.Total)/1024.0/1024.0),
 					memZoom,
 				)
-				slgMem.SetRect(0, 0, termWidth, termHeight-3)
+				slgMem.SetRect(0, 0, termWidth, gridRowHeights[0])
+
+				// create a sparkline group from net widgets
+				slgNet := widgets.NewSparklineGroup(slNet)
+				slgNet.Title = fmt.Sprintf(
+					"Net %.0f (%.1fx)",
+					currentNet, netZoom,
+				)
+				slgNet.SetRect(0, 0, termWidth, gridRowHeights[1])
+
+				// create a sparkline group from files widgets
+				slgFiles := widgets.NewSparklineGroup(slFiles)
+				slgFiles.Title = fmt.Sprintf(
+					"Files %v / %v (%.1fx)",
+					currentFiles, rLimit.Cur,
+					filesZoom,
+				)
+				slgFiles.SetRect(0, 0, termWidth, gridRowHeights[1])
 
 				// create grid ...
 				grid.Set(
-					// with 1 row
-					ui.NewRow(1,
+					// with 2 rows
+					ui.NewRow(1.0/2,
 						// and 2 columns
 						// with 50%/50% size
 						ui.NewCol(1.0/2, slgCpu),
 						ui.NewCol(1.0/2, slgMem),
+					),
+					ui.NewRow(1.0/2,
+						ui.NewCol(1.0/2, slgNet),
+						ui.NewCol(1.0/2, slgFiles),
 					),
 				)
 
@@ -212,9 +270,32 @@ func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					}
 					cpuData = utils.EnsureMaxSliceLength(cpuData, cpuDataSize)
 
+					// network usage
+					netConnections, err := netutil.Connections("all")
+					if err == nil {
+						netConnectionCount := len(netConnections)
+
+						netData = append([]float64{float64(netConnectionCount)}, netData...)
+					} else {
+						netData = append([]float64{-1}, netData...)
+					}
+					netData = utils.EnsureMaxSliceLength(netData, netDataSize)
+
+					numberOfOpenFiles, err := utils.GetNumberOfOpenFilesByPid(processToMonitor.Pid)
+					if err == nil {
+						filesData = append([]float64{float64(numberOfOpenFiles)}, filesData...)
+					} else {
+						lastError = err
+
+						filesData = append([]float64{-1}, filesData...)
+					}
+					filesData = utils.EnsureMaxSliceLength(filesData, filesDataSize)
+
 					// update data ...
 					utils.UpdateUsageSparkline(slMem, memData)
 					utils.UpdateUsageSparkline(slCpu, cpuData)
+					utils.UpdateUsageSparkline(slNet, netData)
+					utils.UpdateUsageSparkline(slFiles, filesData)
 
 					// .. before rerender
 					rerender()
@@ -236,11 +317,16 @@ func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
-	monitorCmd.Flags().IntVarP(&cpuDataSize, "cpu-data-size", "", 360, "custom size of maximum data items for CPU sparkline")
+	monitorCmd.Flags().IntVarP(&cpuDataSize, "cpu-data-size", "", 512, "custom size of maximum data items for CPU sparkline")
 	monitorCmd.Flags().Float64VarP(&cpuZoom, "cpu-zoom", "", 1.0, "zoom factor for CPU sparkline")
+	monitorCmd.Flags().IntVarP(&filesDataSize, "files-data-size", "", 512, "custom size of maximum data items for files sparkline")
+	monitorCmd.Flags().Float64VarP(&filesZoom, "files-zoom", "", 1.0, "zoom factor for files sparkline")
 	monitorCmd.Flags().IntVarP(&interval, "interval", "", 500, "time in milliseconds for the update interval")
-	monitorCmd.Flags().IntVarP(&memDataSize, "mem-data-size", "", 360, "custom size of maximum data items for mem sparkline")
+	monitorCmd.Flags().IntVarP(&memDataSize, "mem-data-size", "", 512, "custom size of maximum data items for mem sparkline")
 	monitorCmd.Flags().Float64VarP(&memZoom, "mem-zoom", "", 1.0, "zoom factor for mem sparkline")
+	monitorCmd.Flags().IntVarP(&netDataSize, "net-data-size", "", 512, "custom size of maximum data items for net sparkline")
+	monitorCmd.Flags().StringVarP(&netKind, "net-kind", "", "all", "zoom factor for net sparkline")
+	monitorCmd.Flags().Float64VarP(&netZoom, "net-zoom", "", 1.0, "zoom factor for net sparkline")
 
 	parentCmd.AddCommand(
 		monitorCmd,
