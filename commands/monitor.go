@@ -164,7 +164,6 @@ func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				}
 			}
 
-			var lastError error
 			rerender := func() {
 				currentCpu := cpuData[0]
 				currentFiles := filesData[0]
@@ -183,10 +182,6 @@ func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				pTitle.Text = fmt.Sprintf("%v (%v)", processName, processPid)
 				pTitle.SetRect(0, 0, termWidth, 3)
 				pTitle.Border = true
-
-				if lastError != nil {
-					pTitle.Text = lastError.Error()
-				}
 
 				totalGridHeight := termHeight - 3
 				gridRowHeights := []int{totalGridHeight / 2}
@@ -281,12 +276,11 @@ func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					}
 					netData = utils.EnsureMaxSliceLength(netData, netDataSize)
 
+					// open files
 					numberOfOpenFiles, err := utils.GetNumberOfOpenFilesByPid(processToMonitor.Pid)
 					if err == nil {
 						filesData = append([]float64{float64(numberOfOpenFiles)}, filesData...)
 					} else {
-						lastError = err
-
 						filesData = append([]float64{-1}, filesData...)
 					}
 					filesData = utils.EnsureMaxSliceLength(filesData, filesDataSize)
