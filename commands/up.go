@@ -31,6 +31,8 @@ import (
 )
 
 func Init_Up_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var noBuild bool
+
 	var upCmd = &cobra.Command{
 		Use:   "up",
 		Short: "Run docker up",
@@ -39,7 +41,12 @@ func Init_Up_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			GPM_UP_COMMAND := strings.TrimSpace(os.Getenv("GPM_UP_COMMAND"))
 
 			if GPM_UP_COMMAND == "" {
-				shellArgs := append([]string{"docker", "compose", "up"}, args...)
+				baseArgs := []string{"docker", "compose", "up"}
+				if !noBuild {
+					baseArgs = append(baseArgs, "--build")
+				}
+
+				shellArgs := append(baseArgs, args...)
 
 				app.RunShellCommandByArgs(shellArgs[0], shellArgs[1:]...)
 			} else {
@@ -47,6 +54,8 @@ func Init_Up_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			}
 		},
 	}
+
+	upCmd.Flags().BoolVarP(&noBuild, "no-build", "", false, "do not use --build flag for docker-compose")
 
 	parentCmd.AddCommand(
 		upCmd,
