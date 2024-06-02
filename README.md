@@ -261,10 +261,10 @@ is a short form of `go mod tidy`.
 
 #### Docker shorthands [<a href="#commands-">↑</a>]
 
-| Shorthand  | Final command         |
-| ---------- | --------------------- |
-| `gpm down` | `docker compose down` |
-| `gpm up`   | `docker compose up`   |
+| Shorthand  | Final command               |
+| ---------- | --------------------------- |
+| `gpm down` | `docker compose down`       |
+| `gpm up`   | `docker compose up --build` |
 
 #### Execute shell command [<a href="#commands-">↑</a>]
 
