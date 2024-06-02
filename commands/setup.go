@@ -94,6 +94,8 @@ func init_setup_git_command(parentCmd *cobra.Command, app *types.AppContext) {
 }
 
 func init_setup_updater_command(parentCmd *cobra.Command, app *types.AppContext) {
+	var installPath string
+
 	var setupUpdaterCmd = &cobra.Command{
 		Use:     "updater",
 		Aliases: []string{"u", "up", "upt"},
@@ -115,6 +117,11 @@ func init_setup_updater_command(parentCmd *cobra.Command, app *types.AppContext)
 				// not supported
 				createScript = nil
 			} else {
+				targetFolder := strings.TrimSpace(installPath)
+				if targetFolder == "" {
+					targetFolder = "/usr/local/bin"
+				}
+
 				bashScriptFilePath := path.Join(binPath, "gpm-update")
 
 				var sha256Command string
@@ -136,6 +143,7 @@ func init_setup_updater_command(parentCmd *cobra.Command, app *types.AppContext)
 						"GOOS":          goos,
 						"GOARCH":        goarch,
 						"SHA256Command": sha256Command,
+						"TargetFolder":  targetFolder,
 					})
 					utils.CheckForError(err)
 					defer bashScriptBuffer.Reset()
@@ -165,6 +173,8 @@ func init_setup_updater_command(parentCmd *cobra.Command, app *types.AppContext)
 			}
 		},
 	}
+
+	setupUpdaterCmd.Flags().StringVarP(&installPath, "install-path", "", "", "custom target folder")
 
 	parentCmd.AddCommand(
 		setupUpdaterCmd,

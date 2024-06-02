@@ -81,6 +81,7 @@ func main() {
 	commands.Init_Chat_Command(rootCmd, &app)
 	commands.Init_Checkout_Command(rootCmd, &app)
 	commands.Init_Diff_Command(rootCmd, &app)
+	commands.Init_Down_Command(rootCmd, &app)
 	commands.Init_Exec_Command(rootCmd, &app)
 	commands.Init_Import_Command(rootCmd, &app)
 	commands.Init_Init_Command(rootCmd, &app)
@@ -102,6 +103,7 @@ func main() {
 	commands.Init_Test_Command(rootCmd, &app)
 	commands.Init_Tidy_Command(rootCmd, &app)
 	commands.Init_Uninstall_Command(rootCmd, &app)
+	commands.Init_Up_Command(rootCmd, &app)
 
 	// execute
 	if err := rootCmd.Execute(); err != nil {

@@ -2,8 +2,11 @@
 
 ## 0.16.0
 
+- feat: `down` and `up` commands, which are shorthands for `docker compose down` and `docker compose commands`
 - feat: `monitor` command now also displays open network and files information
 - feat: `prompt` command which invokes an AI prompt or (continues) a chat from command line
+- feat: `setup updater` now supports custom target folder for binary with `--install-path` flag and `GPM_INSTALL_PATH` environment variable
+- fix: `AppContext.RunShellCommandByArgs()` uses `AppContext.Cwd`
 - refactor: code cleanups and improvements
 
 ## 0.15.0

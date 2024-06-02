@@ -23,6 +23,7 @@
     - [Checkout branch](#checkout-branch-)
     - [Cleanup project](#cleanup-project-)
     - [Compare code changes](#compare-code-changes-)
+    - [Docker shorthands](#docker-shorthands-)
     - [Execute shell command](#execute-shell-command-)
     - [Import aliases](#import-aliases-)
     - [Import projects](#import-projects-)
@@ -257,6 +258,13 @@ is a short form of `go mod tidy`.
 #### Compare code changes [<a href="#commands-">↑</a>]
 
 ![Diff demo 1](./img/demos/diff-demo-1.gif)
+
+#### Docker shorthands [<a href="#commands-">↑</a>]
+
+| Shorthand  | Final command         |
+| ---------- | --------------------- |
+| `gpm down` | `docker compose down` |
+| `gpm up`   | `docker compose up`   |
 
 #### Execute shell command [<a href="#commands-">↑</a>]
 
@@ -589,7 +597,7 @@ From the project folder you will be able to execute `gpm run test1` or `gpm run 
 #### Predefined [<a href="#scripts-">↑</a>]
 
 | Name          | Description                                                                                 |
-| ------------- | ------------------------------------------------------------------------------------------- | --- |
+| ------------- | ------------------------------------------------------------------------------------------- |
 | `postbuild`   | Is executed after successful execution of [build command](#build-project-).                 |
 | `postinstall` | Is executed after successful execution of [install command](#install-dependencies-).        |
 | `posttest`    | Is executed after successful execution of [test command](#run-tests-).                      |
@@ -598,7 +606,7 @@ From the project folder you will be able to execute `gpm run test1` or `gpm run 
 | `pretest`     | Is executed before [test command](#run-tests-) is executed.                                 |
 | `start`       | Is executed by [start command](#start-project-). If not defined `go run .` is executed.     |
 | `test`        | Is executed by [test command](#run-tests-). If not defined `go test .` is executed.         |
-| `tidy`        | Is executed by [tidy command](#cleanup-project-). If not defined `go mod tidy` is executed. |     |
+| `tidy`        | Is executed by [tidy command](#cleanup-project-). If not defined `go mod tidy` is executed. |
 
 ## Environment variables [<a href="#table-of-contents">↑</a>]
 
@@ -623,9 +631,12 @@ Environment variables can be loaded from external files, which are handled in th
 | `GPM_AI_PROMPT`           | Custom prompt for operations which are using chat completion operations, like [checkout command](#build-project-).                                             |                                                                              |
 | `GPM_AI_SYSTEM_PROMPT`    | Custom (initial) system prompt for AI chat operations.                                                                                                         | `You are a helpful AI assistant. You always answer in a very sarcastic way.` |
 | `GPM_BIN_PATH`            | Custom folder for binaries installed by [make command](#build-and-install-executable-). Default is `$HOME/.gpm/bin`.                                           | `/my/custom/bin/path`                                                        |
+| `GPM_DOWN_COMMAND`        | Custom command for [docker compose down](#docker-shorthands-) shorthand.                                                                                       | `docker-compose down`                                                        |
 | `GPM_ENV`                 | ID of the current environment. This is especially used for the [.env files](#environment-variables-).                                                          | `prod`                                                                       |
+| `GPM_INSTALL_PATH`        | Custom installation path of global `gpm` binary.                                                                                                               | `/usr/bin`                                                                   |
 | `GPM_TERMINAL_FORMATTER`  | Default formatter for syntax highlighting in terminal. See [chroma project](https://github.com/alecthomas/chroma/tree/master/formatters) for more information. | `terminal16m`                                                                |
 | `GPM_TERMINAL_STYLE`      | Default style for syntax highlighting in terminal. See [chroma project](https://github.com/alecthomas/chroma/tree/master/styles) for more information.         | `monokai`                                                                    |
+| `GPM_UP_COMMAND`          | Custom command for [docker compose up](#docker-shorthands-) shorthand.                                                                                         | `docker-compose up`                                                          |
 | `OPENAI_API_KEY`          | Key which is used for the [API by OpenAI](https://platform.openai.com/docs/api-reference).                                                                     | `sk-...`                                                                     |
 
 ## Contribution [<a href="#table-of-contents">↑</a>]

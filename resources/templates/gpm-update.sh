@@ -34,8 +34,8 @@ echo "Extracting binary ..."
 tar -xzOf gpm.tar.gz gpm > gpm || handle_error "Could not extract 'gpm' binary"
 
 echo "Installing 'gpm' to /usr/local/bin ..."
-sudo mv gpm /usr/local/bin/gpm || handle_error "Could not move 'gpm' to '/usr/local/bin'"
-sudo chmod +x /usr/local/bin/gpm || handle_error "Could not update permissions of 'gpm' binary"
+sudo mv gpm {{.TargetFolder}}/gpm || handle_error "Could not move 'gpm' to '{{.TargetFolder}}'"
+sudo chmod +x {{.TargetFolder}}/gpm || handle_error "Could not update permissions of 'gpm' binary"
 
 echo "Cleaning up ..."
 rm gpm.tar.gz gpm.tar.gz.sha256 || handle_error "Cleanups failed"

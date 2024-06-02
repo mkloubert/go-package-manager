@@ -947,11 +947,22 @@ func (app *AppContext) RunScript(scriptName string, additionalArgs ...string) {
 	utils.RunCommand(p, additionalArgs...)
 }
 
-// app.RunShellCommandByArgs() - runs a shell command by arguments
+// app.RunShellCommand() - runs a shell command in app's context
+func (app *AppContext) RunShellCommand(cmd string) {
+	app.Debug(fmt.Sprintf("Running '%v' ...", cmd))
+
+	p := utils.CreateShellCommand(cmd)
+	p.Dir = app.Cwd
+
+	utils.RunCommand(p)
+}
+
+// app.RunShellCommandByArgs() - runs a shell command by arguments in app's context
 func (app *AppContext) RunShellCommandByArgs(c string, a ...string) {
 	app.Debug(fmt.Sprintf("Running '%v %v' ...", c, strings.Join(a, " ")))
 
 	p := utils.CreateShellCommandByArgs(c, a...)
+	p.Dir = app.Cwd
 
 	utils.RunCommand(p)
 }
