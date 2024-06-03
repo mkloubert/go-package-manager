@@ -43,6 +43,7 @@
     - [Remove executable](#remove-project-executable-)
     - [Run script](#run-script-)
     - [Run tests](#run-tests-)
+    - [Show dependency graph](#show-dependency-graph-)
     - [Start project](#start-project-)
     - [Synchronize with Git remotes](#synchronize-with-git-remotes-)
     - [Uninstall dependencies](#uninstall-dependencies-)
@@ -480,6 +481,16 @@ gpm test
 ```
 
 will execute `go test .` instead or the `test` script defined in current [gpm.yaml file](#gpmyaml-), if defined.
+
+#### Show dependency graph [<a href="#commands-">↑</a>]
+
+Running
+
+```bash
+gpm show dependencies
+```
+
+will create and open a temporary HTML file which will display a dependency graph of all installed modules.
 
 #### Start project [<a href="#commands-">↑</a>]
 
