@@ -18,6 +18,8 @@ aliases:
   - https://github.com/schollz/progressbar/v3
   prompt:
   - https://github.com/c-bata/go-prompt
+  promptui:
+  - https://github.com/manifoldco/promptui
   psutil:
   - https://github.com/shirou/gopsutil/v3
   spinner:

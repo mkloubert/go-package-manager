@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.17.0
+
+- feat: `show dependencies` command, which generates and opens HTML page with a dependency graph of the modules of the current project
+
 ## 0.16.0
 
 - feat: `down` and `up` commands, which are shorthands for `docker compose down` and `docker compose commands`

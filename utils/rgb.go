@@ -20,12 +20,46 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package resources
+package utils
 
-import "embed"
+import (
+	"crypto/md5"
+	"encoding/hex"
+	"image/color"
+	"strconv"
+)
 
-//go:embed javascripts
-var JavaScripts embed.FS
+func calculateBrightness(r, g, b uint8) float64 {
+	return (0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)) / 255
+}
 
-//go:embed templates
-var Templates embed.FS
+// GenerateColorsFromString() - generates unique background
+// and foregrund colors from a string
+func GenerateColorsFromString(str string) (color.RGBA, color.RGBA) {
+	hash := md5.Sum([]byte(str))
+	hexColor := hex.EncodeToString(hash[:])
+
+	r := hexToInt(hexColor[0:2])
+	g := hexToInt(hexColor[2:4])
+	b := hexToInt(hexColor[4:6])
+
+	background := color.RGBA{R: r, G: g, B: b, A: 255}
+	var foreground color.RGBA
+
+	brightness := calculateBrightness(r, g, b)
+	if brightness > 0.5 {
+		// light background => black
+		foreground = color.RGBA{R: 0, G: 0, B: 0, A: 255}
+	} else {
+		// dark background => white
+		foreground = color.RGBA{R: 255, G: 255, B: 255, A: 255}
+	}
+
+	return background, foreground
+}
+
+func hexToInt(hexStr string) uint8 {
+	val, _ := strconv.ParseUint(hexStr, 16, 8)
+
+	return uint8(val)
+}

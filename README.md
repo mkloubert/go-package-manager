@@ -665,6 +665,7 @@ The project is licensed under the [MIT](./LICENSE).
 - [go-yaml](https://github.com/goccy/go-yaml) by [Masaaki Goshima](https://github.com/sponsors/goccy)
 - [godotenv](https://github.com/joho/godotenv) by [John Barton](https://github.com/joho)
 - [gopsutil](https://github.com/shirou/gopsutil) by [shirou](https://github.com/sponsors/shirou)
+- [Mermaid](https://github.com/mermaid-js/mermaid) by [Knut Sveidqvist](https://github.com/knsv) and [Sidharth Vinod](https://github.com/sidharthv96)
 - [progressbar](https://github.com/schollz/progressbar) by [Zack](https://github.com/sponsors/schollz)
 - [spinner](https://github.com/sponsors/briandowns) by [Brian Downs](https://github.com/sponsors/briandowns)
 - [termui](https://github.com/gizak/termui) by [Zack Guo](https://github.com/gizak)

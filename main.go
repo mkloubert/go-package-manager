@@ -98,6 +98,7 @@ func main() {
 	commands.Init_Remove_Command(rootCmd, &app)
 	commands.Init_Run_Command(rootCmd, &app)
 	commands.Init_Setup_Command(rootCmd, &app)
+	commands.Init_Show_Command(rootCmd, &app)
 	commands.Init_Start_Command(rootCmd, &app)
 	commands.Init_Sync_Command(rootCmd, &app)
 	commands.Init_Test_Command(rootCmd, &app)

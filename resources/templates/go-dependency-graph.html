@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <style type="text/css">
+
+.mermaid {
+  width: calc({{.GraphWidth}} * {{.GraphScale}});
+  height: calc({{.GraphHeight}} * {{.GraphScale}});
+  max-width: calc({{.GraphWidth}} * {{.GraphScale}});
+  max-height: calc({{.GraphHeight}} * {{.GraphScale}});
+  display: block;
+}
+
+    </style>
+
+    <script type="text/javascript">
+
+{{.MermaidJS}}
+
+    </script>
+  </head>
+
+  <body>
+    <div id="gpm-dependency-graph" class="mermaid"></div>
+
+    <script type="text/javascript">
+    
+document.addEventListener('DOMContentLoaded', () =>  {
+  const graphDiv = document.getElementById('gpm-dependency-graph');
+
+  graphDiv.innerHTML = {{.MermaidCodeJSONString}};
+
+  mermaid.initialize({
+    startOnLoad: false,
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+    }
+  });
+
+  mermaid.init(undefined, graphDiv);
+});
+    
+    </script>
+  </body>
+</html>

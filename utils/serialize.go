@@ -20,12 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package resources
+package utils
 
-import "embed"
+import "encoding/json"
 
-//go:embed javascripts
-var JavaScripts embed.FS
-
-//go:embed templates
-var Templates embed.FS
+// SerializeStringToJSON() - serializes a string to JSON
+func SerializeStringToJSON(str string) ([]byte, error) {
+	jsonData, err := json.Marshal(str)
+	if err == nil {
+		return jsonData, nil
+	}
+	return []byte{}, nil
+}

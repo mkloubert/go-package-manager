@@ -20,12 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package resources
+package utils
 
-import "embed"
+import (
+	"crypto/sha256"
+	"fmt"
+)
 
-//go:embed javascripts
-var JavaScripts embed.FS
+// HashSHA256() - hashes a byte array with SHA256 and
+// returns the result as hex string
+func HashSHA256(data []byte) string {
+	hash := sha256.New()
 
-//go:embed templates
-var Templates embed.FS
+	hash.Write([]byte(data))
+
+	hashBytes := hash.Sum(nil)
+
+	return fmt.Sprintf("%x", hashBytes)
+}
