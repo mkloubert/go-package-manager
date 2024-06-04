@@ -1,13 +1,31 @@
+<!doctype html>
 <html>
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="This is a description of my web page.">
+    <meta name="keywords" content="gpm, dependencies, modules, graph">
+    <meta name="generator" content="gpm - Go Package Manager">
+
+    <title>gpm - {{ .EscapedAppName }}</title>
+
     <style type="text/css">
 
 .mermaid {
-  width: calc({{.GraphWidth}} * {{.GraphScale}});
-  height: calc({{.GraphHeight}} * {{.GraphScale}});
-  max-width: calc({{.GraphWidth}} * {{.GraphScale}});
-  max-height: calc({{.GraphHeight}} * {{.GraphScale}});
   display: block;
+}
+
+.moduleList {
+  width: calc({{ .SidebarWidth }} - 40px);
+}
+
+.moduleList li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: calc({{ .SidebarWidth }} - 40px);
+  word-break: break-all;
+  cursor: pointer;
+  font-size: 0.8rem;
 }
 
     </style>
@@ -17,17 +35,60 @@
 {{.MermaidJS}}
 
     </script>
-  </head>
-
-  <body>
-    <div id="gpm-dependency-graph" class="mermaid"></div>
 
     <script type="text/javascript">
-    
-document.addEventListener('DOMContentLoaded', () =>  {
-  const graphDiv = document.getElementById('gpm-dependency-graph');
 
-  graphDiv.innerHTML = {{.MermaidCodeJSONString}};
+{{.TailwindJS}}
+
+    </script>
+    <script type="text/javascript">
+
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+      }
+    }
+  }
+}
+
+    </script>
+
+    <script type="text/javascript">
+
+const gpmModuleList = {{ .JsonModuleList }};
+let graphDirection = "LR";
+let graphDiv;
+let graphScalePercentage = {{ .GraphScalePercentage }};
+let selectedGpmModule;
+
+function gpm_refresh_module_list() {
+  const listDiv = document.getElementById("gpm-module-list");
+  listDiv.innerHTML = "";
+
+  gpmModuleList.forEach((m) => {
+    const li = document.createElement("li");
+    li.innerText = `${m.Name}@${m.Version}`;
+    li.onclick = () => {
+      gpm_update_module_info_box(m);
+    };
+
+    listDiv.appendChild(li);
+  });
+}
+
+function gpm_update_graph_size() {
+  graphDiv.style.maxWidth = `calc({{ .GraphWidth }} * ${(graphScalePercentage / 100).toFixed(2)})`;
+  graphDiv.style.width = graphDiv.style.maxWidth;
+  graphDiv.style.maxHeight = `calc({{ .GraphHeight }} * ${(graphScalePercentage / 100).toFixed(2)})`;
+  graphDiv.style.height = graphDiv.style.maxHeight;
+}
+
+function gpm_update_graph_content() {
+  graphDiv = document.getElementById('gpm-dependency-graph');
+
+  const tpl = {{ .MermaidCodeJSONString }};
+  graphDiv.innerHTML = tpl.split('<<<GraphDirection>>>').join(graphDirection);
 
   mermaid.initialize({
     startOnLoad: false,
@@ -38,8 +99,96 @@ document.addEventListener('DOMContentLoaded', () =>  {
   });
 
   mermaid.init(undefined, graphDiv);
+}
+
+function gpm_update_module_info_box(m) {
+  const infoBox = document.getElementById("gpm-module-info-box");
+  infoBox.innerHTML = "";
+
+  if (m) {
+    const headerDiv = document.createElement("div");
+    headerDiv.className = "h-full w-full px-6 py-4 bg-gray-300";
+
+    const titleDiv = document.createElement("div");
+    titleDiv.style = "word-break: break-word;";
+    titleDiv.className = "font-bold text-sm mb-2";
+    titleDiv.innerText = m.Name;
+
+    headerDiv.appendChild(titleDiv);
+    infoBox.appendChild(headerDiv);
+
+    if (m.Link) {
+      const openLink = document.createElement("a");
+      openLink.target = "_blank";
+      openLink.className = "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-block text-center w-full block";
+      openLink.innerText = "Open";
+      openLink.href = m.Link;
+
+      headerDiv.appendChild(openLink);
+    }
+  } else {
+    const wrapperDiv = document.createElement("div");
+    wrapperDiv.className = "h-full w-full flex items-center justify-center bg-gray-300";
+
+    const paragraph = document.createElement("p");
+    paragraph.className = "text-center";
+    paragraph.innerText = "Click on a module of the left side to see more information here ...";
+
+    wrapperDiv.appendChild(paragraph);
+    infoBox.appendChild(wrapperDiv);
+  }
+
+  selectedGpmModule = m;
+}
+
+document.addEventListener('DOMContentLoaded', () =>  {
+  const textbox = document.getElementById('gpm-graph-scale');
+  textbox.value = String({{ .GraphScalePercentage }}.toFixed(2));
+
+  textbox.addEventListener('input', (event) => {
+    const newValue = parseFloat(event.target.value);
+
+    if (Number.isNaN(newValue)) {
+      return;
+    }
+
+    graphScalePercentage = newValue;
+    gpm_update_graph_size();
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  gpm_update_module_info_box(null);
+  gpm_refresh_module_list();
+  gpm_update_graph_content();
+  gpm_update_graph_size();
 });
     
     </script>
+  </head>
+
+  <body class="h-screen flex">
+    <!-- left sidebar -->
+    <div class="bg-gray-800 text-white w-64 h-full p-4 overflow-y-auto overflow-x-hidden" style="width: {{ .SidebarWidth }};">
+      <h1 class="text-xl font-bold mb-4">{{ .EscapedAppName }}</h1>
+
+      <div class="mb-4">
+        <label for="gpm-graph-scale" class="block mb-2">Scale (%)</label>
+        <input type="number" id="gpm-graph-scale" class="text-gray-900 p-2 w-full">
+      </div>
+
+      <div class="mb-4">
+        <label for="gpm-module-list" class="block mb-2">Installed Modules</label>
+        <div id="gpm-module-list" class="mb-4 moduleList"></div>
+      </div>
+    </div>
+
+    <!-- middle content -->
+    <div id="gpm-dependency-graph-container" class="bg-white text-gray-800 h-full p-4 overflow-auto" style="width: calc(100% - {{ .SidebarWidth }});">
+      <div id="gpm-dependency-graph" class="mermaid"></div>
+    </div>
+
+    <!-- right info box -->
+    <div class="max-w-sm rounded overflow-hidden shadow-lg bg-white" id="gpm-module-info-box" style="width: {{ .InfoboxWidth }};"></div>
   </body>
 </html>

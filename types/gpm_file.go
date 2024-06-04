@@ -30,8 +30,9 @@ import (
 
 // A GpmFile stores all data of a gpm.y(a)ml file.
 type GpmFile struct {
-	Files   []string          `yaml:"files"`   // whitelist of file patterns which are used by pack command for example
-	Scripts map[string]string `yaml:"scripts"` // one or more scripts
+	Files   []string          `yaml:"files,omitempty"`   // whitelist of file patterns which are used by pack command for example
+	Name    string            `yaml:"name,omitempty"`    // the name
+	Scripts map[string]string `yaml:"scripts,omitempty"` // one or more scripts
 }
 
 // LoadGpmFile() - Loads a gpm.yaml file via a file path

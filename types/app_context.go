@@ -705,6 +705,18 @@ func (app *AppContext) GetModuleUrls(moduleNameOrUrl string) []string {
 	return urls
 }
 
+// app.GetName() - returns the of the current app
+func (app *AppContext) GetName() string {
+	name := strings.TrimSpace(app.GpmFile.Name)
+	if name == "" {
+		name = strings.TrimSpace(
+			path.Base(app.Cwd),
+		)
+	}
+
+	return name
+}
+
 // app.GetProjectsFilePath() - returns the possible path of the projects.yaml file
 func (app *AppContext) GetProjectsFilePath() (string, error) {
 	homeDir, err := os.UserHomeDir()

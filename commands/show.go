@@ -27,8 +27,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"html"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -42,20 +44,25 @@ import (
 
 func init_show_dependencies_command(parentCmd *cobra.Command, app *types.AppContext) {
 	var height string
+	var infoboxWidth string
 	var scale float32
+	var sidebarWidth string
 	var title string
 	var width string
 
 	var showDependenciesCmd = &cobra.Command{
 		Use:     "dependencies",
-		Aliases: []string{"dependency", "dep"},
+		Aliases: []string{"dependency", "dep", "deps"},
 		Short:   "Show resource",
 		Long:    `Shows a resource.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			// these are values we will use in CSS
 			// of the output HTML
+			appName := app.GetName()
 			graphWidth := strings.TrimSpace(width)
 			graphHeight := strings.TrimSpace(height)
+			graphInfoboxWidth := strings.TrimSpace(infoboxWidth)
+			graphSidebarWidth := strings.TrimSpace(sidebarWidth)
 
 			cmdArgs := []string{"go", "mod", "graph"}
 
@@ -66,12 +73,10 @@ func init_show_dependencies_command(parentCmd *cobra.Command, app *types.AppCont
 			dependencyGraph, err := p.Output()
 			utils.CheckForError(err)
 
+			installedModulesAndVersions := map[string]bool{}
+
 			// start Mermaid graph
-			mermaidGraph := fmt.Sprintf(`---
-title: %v
----
-flowchart LR%v`,
-				title, fmt.Sprintln())
+			mermaidGraph := fmt.Sprintln("flowchart <<<GraphDirection>>>")
 			blockStyles := map[string]string{}
 			addBlockStyle := func(h string) {
 				bg, fg := utils.GenerateColorsFromString(h)
@@ -98,6 +103,9 @@ flowchart LR%v`,
 				// get left and right part
 				left := strings.TrimSpace(parts[0])
 				right := strings.TrimSpace(parts[1])
+
+				installedModulesAndVersions[left] = true
+				installedModulesAndVersions[right] = true
 
 				// setup IDs
 				leftBlockId := utils.HashSHA256([]byte(left))
@@ -134,6 +142,53 @@ flowchart LR%v`,
 			err = scanner.Err()
 			utils.CheckForError(err)
 
+			// first collect
+			installedModuleHtmlList := []interface{}{}
+			for k := range installedModulesAndVersions {
+				installedModuleHtmlList = append(installedModuleHtmlList, k)
+			}
+			sort.Slice(installedModuleHtmlList, func(x, y int) bool {
+				strX := installedModuleHtmlList[x].(string)
+				strY := installedModuleHtmlList[y].(string)
+
+				return strings.ToLower(strX) < strings.ToLower(strY)
+			})
+			for i := range installedModuleHtmlList {
+				nameAndVersion := strings.TrimSpace(
+					installedModuleHtmlList[i].(string),
+				)
+
+				name := nameAndVersion
+				version := ""
+
+				sepIndex := strings.Index(nameAndVersion, "@")
+				if sepIndex > -1 {
+					version = strings.TrimSpace(name[sepIndex+1:])
+					name = strings.TrimSpace(name[0:sepIndex])
+				}
+
+				moduleLink := ""
+				if name != "" {
+					moduleLink = fmt.Sprintf("https://%v", name)
+				}
+
+				installedModuleHtmlList[i] = map[string]interface{}{
+					"EscapedName":    html.EscapeString(name),
+					"EscapedVersion": html.EscapeString(version),
+					"EscapedVersionAndName": html.EscapeString(
+						fmt.Sprintf("%v@%v", name, version),
+					),
+					"Id":      nameAndVersion,
+					"Link":    moduleLink,
+					"Name":    name,
+					"Version": version,
+				}
+			}
+
+			app.Debug("Serializing module list to JSON ...")
+			installedModuleHtmlListJsonData, err := json.Marshal(installedModuleHtmlList)
+			utils.CheckForError(err)
+
 			mermaidCodeJSONBuffer := &bytes.Buffer{}
 
 			encoder := json.NewEncoder(mermaidCodeJSONBuffer)
@@ -150,7 +205,11 @@ flowchart LR%v`,
 			utils.CheckForError(err)
 
 			app.Debug("Loading Mermaid JS ...")
-			mermaidJSData, err := resources.JavaScripts.ReadFile("javascripts/mermaid.min.js")
+			mermaidJSData, err := resources.JavaScripts.ReadFile("javascripts/mermaid@10.9.1.min.js")
+			utils.CheckForError(err)
+
+			app.Debug("Loading Tailwind JS ...")
+			tailwindJSData, err := resources.JavaScripts.ReadFile("javascripts/tailwindcss@3.4.3.js")
 			utils.CheckForError(err)
 
 			app.Debug("Parsing HTML template ...")
@@ -159,12 +218,19 @@ flowchart LR%v`,
 
 			app.Debug("Creating HTML output ...")
 			var htmlBuffer bytes.Buffer
-			htmlTemplate.Execute(&htmlBuffer, map[string]string{
+			htmlTemplate.Execute(&htmlBuffer, map[string]interface{}{
+				"EscapedAppName":        html.EscapeString(appName),
 				"GraphHeight":           graphHeight,
 				"GraphScale":            fmt.Sprintf("%f", scale),
+				"GraphScalePercentage":  fmt.Sprintf("%f", scale*100.0),
 				"GraphWidth":            graphWidth,
-				"MermaidJS":             string(mermaidJSData),
+				"InfoboxWidth":          graphInfoboxWidth,
+				"JsonModuleList":        string(installedModuleHtmlListJsonData),
 				"MermaidCodeJSONString": string(mermaidCodeJSONString),
+				"MermaidJS":             string(mermaidJSData),
+				"ModuleList":            installedModuleHtmlList,
+				"SidebarWidth":          graphSidebarWidth,
+				"TailwindJS":            string(tailwindJSData),
 			})
 			utils.CheckForError(err)
 			defer htmlBuffer.Reset()
@@ -188,7 +254,9 @@ flowchart LR%v`,
 	}
 
 	showDependenciesCmd.Flags().StringVarP(&height, "height", "", "100%", "custom CSS height of the graph")
-	showDependenciesCmd.Flags().Float32VarP(&scale, "scale", "", 1.0, "custom scale of the graph")
+	showDependenciesCmd.Flags().StringVarP(&infoboxWidth, "infobox-width", "", "320px", "custom width of the infobox")
+	showDependenciesCmd.Flags().Float32VarP(&scale, "scale", "", 3.0, "custom scale of the graph")
+	showDependenciesCmd.Flags().StringVarP(&sidebarWidth, "sidebar-width", "", "420px", "custom width of the sidebar")
 	showDependenciesCmd.Flags().StringVarP(&title, "title", "", "GPM Dependency Graph", "custom title of the graph")
 	showDependenciesCmd.Flags().StringVarP(&width, "width", "", "100%", "custom CSS width of the graph")
 
