@@ -128,7 +128,7 @@ function gpm_update_module_info_box(m) {
     }
   } else {
     const wrapperDiv = document.createElement("div");
-    wrapperDiv.className = "h-full w-full flex items-center justify-center bg-gray-300";
+    wrapperDiv.className = "h-full w-full flex items-center justify-center";
 
     const paragraph = document.createElement("p");
     paragraph.className = "text-center";
@@ -189,6 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <!-- right info box -->
-    <div class="max-w-sm rounded overflow-hidden shadow-lg bg-white" id="gpm-module-info-box" style="width: {{ .InfoboxWidth }};"></div>
+    <div class="max-w-sm rounded overflow-hidden shadow-lg bg-gray-100" id="gpm-module-info-box" style="width: {{ .InfoboxWidth }};"></div>
   </body>
 </html>
