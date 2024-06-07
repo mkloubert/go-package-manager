@@ -490,7 +490,9 @@ Running
 gpm show dependencies
 ```
 
-will create and open a temporary HTML file which will display a dependency graph of all installed modules.
+will create and open a temporary HTML file which will display a dependency graph of all installed modules:
+
+![Show dependency graph demo 1](./img/demos/show-dependencies-1.png)
 
 #### Start project [<a href="#commands-">↑</a>]
 
