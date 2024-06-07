@@ -27,5 +27,8 @@ import "embed"
 //go:embed javascripts
 var JavaScripts embed.FS
 
+//go:embed jsx
+var JSX embed.FS
+
 //go:embed templates
 var Templates embed.FS

@@ -669,6 +669,7 @@ The project is licensed under the [MIT](./LICENSE).
 `gpm` makes use of these following great projects:
 
 - [asciinema](https://github.com/asciinema/asciinema) + [agg](https://github.com/asciinema/agg) by [asciinema team](https://github.com/asciinema)
+- [Babel.js](https://babeljs.io) by [Babel team](https://opencollective.com/babel)
 - [chroma](https://github.com/alecthomas/chroma) by [Alec Thomas](https://github.com/sponsors/alecthomas)
 - [cobra](https://github.com/spf13/cobra) by [Steve Francia](https://github.com/spf13)
 - [go-prompt](https://github.com/c-bata/go-prompt) by [c-bata](https://github.com/sponsors/c-bata)
@@ -678,5 +679,6 @@ The project is licensed under the [MIT](./LICENSE).
 - [gopsutil](https://github.com/shirou/gopsutil) by [shirou](https://github.com/sponsors/shirou)
 - [Mermaid](https://github.com/mermaid-js/mermaid) by [Knut Sveidqvist](https://github.com/knsv) and [Sidharth Vinod](https://github.com/sidharthv96)
 - [progressbar](https://github.com/schollz/progressbar) by [Zack](https://github.com/sponsors/schollz)
+- [React](https://react.dev)
 - [spinner](https://github.com/sponsors/briandowns) by [Brian Downs](https://github.com/sponsors/briandowns)
 - [termui](https://github.com/gizak/termui) by [Zack Guo](https://github.com/gizak)

@@ -24,15 +24,13 @@ package commands
 
 import (
 	"bufio"
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"html"
 	"os"
 	"os/exec"
+	"path"
 	"sort"
 	"strings"
-	"text/template"
 
 	"github.com/spf13/cobra"
 
@@ -45,7 +43,9 @@ import (
 func init_show_dependencies_command(parentCmd *cobra.Command, app *types.AppContext) {
 	var height string
 	var infoboxWidth string
+	var output string
 	var scale float32
+	var shouldNotOpen bool
 	var sidebarWidth string
 	var title string
 	var width string
@@ -185,76 +185,66 @@ func init_show_dependencies_command(parentCmd *cobra.Command, app *types.AppCont
 				}
 			}
 
-			app.Debug("Serializing module list to JSON ...")
-			installedModuleHtmlListJsonData, err := json.Marshal(installedModuleHtmlList)
-			utils.CheckForError(err)
-
-			mermaidCodeJSONBuffer := &bytes.Buffer{}
-
-			encoder := json.NewEncoder(mermaidCodeJSONBuffer)
-			encoder.SetEscapeHTML(false)
-
-			app.Debug("Encoding Mermaid graph to JSON ...")
-			err = encoder.Encode(mermaidGraph)
-			utils.CheckForError(err)
-
-			mermaidCodeJSONString := mermaidCodeJSONBuffer.Bytes()
-
-			app.Debug("Loading HTML template ...")
-			templateData, err := resources.Templates.ReadFile("templates/go-dependency-graph.html")
-			utils.CheckForError(err)
-
-			app.Debug("Loading Mermaid JS ...")
 			mermaidJSData, err := resources.JavaScripts.ReadFile("javascripts/mermaid@10.9.1.min.js")
 			utils.CheckForError(err)
 
-			app.Debug("Loading Tailwind JS ...")
-			tailwindJSData, err := resources.JavaScripts.ReadFile("javascripts/tailwindcss@3.4.3.js")
-			utils.CheckForError(err)
+			htmlFileName := strings.TrimSpace(app.GetFullPathOrDefault(output, ""))
+			if htmlFileName == "" {
+				// save final HTML to temp file instead
+				htmlFile, err := os.CreateTemp("", "gpm-dependency-graph-*.html")
+				utils.CheckForError(err)
 
-			app.Debug("Parsing HTML template ...")
-			htmlTemplate, err := template.New("go-dependency-graph.html").Parse(string(templateData))
-			utils.CheckForError(err)
+				htmlFileName = htmlFile.Name()
+			}
 
-			app.Debug("Creating HTML output ...")
-			var htmlBuffer bytes.Buffer
-			htmlTemplate.Execute(&htmlBuffer, map[string]interface{}{
-				"EscapedAppName":        html.EscapeString(appName),
-				"GraphHeight":           graphHeight,
-				"GraphScale":            fmt.Sprintf("%f", scale),
-				"GraphScalePercentage":  fmt.Sprintf("%f", scale*100.0),
-				"GraphWidth":            graphWidth,
-				"InfoboxWidth":          graphInfoboxWidth,
-				"JsonModuleList":        string(installedModuleHtmlListJsonData),
-				"MermaidCodeJSONString": string(mermaidCodeJSONString),
-				"MermaidJS":             string(mermaidJSData),
-				"ModuleList":            installedModuleHtmlList,
-				"SidebarWidth":          graphSidebarWidth,
-				"TailwindJS":            string(tailwindJSData),
-			})
-			utils.CheckForError(err)
-			defer htmlBuffer.Reset()
-
-			// save final HTML to temp file
-			htmlFile, err := os.CreateTemp("", "gpm-dependency-graph-*.html")
-			utils.CheckForError(err)
-
-			htmlFileName := htmlFile.Name()
-
-			// write final HTML to temp file
+			// write final HTML to file
 			app.Debug(fmt.Sprintf("Writing HTML to '%v' ...", htmlFileName))
-			err = os.WriteFile(htmlFileName, htmlBuffer.Bytes(), constants.DefaultFileMode)
+			r := &types.ReactRenderer{
+				ContentClass: "h-screen flex",
+				ExternalModules: map[string]types.ReactRendererExternalModule{
+					"mermaid": {
+						Type: "module",
+						Url:  utils.ToDataUri(mermaidJSData, "text/javascript"),
+					},
+				},
+				Vars: map[string]interface{}{
+					"appName":              appName,
+					"graphDirection":       "LR",
+					"graphHeight":          graphHeight,
+					"graphScalePercentage": scale * 100.0,
+					"graphWidth":           graphWidth,
+					"infoboxWidth":         graphInfoboxWidth,
+					"mermaidGraph":         mermaidGraph,
+					"moduleList":           installedModuleHtmlList,
+					"sidebarWidth":         graphSidebarWidth,
+				},
+			}
+			// JSX template
+			err = r.AddJsxTemplate("go-dependency-graph")
 			utils.CheckForError(err)
+			// Mermaid
+			err = r.AddJavascriptTemplate("mermaid@10.9.1.min")
+			utils.CheckForError(err)
+			// Tailwind
+			err = r.AddJavascriptTemplate("tailwindcss@3.4.3")
+			utils.CheckForError(err)
+			htmlData, err := r.Render(path.Base(htmlFileName))
+			utils.CheckForError(err)
+			os.WriteFile(htmlFileName, htmlData, constants.DefaultFileMode)
 
-			// open temp file with default file handler
-			app.Debug(fmt.Sprintf("Opening '%v' ...", htmlFileName))
-			err = utils.OpenUrl(htmlFileName)
-			utils.CheckForError(err)
+			if !shouldNotOpen {
+				// open file with default file handler
+				app.Debug(fmt.Sprintf("Opening '%v' ...", htmlFileName))
+				err = utils.OpenUrl(htmlFileName)
+				utils.CheckForError(err)
+			}
 		},
 	}
 
+	showDependenciesCmd.Flags().BoolVarP(&shouldNotOpen, "do-not-open", "", false, "do not open file after created")
 	showDependenciesCmd.Flags().StringVarP(&height, "height", "", "100%", "custom CSS height of the graph")
 	showDependenciesCmd.Flags().StringVarP(&infoboxWidth, "infobox-width", "", "320px", "custom width of the infobox")
+	showDependenciesCmd.Flags().StringVarP(&output, "output", "o", "", "custom output file")
 	showDependenciesCmd.Flags().Float32VarP(&scale, "scale", "", 3.0, "custom scale of the graph")
 	showDependenciesCmd.Flags().StringVarP(&sidebarWidth, "sidebar-width", "", "420px", "custom width of the sidebar")
 	showDependenciesCmd.Flags().StringVarP(&title, "title", "", "GPM Dependency Graph", "custom title of the graph")

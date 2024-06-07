@@ -20,29 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package utils
-
-import (
-	b64 "encoding/base64"
-	"encoding/json"
-	"fmt"
-	"strings"
-)
-
-// SerializeStringToJSON() - serializes a string to JSON
-func SerializeStringToJSON(str string) ([]byte, error) {
-	jsonData, err := json.Marshal(str)
-	if err == nil {
-		return jsonData, nil
-	}
-	return []byte{}, nil
-}
-
-// ToDataUri() - serializes given data to data URI
-func ToDataUri(data []byte, contentType string) string {
-	return fmt.Sprintf(
-		"data:%s;base64,%s",
-		strings.TrimSpace(strings.ToLower(contentType)),
-		b64.StdEncoding.EncodeToString(data),
-	)
-}
+// injected global variables
+// for gpm
+window.GoPackageManager = {
+  vars: {}
+};

@@ -524,6 +524,20 @@ func (app *AppContext) GetEnvFilePaths() ([]string, error) {
 	}
 }
 
+// app.GetFullPathOrDefault() - returns full version of a path or a default if
+// input is empty
+func (app *AppContext) GetFullPathOrDefault(p string, d string) string {
+	p = strings.TrimSpace(p)
+	if p == "" {
+		return d
+	}
+
+	if path.IsAbs(p) {
+		return p
+	}
+	return path.Join(app.Cwd, p)
+}
+
 // app.GetGitBranches() - returns the list of branches using git command
 func (app *AppContext) GetGitBranches() ([]string, error) {
 	p := exec.Command("git", "branch", "-a")
