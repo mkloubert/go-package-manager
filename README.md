@@ -21,6 +21,7 @@
     - [Build project](#build-project-)
     - [Bump version](#bump-version-)
     - [Checkout branch](#checkout-branch-)
+      - [Branch aliases](#branch-aliases-)
     - [Cleanup project](#cleanup-project-)
     - [Compare code changes](#compare-code-changes-)
     - [Docker shorthands](#docker-shorthands-)
@@ -247,6 +248,26 @@ gpm checkout "i will fix the save button on start page" --suggest
 for example could suggest a value like `feature/fix-save-button-on-start-page` when using ChatGPT 3.5
 
 Have a look at the [Setup AI](#setup-ai) which describes how to setup OpenAI or Ollama API.
+
+##### Branch aliases [<a href="#checkout-branch-">↑</a>]
+
+For example, if you define the environment variable `GPM_BRANCH_DEV` with `development` as value, you can run
+
+```bash
+gpm checkout :dev
+```
+
+from the command line to switch to `development` branch.
+
+The `:dev` is the part after the `GPM_BRANCH_` prefix in the environment variable name.
+
+This means you are also able to define a variable, lets say `GPM_BRANCH_FOO`, with the value `bar`, which will allow you to easily switch to `bar` branch if you execute
+
+```
+gpm checkout :foo
+```
+
+Keep in mind: If you have no value for an alias defined, `gpm` will take its name as fallback!
 
 #### Cleanup project [<a href="#commands-">↑</a>]
 

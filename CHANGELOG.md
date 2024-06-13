@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.18.0
+
+- **BREAKING CHANGE**: using `checkout` command with `:` prefix in alias name, will handle this name as alias for a final target branch ... this can be defined via environment variables in the format `GPM_BRANCH_<ALIAS-NAME>` now
+
 ## 0.17.0
 
 - feat: `show dependencies` command, which generates and opens HTML page with a dependency graph of the modules of the current project

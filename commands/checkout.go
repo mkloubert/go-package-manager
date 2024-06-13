@@ -104,8 +104,25 @@ Your full name for the branch without your explanation:`, string(jsonStr)),
 				app.Debug(fmt.Sprintf("Running '%v' ...", strings.Join(cmdArgs, " ")))
 				utils.RunCommand(p)
 			} else {
-				// in this case `branchNameOrDescription` will be handled as branch name
-				branchName := utils.Slugify(branchNameOrDescription, branchSlugRegex)
+				var branchName string
+
+				if strings.HasPrefix(branchNameOrDescription, ":") {
+					// branch names starting with : will handled as aliases
+					// which can be setuped via an environment variable e.g.
+
+					branchAlias := strings.TrimSpace(branchNameOrDescription[1:])
+					branchAliasUpper := strings.ToUpper(branchAlias)
+
+					branchName = strings.TrimSpace(
+						os.Getenv(fmt.Sprintf("GPM_BRANCH_%v", branchAliasUpper)),
+					)
+					if branchName == "" {
+						branchName = branchAlias
+					}
+				} else {
+					// in this case `branchNameOrDescription` will be handled as branch name
+					branchName = utils.Slugify(branchNameOrDescription, branchSlugRegex)
+				}
 
 				var cmdArgs []string
 
