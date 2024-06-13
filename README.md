@@ -290,13 +290,7 @@ is a short form of `go mod tidy`.
 
 #### Execute shell command [<a href="#commands-">↑</a>]
 
-For example
-
-```bash
-gpm execute go version
-```
-
-will run `go version` with the settings and environment variables loaded from [.env\* files](#environment-variables-).
+![Execute demo 1](./img/demos/execute-demo-1.gif)
 
 #### Import aliases [<a href="#commands-">↑</a>]
 

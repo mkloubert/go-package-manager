@@ -32,7 +32,7 @@ import (
 
 func Init_Down_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var downCmd = &cobra.Command{
-		Use:   "up",
+		Use:   "down",
 		Short: "Run docker down",
 		Long:  `Runs docker compose down command.`,
 		Run: func(cmd *cobra.Command, args []string) {

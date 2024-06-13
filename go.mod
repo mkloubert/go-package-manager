@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/alecthomas/chroma v0.10.0
+	github.com/atotto/clipboard v0.1.4
 	github.com/briandowns/spinner v1.23.0
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/fatih/color v1.17.0

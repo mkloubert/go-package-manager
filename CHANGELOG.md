@@ -3,6 +3,8 @@
 ## 0.18.0
 
 - **BREAKING CHANGE**: using `checkout` command with `:` prefix in alias name, will handle this name as alias for a final target branch ... this can be defined via environment variables in the format `GPM_BRANCH_<ALIAS-NAME>` now
+- **BREAKING CHANGE**: `execute` command now generates shell commands from natural language using AI
+- fix: `down` command
 
 ## 0.17.0
 

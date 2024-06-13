@@ -225,6 +225,35 @@ func GetDefaultAIChatModel() string {
 	return strings.TrimSpace(os.Getenv("GPM_AI_CHAT_MODEL"))
 }
 
+// GetEnvVar() - returns, if found, the value of an existing environment
+// variable by its name ignoring case sensitivity
+func GetEnvVar(name string) *string {
+	lowerName := strings.TrimSpace(strings.ToUpper(name))
+
+	var value *string = nil
+
+	allVars := os.Environ()
+	for _, kv := range allVars {
+		sep := strings.Index(kv, "=")
+
+		var n string
+		var v string
+		if sep > -1 {
+			n = kv[0:sep]
+			v = kv[:sep+1]
+		} else {
+			n = kv
+		}
+
+		n = strings.TrimSpace(strings.ToLower(n))
+		if n == lowerName {
+			value = &v
+		}
+	}
+
+	return value
+}
+
 // GetNumberOfOpenFilesByPid() - returns the number of open files by pid
 func GetNumberOfOpenFilesByPid(pid int32) (int64, error) {
 	proc, err := process.NewProcess(pid)
@@ -265,6 +294,42 @@ func GetNumberOfOpenFilesByPid(pid int32) (int64, error) {
 	}
 
 	return int64(len(files)), nil
+}
+
+// GetShell()- returns the name of the current shell
+func GetShell() string {
+	shellName := ""
+
+	if IsWindows() {
+		comspec := GetEnvVar("COMSPEC")
+		if comspec != nil {
+			shellName = *comspec
+		} else {
+			powershell := GetEnvVar("PSModulePath")
+			if powershell != nil && *powershell != "" {
+				shellName = "PowerShell"
+			}
+		}
+	} else {
+		shellName = os.Getenv("SHELL")
+	}
+
+	shellName = strings.TrimSpace(shellName)
+
+	if shellName == "" {
+		shellName = "unknown"
+	} else {
+		lowerShellName := strings.ToLower(shellName)
+		if strings.Contains(lowerShellName, "cmd.exe") {
+			shellName = "cmd.exe"
+		} else if strings.Contains(lowerShellName, "zsh") {
+			shellName = "Z shell"
+		} else if strings.Contains(lowerShellName, "bash") {
+			shellName = "Bash"
+		}
+	}
+
+	return shellName
 }
 
 // IndexOfString() - returns the zero-based index of a string in a string array
