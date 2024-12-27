@@ -4,7 +4,9 @@
 
 - **BREAKING CHANGE**: using `checkout` command with `:` prefix in alias name, will handle this name as alias for a final target branch ... this can be defined via environment variables in the format `GPM_BRANCH_<ALIAS-NAME>` now
 - **BREAKING CHANGE**: `execute` command now generates shell commands from natural language using AI
+- feat: `generate documentation` command, that creates documentation files of this tool
 - fix: `down` command
+- fix: do not use `syscall` on Windows systems anmore
 
 ## 0.17.0
 

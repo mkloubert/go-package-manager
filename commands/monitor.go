@@ -27,7 +27,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -156,12 +155,9 @@ func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				slMem.MaxVal = float64(vMem.Total) / memZoom
 			}
 
-			var rLimit syscall.Rlimit
-			err = syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
-			if err == nil {
-				if rLimit.Cur != 0 {
-					slFiles.MaxVal = float64(rLimit.Cur) / filesZoom
-				}
+			rLimitCur, err := utils.GetCurRLimit()
+			if err == nil && rLimitCur != 0 {
+				slFiles.MaxVal = float64(rLimitCur) / filesZoom
 			}
 
 			rerender := func() {
@@ -217,7 +213,7 @@ func Init_Monitor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				slgFiles := widgets.NewSparklineGroup(slFiles)
 				slgFiles.Title = fmt.Sprintf(
 					"Files %v / %v (%.1fx)",
-					currentFiles, rLimit.Cur,
+					currentFiles, rLimitCur,
 					filesZoom,
 				)
 				slgFiles.SetRect(0, 0, termWidth, gridRowHeights[1])

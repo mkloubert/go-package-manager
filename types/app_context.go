@@ -359,12 +359,19 @@ func (app *AppContext) EnsureBinFolder() (string, error) {
 		return "", err
 	}
 
-	info, err := os.Stat(binPath)
+	return app.EnsureFolder(binPath)
+}
+
+// app.EnsureFolder() - ensures and returns the path of a specific folder
+func (app *AppContext) EnsureFolder(dir string) (string, error) {
+	folderPath := app.GetFullPathOrDefault(dir, app.Cwd)
+
+	info, err := os.Stat(folderPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			err = os.MkdirAll(binPath, constants.DefaultDirMode)
+			err = os.MkdirAll(folderPath, constants.DefaultDirMode)
 			if err == nil {
-				return binPath, nil
+				return folderPath, nil
 			}
 			return "", nil
 		}
@@ -372,9 +379,9 @@ func (app *AppContext) EnsureBinFolder() (string, error) {
 	}
 
 	if info.IsDir() {
-		return binPath, nil
+		return folderPath, nil
 	}
-	return "", fmt.Errorf("%v is no directory", binPath)
+	return "", fmt.Errorf("%v is no directory", folderPath)
 }
 
 // app.GetAIChatSettings() - returns AI chat settings based on this app
