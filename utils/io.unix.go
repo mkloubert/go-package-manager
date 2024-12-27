@@ -32,5 +32,5 @@ func GetCurRLimit() (uint64, error) {
 	var rLimit syscall.Rlimit
 	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
 
-	return rLimit.Cur, err
+	return uint64(rLimit.Cur), err
 }
