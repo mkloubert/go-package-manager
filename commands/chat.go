@@ -1,4 +1,4 @@
-//go:build !openbsd && !arm
+//go:build !(openbsd && arm)
 
 // MIT License
 //
