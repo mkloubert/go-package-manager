@@ -1,3 +1,5 @@
+//go:build !openbsd && !arm
+
 // MIT License
 //
 // Copyright (c) 2024 Marcel Joachim Kloubert (https://marcel.coffee)
