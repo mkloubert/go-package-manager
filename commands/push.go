@@ -33,6 +33,7 @@ import (
 
 func Init_Push_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var defaultRemoteOnly bool
+	var withTags bool
 
 	var pushCmd = &cobra.Command{
 		Use:     "push [remotes]",
@@ -62,14 +63,25 @@ func Init_Push_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			}
 
 			for _, r := range remotes {
-				cmdArgs := []string{"git", "push", r, currentBranchName}
+				// first push code
+				{
+					cmdArgs := []string{"git", "push", r, currentBranchName}
 
-				app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
+					app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
+				}
+
+				// then push tags
+				{
+					cmdArgs := []string{"git", "push", r, "--tags"}
+
+					app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
+				}
 			}
 		},
 	}
 
 	pushCmd.Flags().BoolVarP(&defaultRemoteOnly, "default", "d", false, "default / first remote only")
+	pushCmd.Flags().BoolVarP(&withTags, "with-tags", "t", false, "also push tags")
 
 	parentCmd.AddCommand(
 		pushCmd,

@@ -71,10 +71,7 @@ func Init_Run_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			m := strings.TrimSpace(strings.ToLower(mode))
 
 			switch m {
-			case "":
-			case "s":
-			case "script":
-			case "scripts":
+			case "", "s", "script", "scripts":
 				run_scripts(app, args)
 			default:
 				utils.CloseWithError(fmt.Errorf("invalid value '%v' for mode", m))

@@ -1,5 +1,12 @@
 # Change Log (go-package-manager)
 
+## 0.20.0
+
+- docs: will now be build for [gpm.kloubert.dev](https://gpm.kloubert.dev)
+- feat: `push` command now supports `--with-tags` flag to additionally push tags after upload changes to remote(s)
+- fix: `run` command
+- fix: `GetBestChromaFormatterName()` function
+
 ## 0.19.0
 
 - feat: `chat` command is available on OpenBSD again

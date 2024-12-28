@@ -44,6 +44,8 @@ func init_generate_documentation_command(parentCmd *cobra.Command, app *types.Ap
 		Long:    `Generate documentation into the current directory.`,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if !man && !markdown && !rest && !yaml {
+				app.Debug("Setting 'markdown' as default format ...")
+
 				// default is Markdown
 				markdown = true
 			}

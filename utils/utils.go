@@ -188,8 +188,7 @@ func GetBestChromaFormatterName() string {
 	}
 
 	switch os := runtime.GOOS; os {
-	case "darwin":
-	case "linux":
+	case "darwin", "linux":
 		return "terminal16m"
 	case "windows":
 		return "terminal256"
