@@ -67,4 +67,5 @@ jobs:
             sudo mv ${{ secrets.SSH_SOURCEDIR }}/docs/* ${{ secrets.SSH_TARGETDIR }} &>/dev/null
             sudo chown -R www-data:www-data ${{ secrets.SSH_TARGETDIR }}/* &>/dev/null
             sudo chmod -R 644 ${{ secrets.SSH_TARGETDIR }}/* &>/dev/null
+            sudo chmod 754 ${{ secrets.SSH_TARGETDIR }}/ &>/dev/null
           script_stop: true
