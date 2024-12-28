@@ -1,8 +1,11 @@
 name: Docs by released binaries
 
 on:
-  release:
-    types: [created]
+  workflow_run:
+    workflows:
+      - Build binaries for release
+    types:
+      - completed
 
 jobs:
   build:
