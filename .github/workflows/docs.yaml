@@ -11,6 +11,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Set user and group as environment variables
+        run: |
+          echo "USER=$(whoami)" >> $GITHUB_ENV
+          echo "GROUP=$(id -gn)" >> $GITHUB_ENV
+          echo "UID=$(id -u)" >> $GITHUB_ENV
+          echo "GID=$(id -g)" >> $GITHUB_ENV
       - uses: actions/checkout@v4
       - name: List checked out files
         run: |
