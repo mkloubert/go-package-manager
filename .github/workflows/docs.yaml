@@ -1,9 +1,11 @@
-name: Docs by tag
+name: Docs by released binaries
 
 on:
-  push:
-    tags:
-      - "*"
+  workflow_run:
+    workflows:
+      - Build binaries for release
+    types:
+      - completed
 
 jobs:
   build:
