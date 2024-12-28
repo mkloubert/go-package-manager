@@ -64,6 +64,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            mv -v ${{ secrets.SSH_SOURCEDIR }}/docs/* ${{ secrets.SSH_TARGETDIR }} &>/dev/null
-            chown -R ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_GROUP }} ${{ secrets.SSH_TARGETDIR }}/* &>/dev/null
+            sudo mv -v ${{ secrets.SSH_SOURCEDIR }}/docs/* ${{ secrets.SSH_TARGETDIR }} &>/dev/null
+            sudo chown -R ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_GROUP }} ${{ secrets.SSH_TARGETDIR }}/* &>/dev/null
           script_stop: true
