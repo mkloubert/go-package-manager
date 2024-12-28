@@ -28,7 +28,7 @@ jobs:
           go version
       - name: Build documentation
         run: |
-          go run . run docs
+          sudo -u $USER -g $GROUP go run . run docs
       - name: List build files
         run: |
           ls -l docs
@@ -36,7 +36,7 @@ jobs:
         run: |
           for mdfile in docs/*.md; do
             htmlfile="${mdfile%.md}.html"
-            pandoc -f markdown "$mdfile" -o "$htmlfile"
+            sudo -u $USER -g $GROUP pandoc -f markdown "$mdfile" -o "$htmlfile"
 
             if [ $? -eq 0 ]; then
               # replace .md links to .html
@@ -49,10 +49,8 @@ jobs:
               exit 1
             fi
           done
-      - name: Reset ownership
-        run: sudo chown -R -v $USER:$GROUP docs
       - name: Fix permissions
-        run: sudo chmod -R -v 777 docs
+        run: sudo chmod -R -v 664 docs/
       - name: Check docs directory contents
         run: ls -al docs
       - name: Upload directory

@@ -1,6 +1,6 @@
 # Change Log (go-package-manager)
 
-## 0.20.19
+## 0.20.20
 
 - docs: will now be build for [gpm.kloubert.dev](https://gpm.kloubert.dev)
 - feat: `push` command now supports `--with-tags` flag to additionally push tags after upload changes to remote(s)
