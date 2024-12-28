@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: List checked out files
+        run: |
+          ls -l
       - name: Install Pandoc
         run: |
           sudo apt-get update
@@ -26,6 +29,9 @@ jobs:
       - name: Build documentation
         run: |
           go run . run docs
+      - name: List build files
+        run: |
+          ls -l docs
       - name: Convert Markdown to HTML and update links
         run: |
           for mdfile in docs/*.md; do
