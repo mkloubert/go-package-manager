@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.19.0
+
+- feat: `chat` command is available on OpenBSD again
+
 ## 0.18.4
 
 - **BREAKING CHANGE**: using `checkout` command with `:` prefix in alias name, will handle this name as alias for a final target branch ... this can be defined via environment variables in the format `GPM_BRANCH_<ALIAS-NAME>` now

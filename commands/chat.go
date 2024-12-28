@@ -117,18 +117,12 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					return []prompt.Suggest{}
 				}
 
-				s := []prompt.Suggest{
-					{Text: "/cls", Description: "clear screen"},
-					{Text: "/exit", Description: "exit application"},
-					{Text: "/format <name>", Description: "formatter for console output"},
-					{Text: "/info", Description: "print information about current chat settings and status"},
-					{Text: "/model <name>", Description: "switch to another model"},
-					{Text: "/nosystem", Description: "delete system prompt"},
-					{Text: "/reset", Description: "reset conversation"},
-					{Text: "/style <name>", Description: "console style"},
-					{Text: "/system <text>", Description: "reset conversation and update system prompt"},
-					{Text: "/temp <value>", Description: "custom temperature value"},
+				// convert utils.ChatPromptSuggestion to prompt.Suggest
+				s := make([]prompt.Suggest, 0)
+				for _, suggestion := range utils.GetChatPromptSugesstions() {
+					s = append(s, prompt.Suggest{Text: suggestion.Text, Description: suggestion.Description})
 				}
+
 				return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
 			}
 
