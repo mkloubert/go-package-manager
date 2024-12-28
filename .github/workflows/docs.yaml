@@ -21,10 +21,6 @@ jobs:
           sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
           export PATH=$PATH:/usr/local/go/bin
           go version
-      - name: Install Pandoc
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc
       - name: Build documentation
         run: |
           go run . run docs
@@ -52,7 +48,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "docs/*"
+          source: "docs/*.html"
           target: ${{ secrets.SSH_SOURCEDIR }}
       - name: Move to target
         uses: appleboy/ssh-action@master
