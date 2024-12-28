@@ -41,8 +41,10 @@ jobs:
               exit 1
             fi
           done
+      - name: Reset ownership
+        run: sudo chown -R -v $USER:$GROUP docs
       - name: Fix permissions
-        run: sudo chmod -R -v 664 docs
+        run: sudo chmod -R -v 777 docs
       - name: Check docs directory contents
         run: ls -al docs
       - name: Upload directory
