@@ -42,7 +42,9 @@ jobs:
             fi
           done
       - name: Reset ownership
-        run: sudo chown -R $USER:$USER docs
+        run: sudo chown -R -v $USER:$USER docs
+      - name: Fix permissions
+        run: chmod -R -v 664 docs
       - name: Check docs directory contents
         run: ls -al docs
       - name: Upload directory
