@@ -41,6 +41,8 @@ jobs:
               exit 1
             fi
           done
+      - name: Reset ownership
+        run: sudo chown -R $USER:$USER docs
       - name: Check docs directory contents
         run: ls -al docs
       - name: Upload directory
@@ -50,7 +52,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "docs"
+          source: "docs/*"
           target: ${{ secrets.SSH_SOURCEDIR }}
       - name: Move to target
         uses: appleboy/ssh-action@master
