@@ -46,7 +46,7 @@ jobs:
       - name: Reset ownership
         run: sudo chown -R -v $USER:$GROUP docs
       - name: Fix permissions
-        run: sudo chmod -R -v 664 docs
+        run: sudo chmod -R -v 777 docs
       - name: Check docs directory contents
         run: ls -al docs
       - name: Upload directory
@@ -68,4 +68,5 @@ jobs:
           script: |
             sudo mv -v ${{ secrets.SSH_SOURCEDIR }}/docs/* ${{ secrets.SSH_TARGETDIR }} &>/dev/null
             sudo chown -R ${{ secrets.SERVER_USER }}:${{ secrets.SERVER_GROUP }} ${{ secrets.SSH_TARGETDIR }}/* &>/dev/null
+            sudo chmod -R 644 ${{ secrets.SSH_TARGETDIR }}/ &>/dev/null
           script_stop: true
