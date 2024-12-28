@@ -41,8 +41,6 @@ jobs:
               exit 1
             fi
           done
-      - name: Reset ownership
-        run: sudo chown -R -v $USER:$USER docs
       - name: Fix permissions
         run: sudo chmod -R -v 664 docs
       - name: Check docs directory contents
