@@ -52,7 +52,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "docs/*"
+          source: "docs"
           target: ${{ secrets.SSH_SOURCEDIR }}
       - name: Move to target
         uses: appleboy/ssh-action@master
