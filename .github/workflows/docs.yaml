@@ -11,16 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Set user and group as environment variables
-        run: |
-          echo "USER=$(whoami)" >> $GITHUB_ENV
-          echo "GROUP=$(id -gn)" >> $GITHUB_ENV
-          echo "UID=$(id -u)" >> $GITHUB_ENV
-          echo "GID=$(id -g)" >> $GITHUB_ENV
       - uses: actions/checkout@v4
-      - name: List checked out files
-        run: |
-          sudo ls -l
       - name: Install Pandoc
         run: |
           sudo apt-get update
@@ -34,15 +25,12 @@ jobs:
           go version
       - name: Build documentation
         run: |
-          sudo -u $USER -g $GROUP go run . run docs
-      - name: List build files
-        run: |
-          ls -l docs
+          go run . run docs
       - name: Convert Markdown to HTML and update links
         run: |
           for mdfile in docs/*.md; do
             htmlfile="${mdfile%.md}.html"
-            sudo -u $USER -g $GROUP pandoc -f markdown "$mdfile" -o "$htmlfile"
+            pandoc -f markdown "$mdfile" -o "$htmlfile"
 
             if [ $? -eq 0 ]; then
               # replace .md links to .html
@@ -56,9 +44,7 @@ jobs:
             fi
           done
       - name: Fix permissions
-        run: sudo chown -R -v $USER:$GROUP docs/
-      - name: Fix permissions
-        run: sudo chmod -R -v 664 docs/
+        run: sudo chmod -R 666 docs/
       - name: Check docs directory contents
         run: sudo ls -al docs
       - name: Upload directory
