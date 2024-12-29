@@ -1,6 +1,6 @@
 # Change Log (go-package-manager)
 
-## 0.21.2
+## 0.21.3
 
 - ci: automatic update of [GitHub wiki](https://github.com/mkloubert/go-package-manager/wiki) as well
 

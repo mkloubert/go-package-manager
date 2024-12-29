@@ -44,6 +44,7 @@ jobs:
         run: |
           rm -rf wiki/*
           cp -R docs/* wiki/
+          cp wiki/gpm.md wiki/Home.md
       - name: Convert Markdown to HTML and update links
         run: |
           for mdfile in docs/*.md; do
