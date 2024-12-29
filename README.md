@@ -690,6 +690,7 @@ The project is licensed under the [MIT](./LICENSE).
 - [Babel.js](https://babeljs.io) by [Babel team](https://opencollective.com/babel)
 - [chroma](https://github.com/alecthomas/chroma) by [Alec Thomas](https://github.com/sponsors/alecthomas)
 - [cobra](https://github.com/spf13/cobra) by [Steve Francia](https://github.com/spf13)
+- [Glamour](https://github.com/charmbracelet/glamour) by [Charm](https://github.com/charmbracelet)
 - [go-prompt](https://github.com/c-bata/go-prompt) by [c-bata](https://github.com/sponsors/c-bata)
 - [go-version](https://github.com/hashicorp/go-version) by [HashiCorp](https://github.com/hashicorp)
 - [go-yaml](https://github.com/goccy/go-yaml) by [Masaaki Goshima](https://github.com/sponsors/goccy)
