@@ -1,6 +1,6 @@
 # Change Log (go-package-manager)
 
-## 0.22.3
+## 0.22.4
 
 - **BREAKING CHANGE**: default AI model for Open AI is `gpt-4o-mini` now
 - **BREAKING CHANGE**: default AI model for Ollama is `llama3.3` now

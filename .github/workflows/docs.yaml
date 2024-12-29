@@ -93,5 +93,5 @@ jobs:
         working-directory: wiki
         run: |
           git add .
-          git commit -m "Update triggered by #${{ github.sha }}"
+          git commit -m "Update triggered by #${{ github.sha }}" || true
           git push
