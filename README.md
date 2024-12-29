@@ -6,8 +6,7 @@
 
 - [Overview](#overview-)
 - [Installation](#installation-)
-  - [Linux / UNIX](#linux--unix-)
-  - [MacOS](#macos-)
+  - [MacOS / Linux / UNIX](#macos--linux--unix-)
   - [Windows](#windows-)
   - [Build from source](#build-from-source-)
 - [Usage](#usage-)
@@ -76,59 +75,25 @@ However, it's not only limited to Go but can also be utilized for other project 
 
 You can install `gpm` from a [pre-build binary](https://github.com/mkloubert/go-package-manager/releases) or build it by your own:
 
-### Linux / UNIX [<a href="#installation-">↑</a>]
+### MacOS / Linux / UNIX [<a href="#installation-">↑</a>]
 
-The following [curl operation(s)](https://curl.se/) will download the latest version [from GitHub](https://github.com/mkloubert/go-package-manager/releases) and extract it to `/usr/local/bin` as `gpm` executable, which should be part of the `$PATH` environment variable (this also requires [jq tool](https://github.com/jqlang/jq)):
-
-```bash
-# replace "<!!!OS!!!>" with one of the following values:
-# - "openbsd"
-# - "linux"
-# - "freebsd"
-#
-# replace "<!!!CPU!!!>" with one of the following values:
-# - "386": Intel compatible (32-bit)
-# - "amd64": Intel compatible (64-bit)
-# - "arm": ARM (32-bit)
-# - "arm64": ARM (64-bit)
-curl -s https://api.github.com/repos/mkloubert/go-package-manager/releases/latest | jq -r '.assets[].browser_download_url | select(contains("<!!!OS!!!>") and contains("<!!!CPU!!!>") and (. | tostring | contains("sha256") | not))' | xargs curl -sL | tar xzOf - gpm | sudo tee /usr/local/bin/gpm > /dev/null && sudo chmod +x /usr/local/bin/gpm
-```
-
-Later, you can also execute the following command, which will install a script named `gpm-update` in `$HOME/.gpm/bin` folder:
+You can simply execute the follow remote [shell script](https://sh.kloubert.dev/gpm.sh):
 
 ```bash
-gpm setup updater
+wget -qO- "https://sh.kloubert.dev/gpm.sh" | sh
 ```
 
-### MacOS [<a href="#installation-">↑</a>]
-
-The following [curl operation(s)](https://formulae.brew.sh/formula/curl) will download the latest version [from GitHub](https://github.com/mkloubert/go-package-manager/releases) and extract it to `/usr/local/bin` as `gpm` executable, which should be part of the `$PATH` environment variable (this also requires [jq tool](https://formulae.brew.sh/formula/jq)):
-
-```bash
-# Apple Silicon
-curl -s https://api.github.com/repos/mkloubert/go-package-manager/releases/latest | jq -r '.assets[].browser_download_url | select(contains("darwin") and contains("arm64") and (. | tostring | contains("sha256") | not))' | xargs curl -sL | tar xzOf - gpm | sudo tee /usr/local/bin/gpm > /dev/null && sudo chmod +x /usr/local/bin/gpm
-
-# use the following commands if you use a legacy Intel 64-bit system
-# curl -s https://api.github.com/repos/mkloubert/go-package-manager/releases/latest | jq -r '.assets[].browser_download_url | select(contains("darwin") and contains("amd64") and (. | tostring | contains("sha256") | not))' | xargs curl -sL | tar xzOf - gpm | sudo tee /usr/local/bin/gpm > /dev/null && sudo chmod +x /usr/local/bin/gpm
-```
-
-Later, you can also execute the following command, which will install a script named `gpm-update` in `$HOME/.gpm/bin` folder:
-
-```bash
-gpm setup updater
-```
+Later you can run the command again to update the tool as well.
 
 ### Windows [<a href="#installation-">↑</a>]
 
-will download the latest version [from GitHub](https://github.com/mkloubert/go-package-manager/releases) and extract it to `C:\Program Files\gpm` as `gpm.exe` executable, which should be made part of the `PATH` environment variable:
+You can simply execute the follow remote [PowerShell script](https://sh.kloubert.dev/gpm.ps1):
 
 ```powershell
-# replace "<!!!CPU!!!>" with one of the following values:
-# - "386": Intel compatible (32-bit)
-# - "amd64": Intel compatible (64-bit)
-# - "arm": ARM (32-bit)
-Invoke-WebRequest 'https://api.github.com/repos/mkloubert/go-package-manager/releases/latest' -UseBasicParsing | ConvertFrom-Json | % { $_.assets | Where-Object { $_.browser_download_url -like '*windows*<!!!CPU!!!>*.zip' -and $_.browser_download_url -notlike '*sha256*' } | Select-Object -ExpandProperty browser_download_url -First 1 } | % { $url=$_; $output="gpm.zip"; Invoke-WebRequest $url -OutFile $output; Expand-Archive $output -DestinationPath "$env:TEMP\gpm" -Force; New-Item -ItemType Directory -Path "C:\Program Files\gpm" -Force | Out-Null; Copy-Item "$env:TEMP\gpm\gpm.exe" -Destination "C:\Program Files\gpm" }
+Invoke-WebRequest -Uri "https://sh.kloubert.dev/gpm.ps1" | Select-Object -ExpandProperty Content | Invoke-Expression
 ```
+
+Later you should be able to run the command again to update the tool as well.
 
 ### Build from source [<a href="#installation-">↑</a>]
 

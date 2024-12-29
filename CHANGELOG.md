@@ -1,10 +1,11 @@
 # Change Log (go-package-manager)
 
-## 0.22.0
+## 0.22.1
 
 - **BREAKING CHANGE**: default AI model for Open AI is `gpt-4o-mini` now
 - **BREAKING CHANGE**: default AI model for Ollama is `llama3.3` now
 - feat: `generate project` command that generates a Go project with natural language
+- docs: can directly update `gpm` from `sh.kloubert.dev` server now
 
 ## 0.21.3
 
