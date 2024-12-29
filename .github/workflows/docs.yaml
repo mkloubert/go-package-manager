@@ -44,7 +44,7 @@ jobs:
             fi
           done
       - name: Fix permissions
-        run: sudo chmod -R 744 docs/
+        run: sudo chmod -R 777 docs/
       - name: Check docs directory contents
         run: sudo ls -al docs
       - name: Upload directory
@@ -64,6 +64,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            sudo rm -rf ${{ secrets.SSH_TARGETDIR }}/* &>/dev/null
             sudo mv ${{ secrets.SSH_SOURCEDIR }}/docs/* ${{ secrets.SSH_TARGETDIR }} &>/dev/null
             sudo chown -R www-data:www-data ${{ secrets.SSH_TARGETDIR }}/* &>/dev/null
             sudo chmod -R 644 ${{ secrets.SSH_TARGETDIR }}/* &>/dev/null
