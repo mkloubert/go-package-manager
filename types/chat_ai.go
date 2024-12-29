@@ -47,6 +47,8 @@ type ChatAI interface {
 	UpdateSystem(systemPromt string)
 	// ChatAI.UpdateSystem() - sets up new temperature value
 	UpdateTemperature(newValue float32)
+	// WithJsonSchema() - sends a message with a JSON schema
+	WithJsonSchema(message string, schemaName string, schema map[string]interface{}, onUpdate ChatAIMessageChunkReceiver) error
 }
 
 type ChatAIMessageChunkReceiver = func(messageChunk string) error

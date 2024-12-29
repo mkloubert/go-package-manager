@@ -212,7 +212,7 @@ func (app *AppContext) chatWithOpenAI(prompt string, settings AIChatSettings, op
 	}
 
 	if model == "" {
-		model = "gpt-3.5-turbo"
+		model = "gpt-4o-mini"
 	}
 
 	url := "https://api.openai.com/v1/chat/completions"
@@ -310,7 +310,7 @@ func (app *AppContext) CreateAIChat(options ...CreateAIChatOptions) (ChatAI, err
 		}
 
 		if initialModel == "" {
-			initialModel = "llama3"
+			initialModel = "llama3.3"
 		}
 
 		api = &ollama
@@ -320,7 +320,7 @@ func (app *AppContext) CreateAIChat(options ...CreateAIChatOptions) (ChatAI, err
 		}
 
 		if initialModel == "" {
-			initialModel = "gpt-3.5-turbo"
+			initialModel = "gpt-4o-mini"
 		}
 		if settings.ApiKey != nil {
 			openai.ApiKey = *settings.ApiKey

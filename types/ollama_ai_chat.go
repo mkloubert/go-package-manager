@@ -217,3 +217,87 @@ func (c *OllamaAIChat) UpdateSystem(systemPrompt string) {
 func (c *OllamaAIChat) UpdateTemperature(newValue float32) {
 	c.Temperature = newValue
 }
+
+func (c *OllamaAIChat) WithJsonSchema(message string, schemaName string, schema map[string]interface{}, onUpdate ChatAIMessageChunkReceiver) error {
+	model := strings.TrimSpace(strings.ToLower(c.Model))
+	if model == "" {
+		return fmt.Errorf("no chat ai model defined")
+	}
+
+	url := "http://localhost:11434/api/chat"
+
+	userMessage := OllamaAIChatMessage{
+		Content: message,
+		Role:    "user",
+	}
+
+	messages := []OllamaAIChatMessage{}
+
+	if c.SystemPrompt != "" {
+		systemMessage := OllamaAIChatMessage{
+			Content: c.SystemPrompt,
+			Role:    "system",
+		}
+
+		messages = append(messages, systemMessage)
+	}
+
+	messages = append(messages, c.Conversation...)
+	messages = append(messages, userMessage)
+
+	body := map[string]interface{}{
+		"model":       model,
+		"messages":    messages,
+		"stream":      false,
+		"temperature": c.Temperature,
+		"format":      schema,
+	}
+
+	jsonData, err := json.Marshal(&body)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonData)))
+	if err != nil {
+		return err
+	}
+
+	// setup ...
+	req.Header.Set("Content-Type", "application/json")
+	// ... and finally send the JSON data
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("unexpected response %v", resp.StatusCode)
+	}
+
+	// load the response
+	responseData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var chatResponse OllamaApiChatCompletionResponse
+	err = json.Unmarshal(responseData, &chatResponse)
+	if err != nil {
+		return err
+	}
+
+	assistantMessage := OllamaAIChatMessage{
+		Content: chatResponse.Message.Content,
+		Role:    chatResponse.Message.Role,
+	}
+
+	c.Conversation = append(
+		c.Conversation,
+		userMessage, assistantMessage,
+	)
+
+	return onUpdate(assistantMessage.Content)
+}

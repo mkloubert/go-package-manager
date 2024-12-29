@@ -26,6 +26,8 @@
     - [Compare code changes](#compare-code-changes-)
     - [Docker shorthands](#docker-shorthands-)
     - [Execute shell command](#execute-shell-command-)
+    - [Generate documentation](#generate-documentation-)
+    - [Generate project](#generate-project-)
     - [Import aliases](#import-aliases-)
     - [Import projects](#import-projects-)
     - [Install dependencies](#install-dependencies-)
@@ -291,6 +293,40 @@ is a short form of `go mod tidy`.
 #### Execute shell command [<a href="#commands-">↑</a>]
 
 ![Execute demo 1](./img/demos/execute-demo-1.gif)
+
+#### Generate documentation [<a href="#commands-">↑</a>]
+
+Running the following command
+
+```bash
+gpm generate documentation
+```
+
+will generate the full documentation for this tool as Markdown in the current directory.
+
+To output the documentation into a specific folder, use:
+
+```bash
+gpm generate documentation my-doc-folder
+```
+
+#### Generate project [<a href="#commands-">↑</a>]
+
+To generate a new Go project tailored to your requirements, execute the following command:
+
+```bash
+gpm generate project --output=./my-new-project example.com/foo/example "i need a starter backend with gin, i also need api key check and logging"
+```
+
+This command prompts the default AI provider to create a step-by-step plan for setting up a Go project based on your input `i need a starter backend with gin, i also need api key check and logging`.
+
+The process begins by initializing a new project with the URL `example.com/foo/example` in the `my-new-project` folder. Each step in the setup is executed interactively, with user input guiding the workflow.
+
+Once all steps are completed, the AI generates a summary in the standard output. This summary explains the actions performed and their purpose, ensuring the project aligns with the specified requirements.
+
+The following video does demonstrate this (keep in mind: replace replace `go run . <...>` with `gpm <...>` later):
+
+![Generate project demo 1](./img/demos/generate-project-demo-1.gif)
 
 #### Import aliases [<a href="#commands-">↑</a>]
 
