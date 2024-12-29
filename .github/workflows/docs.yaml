@@ -12,6 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Extract commit author information
+        id: author_info
+        run: |
+          COMMIT_AUTHOR_NAME=$(git log -1 --pretty=format:'%an')
+          COMMIT_AUTHOR_EMAIL=$(git log -1 --pretty=format:'%ae')
+          echo "AUTHOR_NAME=$COMMIT_AUTHOR_NAME" >> $GITHUB_ENV
+          echo "AUTHOR_EMAIL=$COMMIT_AUTHOR_EMAIL" >> $GITHUB_ENV
+      - name: Set up Git
+        run: |
+          git config --global user.name "${{ env.AUTHOR_NAME }}"
+          git config --global user.email "${{ env.AUTHOR_EMAIL }}"
+      - name: Clone wiki repository
+        run: |
+          git clone https://${{ github.repository.owner }}:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.wiki.git wiki
       - name: Install Pandoc
         run: |
           sudo apt-get update
@@ -23,9 +37,13 @@ jobs:
           sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
           export PATH=$PATH:/usr/local/go/bin
           go version
-      - name: Build documentation
+      - name: Build documentation as Markdown
         run: |
           go run . run docs
+      - name: Cleanup wiki folder and copy markdown files
+        run: |
+          rm -rf wiki/*
+          cp -R docs/* wiki/
       - name: Convert Markdown to HTML and update links
         run: |
           for mdfile in docs/*.md; do
@@ -70,3 +88,9 @@ jobs:
             sudo chmod -R 644 ${{ secrets.SSH_TARGETDIR }}/* &>/dev/null
             sudo chmod 744 ${{ secrets.SSH_TARGETDIR }}/ &>/dev/null
           script_stop: true
+      - name: Push update to wiki
+        working-directory: wiki
+        run: |
+          git add .
+          git commit -m "Update triggered by #${{ github.sha }}"
+          git push

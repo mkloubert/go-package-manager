@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.21.0
+
+- ci: automatic update of [GitHub wiki](https://github.com/mkloubert/go-package-manager/wiki) as well
+
 ## 0.20.30
 
 - docs: will now be build for [gpm.kloubert.dev](https://gpm.kloubert.dev)
