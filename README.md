@@ -554,7 +554,7 @@ If you would like to use AI feature, like suggestion of branch names, you can se
 
 Create (or use) an API from https://platform.openai.com/api-keys and write it to `OPENAI_API_KEY` environment variable.
 
-By default `gpt-3.5-turbo` model is used. You can change this, by setting up `GPM_AI_CHAT_MODEL` environment variable with a [value from here](https://platform.openai.com/docs/models) like this:
+By default `gpt-4o-mini` model is used. You can change this, by setting up `GPM_AI_CHAT_MODEL` environment variable with a [value from here](https://platform.openai.com/docs/models) like this:
 
 ```dotenv
 GPM_AI_CHAT_MODEL=gpt-4-turbo
