@@ -1,5 +1,10 @@
 # Change Log (go-package-manager)
 
+## 0.24.0
+
+- feat: `update` command which updates all dependencies of current project
+- refactor: updated all dependencies
+
 ## 0.23.0
 
 - refactor: `generate project` now runs in a terminal UI

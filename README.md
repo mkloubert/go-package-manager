@@ -49,6 +49,7 @@
     - [Start project](#start-project-)
     - [Synchronize with Git remotes](#synchronize-with-git-remotes-)
     - [Uninstall dependencies](#uninstall-dependencies-)
+    - [Update dependencies](#update-dependencies-)
   - [Setup AI](#setup-ai-)
     - [OpenAI / ChatGPT](#openai--chatgpt-)
     - [Ollama](#ollama-)
@@ -545,6 +546,14 @@ gpm uninstall yaml
 ```
 
 later which will simply call `go get -u https://github.com/go-yaml/yaml@none` instead.
+
+#### Update dependencies [<a href="#commands-">↑</a>]
+
+```bash
+gpm update
+```
+
+is a short version of `go get -u ./... && go mod tidy` and will update all dependencies.
 
 ## Setup AI [<a href="#table-of-contents">↑</a>]
 

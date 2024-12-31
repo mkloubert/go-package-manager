@@ -106,6 +106,7 @@ func main() {
 	commands.Init_Tidy_Command(rootCmd, &app)
 	commands.Init_Uninstall_Command(rootCmd, &app)
 	commands.Init_Up_Command(rootCmd, &app)
+	commands.Init_Update_Command(rootCmd, &app)
 
 	// execute
 	if err := rootCmd.Execute(); err != nil {
