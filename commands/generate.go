@@ -158,7 +158,9 @@ You can assume the following:
 - commands will be executed in a common terminal on a "%s" operating system with "%s" architecture
 - I start in a directory where are only go.mod and go.sum files
 Always create a JSON list of all required steps I have to do so at the end there is a ready-to-use project that I can run with 'go run .' or something similar.
-You can use any popular module if needed as well if I does want something else.`,
+Split code into different files if this makes sense and return all files.
+You can use any popular module if needed as well if I does want something else.
+Always return the current and complete state based on our current conversation.`,
 						runtime.GOOS,
 						runtime.GOARCH,
 					))
@@ -229,7 +231,7 @@ You can use any popular module if needed as well if I does want something else.`
 							continue
 						}
 
-						if stepType == "create_file" {
+						if stepType == "file" {
 							relativeFilePath := step["relative_file_path"].(string)
 							utils.CheckForError(err)
 
@@ -380,7 +382,7 @@ require (
 
 						app.Debug(fmt.Sprintf("Step #%v (%s): %s", stepNr, stepTitle, stepDescription))
 
-						if stepType == "create_file" {
+						if stepType == "file" {
 							// create a file
 
 							relativeFilePath := step["relative_file_path"].(string)
@@ -458,10 +460,10 @@ require (
 						},
 						"steps": map[string]interface{}{
 							"type":        "array",
-							"description": "A list of steps to do",
+							"description": "The current and aggregated list of steps to do",
 							"items": map[string]interface{}{
 								"oneOf": []map[string]interface{}{
-									// create_file
+									// file
 									{
 										"type": "object",
 										"required": []string{
@@ -471,7 +473,7 @@ require (
 											"title",
 											"type",
 										},
-										"description": "Contains information for creating a file",
+										"description": "Contains information for a specific file of a list that is part of the project",
 										"properties": map[string]interface{}{
 											"content": map[string]interface{}{
 												"type":        "string",
@@ -479,21 +481,21 @@ require (
 											},
 											"description": map[string]interface{}{
 												"type":        "string",
-												"description": "A description of the create file step",
+												"description": "A description of the file step",
 											},
 											"relative_file_path": map[string]interface{}{
 												"type":        "string",
-												"description": "The relative path and name of the file to create",
+												"description": "The relative path and name of the file",
 												"examples":    []string{"foo/bar.txt", "foo/bar/buzz.tsx"},
 											},
 											"title": map[string]interface{}{
 												"type":        "string",
-												"description": "A (short) description of the create file step as title",
+												"description": "A (short) description of the file step as title",
 											},
 											"type": map[string]interface{}{
 												"type":        "string",
 												"description": "The type",
-												"enum":        []string{"create_file"},
+												"enum":        []string{"file"},
 											},
 										},
 									},
