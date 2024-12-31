@@ -701,3 +701,4 @@ The project is licensed under the [MIT](./LICENSE).
 - [React](https://react.dev)
 - [spinner](https://github.com/sponsors/briandowns) by [Brian Downs](https://github.com/sponsors/briandowns)
 - [termui](https://github.com/gizak/termui) by [Zack Guo](https://github.com/gizak)
+- [tview](https://github.com/rivo/tview) by [rivo](https://github.com/sponsors/rivo)

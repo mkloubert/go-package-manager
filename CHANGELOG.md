@@ -1,5 +1,10 @@
 # Change Log (go-package-manager)
 
+## 0.23.0
+
+- refactor: `generate project` now runs in a terminal UI
+- fix: `show dependencies` that can now handle big diagram sources as well
+
 ## 0.22.5
 
 - **BREAKING CHANGE**: default AI model for Open AI is `gpt-4o-mini` now

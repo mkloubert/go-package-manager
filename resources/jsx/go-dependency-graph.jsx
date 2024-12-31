@@ -118,6 +118,8 @@ const GoDependencyGraphPage = () => {
 
   React.useEffect(() => {
     mermaid.initialize({
+      securityLevel: 'loose',
+      maxTextSize: 1 * 1024 * 1024 * 1024,  // about "1 GB"
       startOnLoad: false,
       flowchart: {
         useMaxWidth: true,
