@@ -23,6 +23,8 @@ jobs:
             goos: darwin
           - goarch: arm
             goos: darwin
+          - goarch: arm
+            goos: netbsd
         include:
           # Linux
           - goarch: loong64
