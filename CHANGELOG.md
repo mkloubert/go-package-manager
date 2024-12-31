@@ -1,6 +1,6 @@
 # Change Log (go-package-manager)
 
-## 0.25.4
+## 0.25.5
 
 - feat: `publish` command
 - feat: add build for `windows/arm64`

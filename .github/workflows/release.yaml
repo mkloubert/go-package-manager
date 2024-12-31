@@ -47,9 +47,6 @@ jobs:
             goos: linux
           - goarch: s390x
             goos: linux
-          # OpenBSD
-          - goarch: ppc64
-            goos: openbsd
     steps:
       - uses: actions/checkout@v4
       - name: "Update build.go"
