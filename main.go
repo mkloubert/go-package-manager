@@ -94,6 +94,7 @@ func main() {
 	commands.Init_Open_Command(rootCmd, &app)
 	commands.Init_Pack_Command(rootCmd, &app)
 	commands.Init_Prompt_Command(rootCmd, &app)
+	commands.Init_Publish_Command(rootCmd, &app)
 	commands.Init_Pull_Command(rootCmd, &app)
 	commands.Init_Push_Command(rootCmd, &app)
 	commands.Init_Remove_Command(rootCmd, &app)

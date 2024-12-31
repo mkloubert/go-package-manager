@@ -1,5 +1,10 @@
 # Change Log (go-package-manager)
 
+## 0.25.0
+
+- feat: `publish` command
+- fix: `push` command
+
 ## 0.24.0
 
 - feat: `update` command which updates all dependencies of current project

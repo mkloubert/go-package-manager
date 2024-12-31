@@ -25,23 +25,52 @@ package commands
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
-
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
+	"github.com/spf13/cobra"
 )
 
-func Init_Push_Command(parentCmd *cobra.Command, app *types.AppContext) {
+func Init_Publish_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var breaking bool
 	var defaultRemoteOnly bool
-	var withTags bool
+	var feature bool
+	var fix bool
+	var force bool
+	var major int64
+	var minor int64
+	var message string
+	var noBump bool
+	var patch int64
 
-	var pushCmd = &cobra.Command{
-		Use:     "push [remotes]",
-		Aliases: []string{"psh"},
-		Short:   "Push to remotes",
-		Long:    `Push to all git remotes or to specific ones.`,
+	var publishCmd = &cobra.Command{
+		Use:     "publish [remotes]",
+		Aliases: []string{"pub"},
+		Short:   "Publish version",
+		Long:    `Bumps the version of the current project and pushes it to all remote repositories.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			currentBranchName, _ := app.GetCurrentGitBranch()
+
+			if !noBump {
+				pvm := app.NewVersionManager()
+
+				bumpOptions := types.BumpProjectVersionOptions{
+					Breaking: &breaking,
+					Feature:  &feature,
+					Fix:      &fix,
+					Force:    &force,
+					Major:    &major,
+					Message:  &message,
+					Minor:    &minor,
+					Patch:    &patch,
+				}
+
+				newVersion, err := pvm.Bump(bumpOptions)
+				utils.CheckForError(err)
+
+				if newVersion != nil {
+					fmt.Printf("v%s%s", newVersion.String(), fmt.Sprintln())
+				}
+			}
 
 			var remotes []string
 			if len(args) == 0 {
@@ -71,7 +100,7 @@ func Init_Push_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				}
 
 				// then push tags
-				if withTags {
+				{
 					cmdArgs := []string{"git", "push", r, "--tags"}
 
 					app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
@@ -80,10 +109,18 @@ func Init_Push_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
-	pushCmd.Flags().BoolVarP(&defaultRemoteOnly, "default", "d", false, "default / first remote only")
-	pushCmd.Flags().BoolVarP(&withTags, "with-tags", "t", false, "also push tags")
+	publishCmd.Flags().BoolVarP(&breaking, "breaking", "", false, "increase major part by 1")
+	publishCmd.Flags().BoolVarP(&defaultRemoteOnly, "default", "d", false, "default / first remote only")
+	publishCmd.Flags().BoolVarP(&feature, "feature", "", false, "increase minor part by 1")
+	publishCmd.Flags().BoolVarP(&fix, "fix", "", false, "increase patch part by 1")
+	publishCmd.Flags().BoolVarP(&force, "force", "", false, "ignore value of previous version")
+	publishCmd.Flags().Int64VarP(&major, "major", "", -1, "set major part")
+	publishCmd.Flags().StringVarP(&message, "message", "", "", "custom git message")
+	publishCmd.Flags().Int64VarP(&minor, "minor", "", -1, "set minor part")
+	publishCmd.Flags().BoolVarP(&noBump, "no-bump", "", false, "do not bump version")
+	publishCmd.Flags().Int64VarP(&patch, "patch", "", -1, "set patch part")
 
 	parentCmd.AddCommand(
-		pushCmd,
+		publishCmd,
 	)
 }

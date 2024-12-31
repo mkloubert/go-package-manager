@@ -24,9 +24,7 @@ package commands
 
 import (
 	"fmt"
-	"strings"
 
-	"github.com/hashicorp/go-version"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 	"github.com/spf13/cobra"
@@ -48,78 +46,25 @@ func init_bump_version_command(parentCmd *cobra.Command, app *types.AppContext) 
 		Short:   "Bump version",
 		Long:    `Bumps a version number.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			latestVersion, err := app.GetLatestVersion()
+			pvm := app.NewVersionManager()
+
+			bumpOptions := types.BumpProjectVersionOptions{
+				Breaking: &breaking,
+				Feature:  &feature,
+				Fix:      &fix,
+				Force:    &force,
+				Major:    &major,
+				Message:  &message,
+				Minor:    &minor,
+				Patch:    &patch,
+			}
+
+			newVersion, err := pvm.Bump(bumpOptions)
 			utils.CheckForError(err)
 
-			if latestVersion == nil {
-				latestVersion, _ = version.NewVersion("0.0.0")
+			if newVersion != nil {
+				fmt.Printf("v%s%s", newVersion.String(), fmt.Sprintln())
 			}
-
-			segments := latestVersion.Segments64()
-			currentMajor := segments[0]
-			currentMinor := segments[1]
-			currentPatch := segments[2]
-
-			newMajor := currentMajor
-			if major > -1 {
-				newMajor = major
-			}
-			newMinor := currentMinor
-			if minor > -1 {
-				newMinor = minor
-			}
-			newPatch := currentPatch
-			if patch > -1 {
-				newPatch = patch
-			}
-
-			if !breaking && !feature && !fix {
-				// default: 1.2.3 => 1.3.0
-
-				newMinor++
-				newPatch = 0
-			} else {
-				if breaking {
-					newMajor++ // by default e.g.: 1.2.3 => 2.0.0
-					if !feature {
-						newMinor = 0
-					}
-					if !fix {
-						newPatch = 0
-					}
-				}
-				if feature {
-					newMinor++ // by default e.g.: 1.2.3 => 1.3.0
-					if !fix {
-						newPatch = 0
-					}
-				}
-				if fix {
-					newPatch++ // e.g. 1.2.3 => 1.2.4
-				}
-			}
-
-			nextVersion, err := version.NewVersion(
-				fmt.Sprintf(
-					"%v.%v.%v",
-					newMajor, newMinor, newPatch,
-				),
-			)
-			utils.CheckForError(err)
-
-			if !force && nextVersion.LessThanOrEqual(latestVersion) {
-				utils.CloseWithError(fmt.Errorf("new version is not greater than latest one"))
-			}
-
-			gitMessage := strings.TrimSpace(message)
-			if gitMessage == "" {
-				gitMessage = fmt.Sprintf("version %v", nextVersion.String())
-			}
-
-			tagName := fmt.Sprintf("v%v", nextVersion.String())
-			fmt.Println(tagName)
-
-			app.RunShellCommandByArgs("git", "tag", "-a", tagName, "-m", gitMessage)
 		},
 	}
 

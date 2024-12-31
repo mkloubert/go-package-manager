@@ -61,6 +61,8 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short:   "Pack project",
 		Long:    `Packs and zips project files`,
 		Run: func(cmd *cobra.Command, args []string) {
+			pvm := app.NewVersionManager()
+
 			if !noPreScript {
 				_, ok := app.GpmFile.Scripts[constants.PrePackScriptName]
 				if ok {
@@ -76,7 +78,7 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			var latestVersion *ver.Version
 			var err error
 			if customVersion == "" {
-				latestVersion, err = app.GetLatestVersion()
+				latestVersion, err = pvm.GetLatestVersion()
 				utils.CheckForError(err)
 			} else {
 				latestVersion, err = ver.NewVersion(customVersion)

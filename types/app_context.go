@@ -35,7 +35,6 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
-	"github.com/hashicorp/go-version"
 	"github.com/joho/godotenv"
 	"github.com/mkloubert/go-package-manager/utils"
 
@@ -675,32 +674,6 @@ func (app *AppContext) GetGpmFilePath() (string, error) {
 	return path.Join(app.Cwd, "gpm.yaml"), nil
 }
 
-// app.GetLatestVersion() - Returns the latest version based on the Git tags
-// of the current repository or nil if not found.
-func (app *AppContext) GetLatestVersion() (*version.Version, error) {
-	allVersions, err := app.GetVersions()
-	if err != nil {
-		return nil, err
-	}
-
-	var latestVersion *version.Version
-	for _, v := range allVersions {
-		updateVersion := func() {
-			latestVersion = v
-		}
-
-		if latestVersion != nil {
-			if latestVersion.LessThanOrEqual(v) {
-				updateVersion()
-			}
-		} else {
-			updateVersion()
-		}
-	}
-
-	return latestVersion, nil
-}
-
 // app.GetModuleUrls() - returns the list of module urls based on the
 // information from gpm.y(a)ml file
 func (app *AppContext) GetModuleUrls(moduleNameOrUrl string) []string {
@@ -761,26 +734,6 @@ func (app *AppContext) GetSystemAIPrompt(defaultPrompt string) string {
 	}
 
 	return prompt
-}
-
-// app.GetVersions() - Returns all versions represented by Git tags
-// inside the current working directory.
-func (app *AppContext) GetVersions() ([]*version.Version, error) {
-	var versions []*version.Version
-
-	tags, err := app.GetGitTags()
-	if err != nil {
-		return versions, err
-	}
-
-	for _, t := range tags {
-		v, err := version.NewVersion(t)
-		if err == nil {
-			versions = append(versions, v)
-		}
-	}
-
-	return versions, nil
 }
 
 // app.ListFiles() - Lists all files inside the current working directory
@@ -960,6 +913,16 @@ func (app *AppContext) LoadProjectsFileIfExist() bool {
 
 	app.ProjectsFile = projects
 	return true
+}
+
+// app.NewVersionManager() - creates a new `ProjectVersionManager` instance based on
+// this application context
+func (app *AppContext) NewVersionManager() *ProjectVersionManager {
+	pvm := &ProjectVersionManager{
+		app: app,
+	}
+
+	return pvm
 }
 
 // app.RunCurrentProject() - runs the current go project

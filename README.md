@@ -38,6 +38,7 @@
     - [Open alias](#open-alias-)
     - [Open project](#open-project-)
     - [Pack project](#pack-project-)
+    - [Publish new version](#publish-new-version-)
     - [Pull from Git remotes](#pull-from-git-remotes-)
     - [Push to Git remotes](#push-to-git-remotes-)
     - [Remove alias](#remove-alias-)
@@ -423,6 +424,18 @@ will open this URL usually in the browser.
 #### Pack project [<a href="#commands-">↑</a>]
 
 ![AI Chat Demo 1](./img/demos/pack-demo-1.gif)
+
+#### Publish new version [<a href="#commands-">↑</a>]
+
+Running
+
+```bash
+gpm publish
+```
+
+will bump the feature part of the project's current version represented by Git tags.
+
+After this, the code will be pushed to all remotes, including tags as well.
 
 #### Pull from Git remotes [<a href="#commands-">↑</a>]
 
