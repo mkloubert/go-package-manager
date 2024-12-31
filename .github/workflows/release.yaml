@@ -1,12 +1,12 @@
 name: Build binaries for release
 
-on: 
+on:
   release:
     types: [created]
 
 permissions:
-    contents: write
-    packages: write
+  contents: write
+  packages: write
 
 jobs:
   releases-matrix:
@@ -21,29 +21,27 @@ jobs:
             goos: darwin
           - goarch: arm
             goos: darwin
-          - goarch: arm64
-            goos: windows
     steps:
-    - uses: actions/checkout@v4
-    - name: "Update build.go"
-      run: |
-        echo "package main" > ./build.go &&
-        echo "" >> ./build.go &&
-        echo "import \"runtime\"" >> ./build.go &&
-        echo "" >> ./build.go &&
-        echo "const AppVersion = \"$(echo ${GITHUB_REF#refs/tags/} | cut -c 2-)\"" >> ./build.go &&
-        echo "const BuildArch = runtime.GOARCH" >> ./build.go &&
-        echo "const BuildOS = runtime.GOOS" >> ./build.go
-    - uses: wangyoucao577/go-release-action@v1
-      with:
-        retry: 10
-        overwrite: true
-        github_token: ${{ secrets.GH_PAT }}
-        goos: ${{ matrix.goos }}
-        goarch: ${{ matrix.goarch }}
-        goversion: "1.22"
-        md5sum: false
-        sha256sum: true
-        project_path: "./"
-        binary_name: "gpm"
-        extra_files: LICENSE README.md CHANGELOG.md
+      - uses: actions/checkout@v4
+      - name: "Update build.go"
+        run: |
+          echo "package main" > ./build.go &&
+          echo "" >> ./build.go &&
+          echo "import \"runtime\"" >> ./build.go &&
+          echo "" >> ./build.go &&
+          echo "const AppVersion = \"$(echo ${GITHUB_REF#refs/tags/} | cut -c 2-)\"" >> ./build.go &&
+          echo "const BuildArch = runtime.GOARCH" >> ./build.go &&
+          echo "const BuildOS = runtime.GOOS" >> ./build.go
+      - uses: wangyoucao577/go-release-action@v1
+        with:
+          retry: 10
+          overwrite: true
+          github_token: ${{ secrets.GH_PAT }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          goversion: "1.22"
+          md5sum: false
+          sha256sum: true
+          project_path: "./"
+          binary_name: "gpm"
+          extra_files: LICENSE README.md CHANGELOG.md
