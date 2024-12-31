@@ -58,6 +58,7 @@ jobs:
           echo "const AppVersion = \"$(echo ${GITHUB_REF#refs/tags/} | cut -c 2-)\"" >> ./build.go &&
           echo "const BuildArch = runtime.GOARCH" >> ./build.go &&
           echo "const BuildOS = runtime.GOOS" >> ./build.go
+          echo "const BuildCompiler = \"${{ vars.GO_VERSION }}\"" >> ./build.go
       - uses: wangyoucao577/go-release-action@v1
         with:
           retry: 10
@@ -65,7 +66,7 @@ jobs:
           github_token: ${{ secrets.GH_PAT }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          goversion: "1.22"
+          goversion: ${{ vars.GO_VERSION }}
           md5sum: false
           sha256sum: true
           project_path: "./"

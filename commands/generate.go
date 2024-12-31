@@ -250,12 +250,19 @@ You can use any popular module if needed as well if I does want something else.`
 					}
 
 					if len(modulesToInstall) > 0 {
+						compilerVersion, err := app.GetCurrentCompilerVersion()
+
+						goCompiler := "0.0.0"
+						if err == nil && compilerVersion != nil {
+							goCompiler = compilerVersion.String()
+						}
+
 						goModContent := fmt.Sprintf(`module %s
 
-go 1.22.0
+go %s
 
 require (
-`, projectUrl)
+`, projectUrl, goCompiler)
 
 						for modUrl := range modulesToInstall {
 							goModContent = goModContent + fmt.Sprintf(`%v%v latest

@@ -32,7 +32,7 @@ jobs:
           sudo apt-get install -y pandoc
       - name: Install Go
         run: |
-          GO_VERSION=1.22.0
+          GO_VERSION=${{ vars.GO_VERSION }}
           wget https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz
           sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
           export PATH=$PATH:/usr/local/go/bin

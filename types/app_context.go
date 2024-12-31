@@ -32,9 +32,11 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 	"strings"
 
 	"github.com/goccy/go-yaml"
+	"github.com/hashicorp/go-version"
 	"github.com/joho/godotenv"
 	"github.com/mkloubert/go-package-manager/utils"
 
@@ -482,6 +484,74 @@ func (app *AppContext) GetBinFolderPath() (string, error) {
 		return binPath, nil
 	}
 	return "", nil
+}
+
+// app.GetCurrentCompilerVersion() - tries to detect the current Go compiler
+// version that should be used
+func (app *AppContext) GetCurrentCompilerVersion() (*version.Version, error) {
+	app.Debug("Checking for version in 'go.mod' file ...")
+
+	// first try detect in `go.mod` of current directory
+	goModFile := app.GetFullPathOrDefault("go.mod", "")
+	if goModFile != "" {
+		doesGoModExist, err := utils.IsFileExisting(goModFile)
+		if err == nil && doesGoModExist {
+			goModContent, err := os.ReadFile(goModFile)
+			if err == nil {
+				var versionInGoMod *version.Version = nil
+
+				// search for line with `go <version>`
+				for _, line := range strings.Split(string(goModContent), "\n") {
+					trimmedLine := strings.TrimSpace(line)
+					if !strings.HasPrefix(trimmedLine, "go ") {
+						continue
+					}
+
+					maybeVersion := strings.TrimSpace(trimmedLine[3:])
+					ver, err := version.NewVersion(maybeVersion)
+					if err == nil {
+						versionInGoMod = ver
+					}
+
+					// found => stop here, even if failed
+					break
+				}
+
+				if versionInGoMod != nil {
+					// take from go.mod
+					return versionInGoMod, nil
+				}
+			}
+		}
+	}
+
+	// now try via `go version`
+	app.Debug("Running 'go version' ...")
+
+	p := exec.Command("go", "version")
+	p.Env = os.Environ()
+	p.Dir = app.Cwd
+
+	output, err := p.Output()
+	if err == nil {
+		versionOutput := strings.TrimSpace(string(output))
+		fields := strings.Fields(versionOutput)
+		if len(fields) > 2 {
+			ver, err := version.NewVersion(fields[2][2:])
+			if err == nil {
+				return ver, nil // from `go version`
+			}
+		}
+	}
+
+	app.Debug("Try get version from 'runtime.Version()' ...")
+	runtimeVersion := runtime.Version()
+	ver, err := version.NewVersion(runtimeVersion[2:])
+	if err == nil {
+		return ver, nil // from `runtime.Version()`
+	}
+
+	return nil, fmt.Errorf("could not detect Go compiler version")
 }
 
 // app.GetCurrentGitBranch() - returns the name of the current branch using git command

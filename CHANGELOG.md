@@ -1,5 +1,10 @@
 # Change Log (go-package-manager)
 
+## 0.26.0
+
+- feat: automatic Go compiler detection in `generate project` command
+- refactor: using Go compiler `1.23.4`
+
 ## 0.25.5
 
 - feat: `publish` command
