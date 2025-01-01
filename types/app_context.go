@@ -843,8 +843,6 @@ func (app *AppContext) ListFiles() ([]string, error) {
 		}
 	}
 
-	matchingFiles = nil
-
 	return files, nil
 }
 

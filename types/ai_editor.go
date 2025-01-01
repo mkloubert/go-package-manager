@@ -740,7 +740,7 @@ func (e *AIEditor) UpdateFileTree(fileItems []AIEditorFileItem) []*AIEditorFileT
 		roots = append(roots, node)
 	}
 
-	// sort recursivly
+	// sort recursively
 	sort_ai_editor_file_nodes(roots)
 
 	// set new data and update view

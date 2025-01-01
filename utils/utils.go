@@ -440,8 +440,6 @@ func RemoveDuplicatesInStringList(arr []string) []string {
 		}
 	}
 
-	alreadySeen = nil
-
 	return result
 }
 
