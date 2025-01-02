@@ -22,11 +22,25 @@
 
 package utils
 
-import "runtime"
+import (
+	"runtime"
+)
 
 // IsMacOS() - checks if current operating system is MacOS or not
 func IsMacOS() bool {
 	return runtime.GOOS == "darwin"
+}
+
+// IsPOSIXLikeOS() - checks if current operating system is POSIX-like system or not
+func IsPOSIXLikeOS() bool {
+	supportedSystems := []string{"aix", "darwin", "dragonfly", "freebsd", "illumos", "linux", "netbsd", "openbsd", "solaris"}
+	for _, o := range supportedSystems {
+		if o == runtime.GOOS {
+			return true
+		}
+	}
+
+	return false
 }
 
 // IsWindows() - checks if current operating system is Microsoft Windows or not

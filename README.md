@@ -11,6 +11,7 @@
   - [MacOS / Linux / UNIX](#macos--linux--unix-)
   - [Windows](#windows-)
   - [Build from source](#build-from-source-)
+- [Updates](#updates-)
 - [Usage](#usage-)
   - [Commands](#commands-)
     - [Add alias](#add-alias-)
@@ -109,6 +110,16 @@ git clone https://github.com/mkloubert/go-package-manager.git -o gpm
 cd gpm
 go build . && ./gpm --version
 ```
+
+## Updates [<a href="#installation-">↑</a>]
+
+A self-update works with
+
+```bash
+gpm update --self
+```
+
+if you have a valid [sh](https://en.wikipedia.org/wiki/Unix_shell) or [PowerShell](https://en.wikipedia.org/wiki/PowerShell) installed.
 
 ## Usage [<a href="#table-of-contents">↑</a>]
 
@@ -692,6 +703,7 @@ Environment variables can be loaded from external files, which are handled in th
 | `GPM_TERMINAL_FORMATTER`  | Default formatter for syntax highlighting in terminal. See [chroma project](https://github.com/alecthomas/chroma/tree/master/formatters) for more information. | `terminal16m`                                                                |
 | `GPM_TERMINAL_STYLE`      | Default style for syntax highlighting in terminal. See [chroma project](https://github.com/alecthomas/chroma/tree/master/styles) for more information.         | `monokai`                                                                    |
 | `GPM_UP_COMMAND`          | Custom command for [docker compose up](#docker-shorthands-) shorthand.                                                                                         | `docker-compose up`                                                          |
+| `GPM_UPDATE_SCRIPT`       | Custom URL to self-update script                                                                                                                               | `sh.kloubert.dev/gpm.sh`                                                     |
 | `OPENAI_API_KEY`          | Key which is used for the [API by OpenAI](https://platform.openai.com/docs/api-reference).                                                                     | `sk-...`                                                                     |
 
 ## Contribution [<a href="#table-of-contents">↑</a>]

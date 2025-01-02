@@ -7,6 +7,8 @@ aliases:
     - https://github.com/fatih/color
   dotenv:
     - https://github.com/joho/godotenv
+  fake-useragent:
+    - https://github.com/eddycjy/fake-useragent
   glamour:
     - github.com/charmbracelet/glamour
   mongo:

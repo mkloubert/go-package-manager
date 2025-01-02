@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.29.0
+
+- feat: self-update by executing `gpm update --self`
+
 ## 0.28.0
 
 - **BREAKING CHANGE**: `bump version` command is now reduced to simple `bump`

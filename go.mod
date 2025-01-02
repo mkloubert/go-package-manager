@@ -3,6 +3,7 @@ module github.com/mkloubert/go-package-manager
 go 1.23.4
 
 require (
+	github.com/EDDYCJY/fake-useragent v0.2.0
 	github.com/alecthomas/chroma v0.10.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/briandowns/spinner v1.23.1
@@ -22,7 +23,9 @@ require (
 )
 
 require (
+	github.com/PuerkitoBio/goquery v1.10.1 // indirect
 	github.com/alecthomas/chroma/v2 v2.14.0 // indirect
+	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
