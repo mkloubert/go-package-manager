@@ -121,6 +121,8 @@ gpm update --self
 
 if you have a valid [sh](https://en.wikipedia.org/wiki/Unix_shell) or [PowerShell](https://en.wikipedia.org/wiki/PowerShell) installed.
 
+You are able to customize final directory with `GPM_BIN_PATH`, which is `C:\Program Files\gpm` on Windows and `/usr/local/bin` on POSIX-like systems by default e.g.
+
 ## Usage [<a href="#table-of-contents">↑</a>]
 
 ### Commands [<a href="#usage-">↑</a>]

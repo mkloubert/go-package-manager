@@ -9,12 +9,10 @@ function Handle-Error {
 Write-Host "Go Package Manager Updater"
 Write-Host ""
 
-# Detect the operating system
 $OS = "windows"
 
 Write-Host "Your operating system: $OS"
 
-# Detect the system architecture
 $ARCH = $null
 switch ([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture) {
     "X64" { $ARCH = "amd64" }
@@ -95,8 +93,11 @@ try {
     Handle-Error "Could not extract 'gpm.exe' binary"
 }
 
-# Prompt for installation directory
-$DefaultDestination = "C:\\Program Files\\gpm\\gpm.exe"
+$DefaultDestination = $env:GPM_BIN_PATH
+if ([string]::IsNullOrWhiteSpace($DefaultDestination)) {
+    $DefaultDestination = "C:\\Program Files\\gpm\\gpm.exe"
+}
+
 $Destination = Read-Host "Enter the installation directory (Press Enter to use the default: $DefaultDestination)"
 if ([string]::IsNullOrWhiteSpace($Destination)) {
     $Destination = $DefaultDestination

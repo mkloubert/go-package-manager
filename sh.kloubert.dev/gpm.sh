@@ -8,6 +8,8 @@ handle_error() {
 echo "Go Package Manager Updater"
 echo ""
 
+GPM_BIN_PATH=${GPM_BIN_PATH:-/usr/local/bin}
+
 case "$(uname -s)" in
     Darwin)
         OS="darwin"
@@ -87,9 +89,9 @@ shasum -a 256 gpm.tar.gz.sha256 || handle_error "SHA256 verification failed"
 echo "Extracting binary ..."
 tar -xzOf gpm.tar.gz gpm > gpm || handle_error "Could not extract 'gpm' binary"
 
-echo "Installing 'gpm' to /usr/local/bin ..."
-sudo mv gpm /usr/local/bin/gpm || handle_error "Could not move 'gpm' to '/usr/local/bin'"
-sudo chmod +x /usr/local/bin/gpm || handle_error "Could not update permissions of 'gpm' binary"
+echo "Installing 'gpm' to $GPM_BIN_PATH ..."
+sudo mv gpm "$GPM_BIN_PATH/gpm" || handle_error "Could not move 'gpm' to '$GPM_BIN_PATH'"
+sudo chmod +x "$GPM_BIN_PATH/gpm" || handle_error "Could not update permissions of 'gpm' binary"
 
 echo "Cleaning up ..."
 rm gpm.tar.gz gpm.tar.gz.sha256 || handle_error "Cleanups failed"
