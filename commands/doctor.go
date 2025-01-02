@@ -114,12 +114,17 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 								fmt.Println()
 
+								// cleanups and extract direct items
 								directItems := make([]GoModFileRequireItem, 0)
 								for _, item := range goMod.Require {
+									item.Path = strings.TrimSpace(item.Path)
+									item.Version = strings.TrimSpace(item.Version)
+
 									if item.Indirect == nil || !*item.Indirect {
 										directItems = append(directItems, item)
 									}
 								}
+
 								if len(directItems) > 0 {
 									fmt.Println("Checking dependencies for up-to-dateness ...")
 									for i, item := range directItems {
