@@ -117,7 +117,7 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 								// cleanups and extract direct items
 								directItems := make([]GoModFileRequireItem, 0)
 								for _, item := range goMod.Require {
-									item.Path = strings.TrimSpace(item.Path)
+									item.Path = strings.TrimSpace(strings.ToLower(item.Path))
 									item.Version = strings.TrimSpace(item.Version)
 
 									if item.Indirect == nil || !*item.Indirect {
@@ -425,7 +425,7 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					if varValue != "" {
 						fmt.Printf("\t[%s] %s is set: %s%s", green("✓"), varName, varValue, fmt.Sprintln())
 					} else {
-						fmt.Printf("\t[%s] %s is not set%s", red("!"), varName, fmt.Sprintln())
+						fmt.Printf("\t[%s] %s is not set%s", yellow("⚠️"), varName, fmt.Sprintln())
 					}
 				}
 			}
