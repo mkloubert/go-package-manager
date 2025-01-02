@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init_bump_version_command(parentCmd *cobra.Command, app *types.AppContext) {
+func Init_Bump_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var breaking bool
 	var feature bool
 	var fix bool
@@ -40,9 +40,9 @@ func init_bump_version_command(parentCmd *cobra.Command, app *types.AppContext) 
 	var message string
 	var patch int64
 
-	var versionCmd = &cobra.Command{
-		Use:     "version",
-		Aliases: []string{"v", "ver"},
+	var bumpVersionCmd = &cobra.Command{
+		Use:     "bump",
+		Aliases: []string{"bp", "bmp"},
 		Short:   "Bump version",
 		Long:    `Bumps a version number.`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -68,34 +68,16 @@ func init_bump_version_command(parentCmd *cobra.Command, app *types.AppContext) 
 		},
 	}
 
-	versionCmd.Flags().BoolVarP(&breaking, "breaking", "", false, "increase major part by 1")
-	versionCmd.Flags().BoolVarP(&feature, "feature", "", false, "increase minor part by 1")
-	versionCmd.Flags().BoolVarP(&fix, "fix", "", false, "increase patch part by 1")
-	versionCmd.Flags().BoolVarP(&force, "force", "", false, "ignore value of previous version")
-	versionCmd.Flags().Int64VarP(&major, "major", "", -1, "set major part")
-	versionCmd.Flags().StringVarP(&message, "message", "", "", "custom git message")
-	versionCmd.Flags().Int64VarP(&minor, "minor", "", -1, "set minor part")
-	versionCmd.Flags().Int64VarP(&patch, "patch", "", -1, "set patch part")
+	bumpVersionCmd.Flags().BoolVarP(&breaking, "breaking", "", false, "increase major part by 1")
+	bumpVersionCmd.Flags().BoolVarP(&feature, "feature", "", false, "increase minor part by 1")
+	bumpVersionCmd.Flags().BoolVarP(&fix, "fix", "", false, "increase patch part by 1")
+	bumpVersionCmd.Flags().BoolVarP(&force, "force", "", false, "ignore value of previous version")
+	bumpVersionCmd.Flags().Int64VarP(&major, "major", "", -1, "set major part")
+	bumpVersionCmd.Flags().StringVarP(&message, "message", "", "", "custom git message")
+	bumpVersionCmd.Flags().Int64VarP(&minor, "minor", "", -1, "set minor part")
+	bumpVersionCmd.Flags().Int64VarP(&patch, "patch", "", -1, "set patch part")
 
 	parentCmd.AddCommand(
-		versionCmd,
-	)
-}
-
-func Init_Bump_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var bumpCmd = &cobra.Command{
-		Use:     "bump",
-		Aliases: []string{"bp", "bmp"},
-		Short:   "Bump resource",
-		Long:    `Bumps a resource like a version.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
-	}
-
-	init_bump_version_command(bumpCmd, app)
-
-	parentCmd.AddCommand(
-		bumpCmd,
+		bumpVersionCmd,
 	)
 }

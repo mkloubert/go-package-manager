@@ -11,6 +11,8 @@ aliases:
     - github.com/charmbracelet/glamour
   mongo:
     - https://go.mongodb.org/mongo-driver/mongo
+  now:
+    - https://github.com/jinzhu/now
   pretty:
     - https://github.com/jedib0t/go-pretty/v6/list
     - https://github.com/jedib0t/go-pretty/v6/progress

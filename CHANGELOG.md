@@ -1,5 +1,10 @@
 # Change Log (go-package-manager)
 
+## 0.28.0
+
+- **BREAKING CHANGE**: `bump version` command is now reduced to simple `bump`
+- feat: additional checks like environment variables and unsed modules by `doctor` command
+
 ## 0.27.0
 
 - **BREAKING CHANGE**: remove `audit` command

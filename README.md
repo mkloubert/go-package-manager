@@ -183,7 +183,7 @@ will run `go build .` in the current directory or the `build` script in [gpm.yam
 The simple execution of
 
 ```bash
-gpm bump version
+gpm bump
 ```
 
 will detect the latest version of the underlying repository from [Git tags](https://git-scm.com/book/en/v2/Git-Basics-Tagging) and then upgrade the minor part only, e.g. `1.2.4` => `1.3.0`. Finally a new Git tag is created in the format `v1.3.0`.

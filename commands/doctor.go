@@ -28,6 +28,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"os/exec"
 	"sort"
 	"strings"
@@ -188,6 +189,35 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 											s.Stop()
 
 											fmt.Printf("\t[%s] Version of '%s' is invalid: %s%s", red("!"), item.Path, err.Error(), fmt.Sprintln())
+										}
+									}
+									fmt.Println()
+
+									fmt.Println("Checking for unsed dependencies ...")
+									for i, item := range goMod.Require {
+										s := spinner.New(spinner.CharSets[24], 100*time.Millisecond)
+										s.Prefix = "\t["
+										s.Suffix = fmt.Sprintf("] Checking '%s' (%v/%v) ...", item.Path, i+1, len(goMod.Require))
+										s.Start()
+
+										p := exec.Command("go", "mod", "why", "-m", item.Path)
+										p.Dir = app.Cwd
+										p.Stderr = nil
+										p.Stdin = nil
+										p.Stdout = nil
+										output, err := p.Output()
+
+										s.Stop()
+
+										if err == nil {
+											strOutput := string(output)
+											if strings.Contains(strOutput, fmt.Sprintf("module does not need module %s)", item.Path)) {
+												fmt.Printf("\t[%s] Module '%s' is not used, run 'gpm uninstall %s' or a single 'gpm tidy' to fix this%s", red("!"), item.Path, item.Path, fmt.Sprintln())
+											} else {
+												fmt.Printf("\t[%s] '%s' has no known issues%s", green("✓"), item.Path, fmt.Sprintln())
+											}
+										} else {
+											fmt.Printf("\t[%s] Check failed for '%s':%s%s", red("!"), item.Path, err.Error(), fmt.Sprintln())
 										}
 									}
 									fmt.Println()
@@ -377,6 +407,21 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				} else {
 					fmt.Printf("[%s] Could not check go.mod file: %s%s", yellow("⚠️"), err.Error(), fmt.Sprintln())
 					fmt.Println()
+				}
+			}
+
+			fmt.Println("Environment variables ...")
+			{
+				vars := make([]string, 0)
+				vars = append(vars, "GOPATH", "GOROOT", "GOPROXY")
+
+				for _, varName := range vars {
+					varValue := os.Getenv(varName)
+					if varValue != "" {
+						fmt.Printf("\t[%s] %s is set: %s%s", green("✓"), varName, varValue, fmt.Sprintln())
+					} else {
+						fmt.Printf("\t[%s] %s is not set%s", red("!"), varName, fmt.Sprintln())
+					}
 				}
 			}
 		},
