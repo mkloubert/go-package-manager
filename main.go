@@ -75,12 +75,12 @@ func main() {
 
 	// initialize commands
 	commands.Init_Add_Command(rootCmd, &app)
-	commands.Init_Audit_Command(rootCmd, &app)
 	commands.Init_Build_Command(rootCmd, &app)
 	commands.Init_Bump_Command(rootCmd, &app)
 	commands.Init_Chat_Command(rootCmd, &app)
 	commands.Init_Checkout_Command(rootCmd, &app)
 	commands.Init_Diff_Command(rootCmd, &app)
+	commands.Init_Doctor_Command(rootCmd, &app)
 	commands.Init_Down_Command(rootCmd, &app)
 	commands.Init_Exec_Command(rootCmd, &app)
 	commands.Init_Generate_Command(rootCmd, &app)

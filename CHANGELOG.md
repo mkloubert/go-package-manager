@@ -1,5 +1,10 @@
 # Change Log (go-package-manager)
 
+## 0.27.0
+
+- **BREAKING CHANGE**: remove `audit` command
+- feat: `doctor` command
+
 ## 0.26.2
 
 - feat: automatic Go compiler detection in `generate project` command

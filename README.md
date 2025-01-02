@@ -17,12 +17,12 @@
     - [Add project](#add-project-)
     - [AI chat](#ai-chat-)
     - [AI prompt](#ai-prompt-)
-    - [Audit dependencies](#audit-dependencies-)
     - [Build and install executable](#build-and-install-executable-)
     - [Build project](#build-project-)
     - [Bump version](#bump-version-)
     - [Checkout branch](#checkout-branch-)
       - [Branch aliases](#branch-aliases-)
+    - [Checkup project](#checkup-project-)
     - [Cleanup project](#cleanup-project-)
     - [Compare code changes](#compare-code-changes-)
     - [Docker shorthands](#docker-shorthands-)
@@ -158,10 +158,6 @@ the repository will be cloned to `react-spa-template` subfolder, then its `.git`
 
 ![AI Prompt Demo 1](./img/demos/ai-prompt-demo-1.gif)
 
-#### Audit dependencies [<a href="#commands-">↑</a>]
-
-![Audit Demo 1](./img/demos/audit-demo-1.gif)
-
 #### Build and install executable [<a href="#commands-">↑</a>]
 
 ```bash
@@ -239,6 +235,12 @@ gpm checkout :foo
 ```
 
 Keep in mind: If you have no value for an alias defined, `gpm` will take its name as fallback!
+
+#### Checkup project [<a href="#commands-">↑</a>]
+
+The following demo shows how `gpm doctor` works:
+
+![Doctor demo 1](./img/demos/doctor-demo-1.gif)
 
 #### Cleanup project [<a href="#commands-">↑</a>]
 
