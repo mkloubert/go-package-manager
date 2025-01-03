@@ -120,7 +120,7 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 								for _, item := range goMod.Require {
 									refItem := &item
 
-									refItem.Path = strings.TrimSpace(strings.ToLower(refItem.Path))
+									refItem.Path = strings.TrimSpace(refItem.Path)
 									refItem.Version = strings.TrimSpace(refItem.Version)
 
 									allItems = append(allItems, refItem)
@@ -139,7 +139,7 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 										thisVersion, err := version.NewVersion(strings.TrimSpace(item.Version))
 										if err == nil {
-											url := fmt.Sprintf("https://proxy.golang.org/%s/@latest", item.Path)
+											url := fmt.Sprintf("https://proxy.golang.org/%s/@latest", strings.ToLower(item.Path))
 											req, err := http.NewRequest("GET", url, bytes.NewBuffer([]byte{}))
 											if err == nil {
 												client := &http.Client{}
