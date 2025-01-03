@@ -114,14 +114,18 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 								fmt.Println()
 
-								// cleanups and extract direct items
-								directItems := make([]GoModFileRequireItem, 0)
+								// cleanups and extract items as references
+								allItems := make([]*GoModFileRequireItem, 0)
+								directItems := make([]*GoModFileRequireItem, 0)
 								for _, item := range goMod.Require {
-									item.Path = strings.TrimSpace(strings.ToLower(item.Path))
-									item.Version = strings.TrimSpace(item.Version)
+									refItem := &item
 
-									if item.Indirect == nil || !*item.Indirect {
-										directItems = append(directItems, item)
+									refItem.Path = strings.TrimSpace(strings.ToLower(refItem.Path))
+									refItem.Version = strings.TrimSpace(refItem.Version)
+
+									allItems = append(allItems, refItem)
+									if refItem.Indirect == nil || !*refItem.Indirect {
+										directItems = append(directItems, refItem)
 									}
 								}
 
@@ -199,10 +203,10 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 									fmt.Println()
 
 									fmt.Println("Checking for unsed dependencies ...")
-									for i, item := range goMod.Require {
+									for i, item := range allItems {
 										s := spinner.New(spinner.CharSets[24], 100*time.Millisecond)
 										s.Prefix = "\t["
-										s.Suffix = fmt.Sprintf("] Checking '%s' (%v/%v) ...", item.Path, i+1, len(goMod.Require))
+										s.Suffix = fmt.Sprintf("] Checking '%s' (%v/%v) ...", item.Path, i+1, len(allItems))
 										s.Start()
 
 										p := exec.Command("go", "mod", "why", "-m", item.Path)
@@ -228,10 +232,10 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 									fmt.Println()
 
 									fmt.Println("Checking all dependencies for security issues ...")
-									for i, item := range goMod.Require {
+									for i, item := range allItems {
 										s := spinner.New(spinner.CharSets[24], 100*time.Millisecond)
 										s.Prefix = "\t["
-										s.Suffix = fmt.Sprintf("] Checking '%s' (%v/%v) ...", item.Path, i+1, len(goMod.Require))
+										s.Suffix = fmt.Sprintf("] Checking '%s' (%v/%v) ...", item.Path, i+1, len(allItems))
 										s.Start()
 
 										url := "https://api.osv.dev/v1/query"
