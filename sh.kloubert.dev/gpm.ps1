@@ -25,8 +25,6 @@ switch ([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture
     }
 }
 
-$ARCH = "386"
-
 Write-Host "Your architecture: $ARCH"
 Write-Host ""
 
