@@ -9,9 +9,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - name: Extract commit author information
         id: author_info
         run: |
@@ -19,7 +19,7 @@ jobs:
           COMMIT_AUTHOR_EMAIL=$(git log -1 --pretty=format:'%ae')
           echo "AUTHOR_NAME=$COMMIT_AUTHOR_NAME" >> $GITHUB_ENV
           echo "AUTHOR_EMAIL=$COMMIT_AUTHOR_EMAIL" >> $GITHUB_ENV
-      - name: Set up Git
+      - name: Setup Git
         run: |
           git config --global user.name "${{ env.AUTHOR_NAME }}"
           git config --global user.email "${{ env.AUTHOR_EMAIL }}"
@@ -31,12 +31,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pandoc
       - name: Install Go
-        run: |
-          GO_VERSION=${{ vars.GO_VERSION }}
-          wget https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz
-          sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
-          export PATH=$PATH:/usr/local/go/bin
-          go version
+        uses: actions/setup-go@v5.2.0
+        with:
+          go-version: ${{ vars.GO_VERSION }}
       - name: Build documentation as Markdown
         run: |
           go run . run docs
@@ -67,7 +64,7 @@ jobs:
       - name: Check docs directory contents
         run: sudo ls -al docs
       - name: Upload directory
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}
@@ -76,7 +73,7 @@ jobs:
           source: "docs"
           target: ${{ secrets.SSH_SOURCEDIR }}
       - name: Move to target
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}

@@ -11,7 +11,7 @@ permissions:
 jobs:
   releases-matrix:
     name: Release Go binaries
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         goos: [darwin, freebsd, linux, netbsd, openbsd, windows]
@@ -48,7 +48,7 @@ jobs:
           - goarch: s390x
             goos: linux
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - name: "Update build.go"
         run: |
           echo "package main" > ./build.go &&
