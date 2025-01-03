@@ -1,6 +1,6 @@
 # Change Log (go-package-manager)
 
-## 0.29.8
+## 0.29.9
 
 - feat: self-update by executing `gpm update --self`
 - chore: improve (self-)update scripts
