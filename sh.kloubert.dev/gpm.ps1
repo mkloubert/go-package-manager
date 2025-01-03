@@ -93,7 +93,7 @@ try {
     Handle-Error "Could not extract 'gpm.exe' binary"
 }
 
-$DefaultDestination = $env:GPM_BIN_PATH
+$DefaultDestination = $env:GPM_INSTALL_PATH
 if ([string]::IsNullOrWhiteSpace($DefaultDestination)) {
     $DefaultDestination = "C:\\Program Files\\gpm\\gpm.exe"
 }
