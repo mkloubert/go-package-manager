@@ -26,6 +26,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	mathRand "math/rand"
 	"net/http"
 	"net/url"
 	"os"
@@ -163,6 +164,11 @@ func EnsureMaxSliceLength[T any](slice []T, maxLength int) []T {
 		return slice[0:maxLength]
 	}
 	return slice
+}
+
+// GenerateRandomUint16() - creates a new random uint16 value
+func GenerateRandomUint16() uint16 {
+	return uint16(mathRand.Intn(1 << 16)) // 1 << 16 is 65536, the range of uint16
 }
 
 // GetAIChatTemperature() - returns the value for AI chat conversation temperature
@@ -406,6 +412,22 @@ func ListFiles(dir string, pattern string) ([]string, error) {
 		return nil
 	})
 	return matchingFiles, err
+}
+
+// MaxUint16() - returns the maximum uint16 value
+func MaxUint16(a, b uint16, more ...uint16) uint16 {
+	var result uint16 = b
+	if a > b {
+		result = a
+	}
+
+	for _, c := range more {
+		if c > result {
+			result = c
+		}
+	}
+
+	return result
 }
 
 // OpenUrl() - opens a URL by the default application handler

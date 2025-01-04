@@ -34,6 +34,8 @@ aliases:
     - https://github.com/gizak/termui/v3
   tview:
     - https://github.com/rivo/tview
+  uuid:
+    - github.com/google/uuid
   version:
     - https://github.com/hashicorp/go-version
   yaml:

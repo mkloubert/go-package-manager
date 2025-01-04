@@ -13,6 +13,7 @@ require (
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/gizak/termui/v3 v3.1.0
 	github.com/goccy/go-yaml v1.15.13
+	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-version v1.7.0
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/joho/godotenv v1.5.1

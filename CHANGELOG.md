@@ -1,5 +1,10 @@
 # Change Log (go-package-manager)
 
+## 0.31.0
+
+- feat: `generate password` command
+- feat: `generate uuid` command
+
 ## 0.30.0
 
 - feat: `gpm update` now supports update of specific modules as well

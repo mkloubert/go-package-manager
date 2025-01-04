@@ -29,6 +29,7 @@
     - [Docker shorthands](#docker-shorthands-)
     - [Execute shell command](#execute-shell-command-)
     - [Generate documentation](#generate-documentation-)
+    - [Generate passwords or UUIDs](#generate-passwords-or-uuids-)
     - [Generate project](#generate-project-)
     - [Import aliases](#import-aliases-)
     - [Import projects](#import-projects-)
@@ -311,6 +312,20 @@ Once all steps are completed, the AI generates a summary in the standard output.
 The following video does demonstrate this (keep in mind: replace replace `go run . <...>` with `gpm <...>` later):
 
 ![Generate project demo 1](./img/demos/generate-project-demo-1.gif)
+
+#### Generate passwords or UUIDs [<a href="#commands-">↑</a>]
+
+To generate passwords or UUIDs/GUIDs simply run
+
+```bash
+gpm generate password
+```
+
+or
+
+```bash
+gpm generate uuid
+```
 
 #### Import aliases [<a href="#commands-">↑</a>]
 
