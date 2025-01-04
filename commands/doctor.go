@@ -116,7 +116,6 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 								// cleanups and extract items as references
 								allItems := make([]*GoModFileRequireItem, 0)
-								directItems := make([]*GoModFileRequireItem, 0)
 								for _, item := range goMod.Require {
 									refItem := &item
 
@@ -124,17 +123,14 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 									refItem.Version = strings.TrimSpace(refItem.Version)
 
 									allItems = append(allItems, refItem)
-									if refItem.Indirect == nil || !*refItem.Indirect {
-										directItems = append(directItems, refItem)
-									}
 								}
 
-								if len(directItems) > 0 {
+								if len(allItems) > 0 {
 									fmt.Println("Checking dependencies for up-to-dateness ...")
-									for i, item := range directItems {
+									for i, item := range allItems {
 										s := spinner.New(spinner.CharSets[24], 100*time.Millisecond)
 										s.Prefix = "\t["
-										s.Suffix = fmt.Sprintf("] Checking '%s' (%v/%v) ...", item.Path, i+1, len(directItems))
+										s.Suffix = fmt.Sprintf("] Checking '%s' (%v/%v) ...", item.Path, i+1, len(allItems))
 										s.Start()
 
 										thisVersion, err := version.NewVersion(strings.TrimSpace(item.Version))

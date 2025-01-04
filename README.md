@@ -585,6 +585,14 @@ gpm update
 
 is a short version of `go get -u ./... && go mod tidy` and will update all dependencies.
 
+On the other hand, you are able to run something like
+
+```bash
+gpm update github.com/alecthomas/chroma yaml
+```
+
+to update specific ones. Each argument can be a module URL or [alias](#add-alias-).
+
 ## Setup AI [<a href="#table-of-contents">↑</a>]
 
 If you would like to use AI feature, like suggestion of branch names, you can setup one of the following APIs:

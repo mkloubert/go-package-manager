@@ -1,5 +1,12 @@
 # Change Log (go-package-manager)
 
+## 0.30.0
+
+- feat: `gpm update` now supports update of specific modules as well
+- fix: using `TidyUp()` method from `AppContext` instead raw `go mod tidy`
+- refactor: `gpm doctor` now checks all dependencies for up-to-dateness
+- refactor: code cleanups and improvements
+
 ## 0.29.10
 
 - feat: self-update by executing `gpm update --self`

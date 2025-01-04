@@ -418,12 +418,7 @@ require (
 					}
 
 					// cleanup project
-					p = utils.CreateShellCommandByArgs("go", "mod", "tidy")
-					p.Dir = outDir
-					p.Stdout = nil
-					p.Stderr = nil
-					app.Debug(fmt.Sprintf("Cleanup project '%s' ...", projectUrl))
-					utils.RunCommand(p)
+					app.TidyUp()
 
 					// output final summary
 					out, _ := glamour.Render(lastResponse.FinalSummary, "dark")

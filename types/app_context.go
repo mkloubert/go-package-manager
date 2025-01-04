@@ -745,7 +745,7 @@ func (app *AppContext) GetGpmFilePath() (string, error) {
 }
 
 // app.GetModuleUrls() - returns the list of module urls based on the
-// information from gpm.y(a)ml file
+// information from aliases.y(a)ml file if possible
 func (app *AppContext) GetModuleUrls(moduleNameOrUrl string) []string {
 	moduleNameOrUrl = utils.CleanupModuleName(moduleNameOrUrl)
 
