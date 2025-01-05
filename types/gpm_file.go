@@ -23,6 +23,7 @@
 package types
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/goccy/go-yaml"
@@ -33,6 +34,31 @@ type GpmFile struct {
 	Files   []string          `yaml:"files,omitempty"`   // whitelist of file patterns which are used by pack command for example
 	Name    string            `yaml:"name,omitempty"`    // the name
 	Scripts map[string]string `yaml:"scripts,omitempty"` // one or more scripts
+}
+
+// GetFilesSectionByEnvSafe() - will return environment specific `files` section in `gpm.yaml`
+// file, if exists, otherwise the default one
+func (g *GpmFile) GetFilesSectionByEnvSafe(envName string) []string {
+	if envName != "" {
+		data, err := yaml.Marshal(g)
+		if err == nil {
+			var gpmFileAsMap map[string]interface{}
+			err := yaml.Unmarshal(data, &gpmFileAsMap)
+
+			if err == nil && gpmFileAsMap != nil {
+				key := fmt.Sprintf("files:%s", envName)
+
+				maybeArray, ok := gpmFileAsMap[key]
+				if ok && maybeArray != nil {
+					files, ok := maybeArray.([]string)
+					if ok && files != nil {
+						return files
+					}
+				}
+			}
+		}
+	}
+	return g.Files
 }
 
 // LoadGpmFile() - Loads a gpm.yaml file via a file path

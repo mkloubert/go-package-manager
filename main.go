@@ -53,16 +53,22 @@ func main() {
 	app.Cwd = cwd
 	app.IsCI = strings.TrimSpace(strings.ToLower(os.Getenv("CI"))) == "true"
 
+	// use "aliases-file flag" everywhere
+	rootCmd.PersistentFlags().StringVarP(&app.AliasesFilePath, "aliases-file", "", "", "custom aliases file")
 	// use "environment flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.Environment, "environment", "", "", "name of the environment")
 	// use "env-file flag" everywhere
 	rootCmd.PersistentFlags().StringArrayVarP(&app.EnvFiles, "env-file", "e", []string{}, "one or more environment files")
+	// use "gpm-root flag" everywhere
+	rootCmd.PersistentFlags().StringVarP(&app.GpmRootPath, "gpm-root", "", "", "custom root directory for this app")
 	// use "no-system-prompt flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.NoSystemPrompt, "no-system-prompt", "", false, "do not use system prompt")
 	// use "ollama flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.Ollama, "ollama", "", false, "use Ollama")
 	// use "prompt flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.Prompt, "prompt", "", "", "custom (AI) prompt")
+	// use "projects-file flag" everywhere
+	rootCmd.PersistentFlags().StringVarP(&app.ProjectsFilePath, "projects-file", "", "", "custom projects file")
 	// use "system-prompt flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.SystemPrompt, "system-prompt", "", "", "custom (AI) system prompt")
 	// use "verbose flag" everywhere

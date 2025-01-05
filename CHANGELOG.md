@@ -1,5 +1,15 @@
 # Change Log (go-package-manager)
 
+## 0.32.0
+
+- **BREAKING CHANGE**: when an environment is defined, the root base path of the application changes from `${HOME}/.gpm` to the specified path
+- **BREAKING CHANGE**: with the introduction of the `GPM_ROOT_BASE_PATH` environment variable, `.env.{ENV-SUFFIX}` files are no longer supported ... these files must be moved or merged into the corresponding environment subfolder, like `${HOME}/.gpm/<ENV-NAME>`, as `.env`
+- **BREAKING CHANGE**: Scripts in the `gpm.yaml` file with an environment prefix (e.g., `dev:build` for a `dev` environment) will now execute instead of their unprefixed counterparts (e.g., `build`)
+- feat: added support for the `GPM_ROOT_BASE_PATH` environment variable
+- feat: you can now define a custom `files` section with an environment suffix in the `gpm.yaml` file (e.g., `files:dev` for a `dev` environment)
+- feat: can define custom path to `aliases.yaml` file by `GPM_ALIASES_FILE` environment variable
+- feat: can define custom path to `projects.yaml` file by `GPM_PROJECTS_FILE` environment variable
+
 ## 0.31.0
 
 - feat: `generate password` command

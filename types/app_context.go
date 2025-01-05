@@ -51,20 +51,23 @@ type AIPrompts struct {
 
 // An AppContext contains all information for running this app
 type AppContext struct {
-	AliasesFile    AliasesFile  // aliases.yaml file in home folder
-	Cwd            string       // current working directory
-	EnvFiles       []string     // one or more env files
-	Environment    string       // the name of the environment
-	GpmFile        GpmFile      // the gpm.y(a)ml file
-	IsCI           bool         // indicates if app runs in CI environment like GitHub action or GitLab runner
-	L              *log.Logger  // the logger to use
-	NoSystemPrompt bool         // do not use system prompt
-	Ollama         bool         // use Ollama
-	Out            *io.Writer   // the output stream
-	ProjectsFile   ProjectsFile // projects.yaml file in home folder
-	Prompt         string       // custom (AI) prompt
-	SystemPrompt   string       // custom system prompt
-	Verbose        bool         // output verbose information
+	AliasesFile      AliasesFile  // aliases.yaml file in home folder
+	AliasesFilePath  string       // custom file path of the `aliases.yaml` file from CLI flags
+	Cwd              string       // current working directory
+	EnvFiles         []string     // one or more env files
+	Environment      string       // the name of the environment
+	GpmFile          GpmFile      // the gpm.y(a)ml file
+	GpmRootPath      string       // custom app root path from CLI flags
+	IsCI             bool         // indicates if app runs in CI environment like GitHub action or GitLab runner
+	L                *log.Logger  // the logger to use
+	NoSystemPrompt   bool         // do not use system prompt
+	Ollama           bool         // use Ollama
+	Out              *io.Writer   // the output stream
+	ProjectsFile     ProjectsFile // projects.yaml file in home folder
+	ProjectsFilePath string       // custom file path of the `projects.yaml` file from CLI flags
+	Prompt           string       // custom (AI) prompt
+	SystemPrompt     string       // custom system prompt
+	Verbose          bool         // output verbose information
 }
 
 // ChatWithAIOption stores settings for
@@ -385,6 +388,16 @@ func (app *AppContext) EnsureFolder(dir string) (string, error) {
 	return "", fmt.Errorf("%v is no directory", folderPath)
 }
 
+// app.EnsureRootFolder() - ensures the root directory for this app exists, and
+// returns its path on success
+func (app *AppContext) EnsureRootFolder() (string, error) {
+	rootDir, err := app.GetRootPath()
+	if err == nil {
+		return app.EnsureFolder(rootDir)
+	}
+	return "", err
+}
+
 // app.GetAIChatSettings() - returns AI chat settings based on this app
 func (app *AppContext) GetAIChatSettings() (AIChatSettings, error) {
 	var settings AIChatSettings
@@ -455,35 +468,53 @@ func (app *AppContext) GetAIPromptSettings(defaultPrompt string, defaultSystemPr
 
 // app.GetAliasesFilePath() - returns the possible path of the aliases.yaml file
 func (app *AppContext) GetAliasesFilePath() (string, error) {
-	homeDir, err := os.UserHomeDir()
+	// first try from cli flag
+	customFile := strings.TrimSpace(
+		app.AliasesFilePath,
+	)
+	if customFile == "" {
+		// now from environment variable
+		customFile = strings.TrimSpace(
+			os.Getenv("GPM_ALIASES_FILE"),
+		)
+	}
+	if customFile != "" && path.IsAbs(customFile) {
+		return customFile, nil
+	}
+
+	// now try from <GPM-ROOT> ...
+
+	rootDir, err := app.GetRootPath()
 	if err == nil {
-		return path.Join(homeDir, ".gpm/aliases.yaml"), nil
+		if customFile != "" {
+			return path.Join(rootDir, customFile), nil
+		}
+		return path.Join(rootDir, "aliases.yaml"), nil
 	}
 	return "", err
 }
 
 // app.GetBinFolderPath() - returns the possible path of a central bin folder
 func (app *AppContext) GetBinFolderPath() (string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err == nil {
-		gpmDirPath := path.Join(homeDir, ".gpm")
-
-		var binPath string
-
-		GPM_BIN_PATH := strings.TrimSpace(os.Getenv("GPM_BIN_PATH"))
-		if GPM_BIN_PATH != "" {
-			binPath = GPM_BIN_PATH
-		} else {
-			binPath = path.Join(gpmDirPath, "bin")
-		}
-
-		if !path.IsAbs(binPath) {
-			binPath = path.Join(gpmDirPath, binPath)
-		}
-
-		return binPath, nil
+	gpmDirPath, err := app.GetRootPath()
+	if err != nil {
+		return "", err
 	}
-	return "", nil
+
+	var binPath string
+
+	GPM_BIN_PATH := strings.TrimSpace(os.Getenv("GPM_BIN_PATH"))
+	if GPM_BIN_PATH != "" {
+		binPath = GPM_BIN_PATH
+	} else {
+		binPath = path.Join(gpmDirPath, "bin")
+	}
+
+	if !path.IsAbs(binPath) {
+		binPath = path.Join(gpmDirPath, binPath)
+	}
+
+	return binPath, nil
 }
 
 // app.GetCurrentCompilerVersion() - tries to detect the current Go compiler
@@ -573,31 +604,34 @@ func (app *AppContext) GetCurrentGitBranch() (string, error) {
 
 // app.GetEnvFilePaths() - returns possible paths of .env* files
 func (app *AppContext) GetEnvFilePaths() ([]string, error) {
-	homeDir, err := os.UserHomeDir()
+	rootDir, err := app.GetRootPath()
 	if err == nil {
 		envFilename := ".env"
-		envFileWithSuffix := ".env"
 		envLocalFilename := ".env.local"
-
-		environment := app.GetEnvironment()
-		if environment != "" {
-			envFileWithSuffix += "." + environment
-		}
 
 		envFilePaths := utils.RemoveDuplicatesInStringList(
 			[]string{
-				path.Join(homeDir, ".gpm/"+envFilename),                  // ${HOME}/.env
-				path.Join(app.Cwd, envFilename),                          // <PROJECT-DIR>/.env
-				path.Join(app.Cwd, envFileWithSuffix),                    // <PROJECT-DIR>/.env<SUFFIX>
-				path.Join(app.Cwd, envLocalFilename),                     // <PROJECT-DIR>/.env.local
-				path.Join(app.Cwd, envFilename+"."+environment+".local"), // <PROJECT-DIR>/.env<SUFFIX>.local
+				path.Join(rootDir, envFilename),      // <GPM-ROOT>/.env
+				path.Join(app.Cwd, envFilename),      // <PROJECT-DIR>/.env
+				path.Join(app.Cwd, envLocalFilename), // <PROJECT-DIR>/.env.local
 			},
 		)
 
 		return envFilePaths, nil
-	} else {
-		return []string{}, err
 	}
+	return []string{}, err
+}
+
+// app.GetEnvironment() - returns the name of the environment
+func (app *AppContext) GetEnvironment() string {
+	environment := strings.TrimSpace(app.Environment) // first try --environment flag
+	if environment == "" {
+		environment = os.Getenv("GPM_ENV") // now try GPM_ENV
+	}
+
+	return strings.TrimSpace(
+		strings.ToLower(environment),
+	)
 }
 
 // app.GetFullPathOrDefault() - returns full version of a path or a default if
@@ -646,18 +680,6 @@ func (app *AppContext) GetGitBranches() ([]string, error) {
 	}
 
 	return branchNames, nil
-}
-
-// app.GetEnvironment() - returns the name of the environment
-func (app *AppContext) GetEnvironment() string {
-	environment := strings.TrimSpace(app.Environment) // first try --environment flag
-	if environment == "" {
-		environment = os.Getenv("GPM_ENV") // now try GPM_ENV
-	}
-
-	return strings.TrimSpace(
-		strings.ToLower(environment),
-	)
 }
 
 // app.GetGitRemotes() - returns the list of remotes using git command
@@ -744,6 +766,11 @@ func (app *AppContext) GetGpmFilePath() (string, error) {
 	return path.Join(app.Cwd, "gpm.yaml"), nil
 }
 
+// app.GetGpmFilesSection() - returns `Files` section in `gpm.yaml` files based on the current environment
+func (app *AppContext) GetGpmFilesSection() []string {
+	return app.GpmFile.GetFilesSectionByEnvSafe(app.GetEnvironment())
+}
+
 // app.GetModuleUrls() - returns the list of module urls based on the
 // information from aliases.y(a)ml file if possible
 func (app *AppContext) GetModuleUrls(moduleNameOrUrl string) []string {
@@ -783,12 +810,70 @@ func (app *AppContext) GetName() string {
 
 // app.GetProjectsFilePath() - returns the possible path of the projects.yaml file
 func (app *AppContext) GetProjectsFilePath() (string, error) {
+	// first try from cli flag
+	customFile := strings.TrimSpace(
+		app.ProjectsFilePath,
+	)
+	if customFile == "" {
+		// now from environment variable
+		customFile = strings.TrimSpace(
+			os.Getenv("GPM_PROJECTS_FILE"),
+		)
+	}
+	if customFile != "" && path.IsAbs(customFile) {
+		return customFile, nil
+	}
+
+	// now try from <GPM-ROOT> ...
+
+	rootDir, err := app.GetRootPath()
+	if err == nil {
+		if customFile != "" {
+			return path.Join(rootDir, customFile), nil
+		}
+		return path.Join(rootDir, "projects.yaml"), nil
+	}
+	return "", err
+}
+
+// app.GetRootPath() - returns the root directory for this app, usually inside the user's
+// home directory
+func (app *AppContext) GetRootPath() (string, error) {
+	// first try from cli flag
+	customDir := strings.TrimSpace(
+		app.GpmRootPath,
+	)
+	if customDir == "" {
+		// now from environment variable
+		customDir = strings.TrimSpace(
+			os.Getenv("GPM_ROOT_BASE_PATH"),
+		)
+	}
+	if customDir != "" && path.IsAbs(customDir) {
+		return customDir, nil
+	}
+
+	// subfolder inside ${HOME}
 	homeDir, err := os.UserHomeDir()
 	if err == nil {
-		return path.Join(homeDir, ".gpm/projects.yaml"), nil
-	} else {
-		return "", err
+		var subDir string
+		if customDir == "" {
+			subDir = ".gpm" // default
+		} else {
+			subDir = customDir
+		}
+
+		// add environment as suffix if defined
+		safeEnvName := utils.SanitizeFilename(
+			app.GetEnvironment(),
+		)
+		if safeEnvName != "" {
+			subDir = fmt.Sprintf("%s%s%s", subDir, string(os.PathSeparator), safeEnvName)
+		}
+
+		return path.Join(homeDir, subDir), nil
 	}
+	return "", err
 }
 
 // app.GetSystemAIPrompt() - returns the AI system prompt based on the current app settings
@@ -809,8 +894,10 @@ func (app *AppContext) GetSystemAIPrompt(defaultPrompt string) string {
 // app.ListFiles() - Lists all files inside the current working directory
 // based of the patterns from "files" section of gpm.yaml file.
 func (app *AppContext) ListFiles() ([]string, error) {
+	gpmFiles := app.GetGpmFilesSection()
+
 	var patterns []string
-	if len(app.GpmFile.Files) == 0 {
+	if len(gpmFiles) == 0 {
 		executableFilename := path.Base(app.Cwd)
 		if utils.IsWindows() {
 			executableFilename += constants.WindowsExecutableExt
@@ -822,7 +909,7 @@ func (app *AppContext) ListFiles() ([]string, error) {
 			"^CHANGELOG.md$", "^CONTRIBUTING.md$", "^CONTRIBUTION.md$", "^LICENSE$", "^README.md$",
 		)
 	} else {
-		patterns = append(patterns, app.GpmFile.Files...)
+		patterns = append(patterns, gpmFiles...)
 	}
 
 	var files []string
@@ -1003,7 +1090,21 @@ func (app *AppContext) RunCurrentProject(additionalArgs ...string) {
 
 // app.RunScript() - runs a script defined in gpm.y(a)ml file
 func (app *AppContext) RunScript(scriptName string, additionalArgs ...string) {
-	cmdToExecute := app.GpmFile.Scripts[scriptName]
+	finalScriptName := scriptName
+
+	// try to check if there is a script name with environment prefix
+	// like `dev:foo` if script is called `foo` and environment `dev` e.g.
+	envName := app.GetEnvironment()
+	if envName != "" {
+		scriptNameWithEnv := fmt.Sprintf("%s:%s", envName, scriptName)
+
+		_, ok := app.GpmFile.Scripts[scriptNameWithEnv]
+		if ok {
+			finalScriptName = scriptNameWithEnv
+		}
+	}
+
+	cmdToExecute := app.GpmFile.Scripts[finalScriptName]
 
 	p := utils.CreateShellCommand(cmdToExecute)
 

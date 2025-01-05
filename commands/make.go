@@ -54,7 +54,7 @@ func Init_Make_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				func() {
 					app.Debug(fmt.Sprintf("Will make project from '%v' ...", gitResource))
 
-					// get `$HOME/.gpm/bin` folder
+					// get `<GPM-ROOT>/bin` folder
 					binPath, err := app.EnsureBinFolder()
 					utils.CheckForError(err)
 
@@ -132,7 +132,7 @@ func Init_Make_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					if executableNameInBinFolder == "" {
 						// use project name as default for the
 						// name of the final executable file in
-						// ${HOME}/.gpm/bin folder
+						// <GPM-ROOT>/bin folder
 						executableNameInBinFolder = projectName
 					}
 
@@ -146,12 +146,12 @@ func Init_Make_Command(parentCmd *cobra.Command, app *types.AppContext) {
 						os.Remove(executableFileInBinFolder)
 					}
 
-					// move build executable to ${HOME}/.gpm/bin folder
+					// move build executable to <GPM-ROOT>/bin folder
 					app.Debug(fmt.Sprintf("Moving build executable '%v' to '%v' ...", buildExecutableFilePath, executableFileInBinFolder))
 					err = os.Rename(buildExecutableFilePath, executableFileInBinFolder)
 					utils.CheckForError(err)
 
-					// make file in ${HOME}/.gpm/bin folder executable
+					// make file in <GPM-ROOT>/bin folder executable
 					app.Debug(fmt.Sprintf("Setting up permissions for '%v' executable ...", executableFileInBinFolder))
 					err = os.Chmod(executableFileInBinFolder, constants.DefaultDirMode)
 					utils.CheckForError(err)

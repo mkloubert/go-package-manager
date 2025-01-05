@@ -8,3 +8,5 @@ files:
 scripts:
   docs: "go run . generate documentation ./docs"
   test: "exit 0"
+  test1: "echo test1 runs on default environment"
+  dev:test1: "echo test1 runs on 'dev' environment"

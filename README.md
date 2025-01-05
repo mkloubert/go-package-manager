@@ -136,7 +136,7 @@ With
 gpm add alias yaml https://github.com/go-yaml/yaml
 ```
 
-you define the alias `yaml` which refers to the Git repository in `https://github.com/go-yaml/yaml`. This information will be stored in `aliases.yaml` file inside your `$HOME/.gpm` folder.
+you define the alias `yaml` which refers to the Git repository in `https://github.com/go-yaml/yaml`. This information will be stored in `aliases.yaml` file inside your `<GPM-ROOT>` folder.
 
 If you later run
 
@@ -154,7 +154,7 @@ With
 gpm add project react-project https://github.com/ofnullable/react-spa-template
 ```
 
-you define the alias `react-project` which refers to the Git repository in `https://github.com/ofnullable/react-spa-template`. This information will be stored in `projects.yaml` file inside your `$HOME/.gpm` folder.
+you define the alias `react-project` which refers to the Git repository in `https://github.com/ofnullable/react-spa-template`. This information will be stored in `projects.yaml` file inside your `<GPM-ROOT>` folder.
 
 If you later run
 
@@ -180,7 +180,7 @@ gpm make https://github.com/gohugoio/hugo
 
 will clone the repository into a temp folder and run `gpm build` from it.
 
-The final executable will be installed in `$HOME/.gpm/bin` folder. So it could be useful to add it to the `$PATH` enviornment variable.
+The final executable will be installed in `<GPM-ROOT>/bin` folder. So it could be useful to add it to the `$PATH` enviornment variable.
 
 FYI: Instead of the URL as argument you can use a project alias added by [add project command](#add-project-).
 
@@ -333,7 +333,7 @@ gpm generate uuid
 gpm import aliases https://raw.githubusercontent.com/mkloubert/go-package-manager/main/aliases.yaml
 ```
 
-loads aliases from `https://raw.githubusercontent.com/mkloubert/go-package-manager/main/aliases.yaml` and merge them with entries in `aliases.yaml` file in `$HOME/.gpm` folder.
+loads aliases from `https://raw.githubusercontent.com/mkloubert/go-package-manager/main/aliases.yaml` and merge them with entries in `aliases.yaml` file in `<GPM-ROOT>` folder.
 
 You can also use a local file path and/or pipe from `STDIN` as well.
 
@@ -343,7 +343,7 @@ You can also use a local file path and/or pipe from `STDIN` as well.
 gpm import projects https://raw.githubusercontent.com/mkloubert/go-package-manager/main/projects.yaml
 ```
 
-loads projects from `https://raw.githubusercontent.com/mkloubert/go-package-manager/main/projects.yaml` and merge them with entries in `projects.yaml` file in `$HOME/.gpm` folder.
+loads projects from `https://raw.githubusercontent.com/mkloubert/go-package-manager/main/projects.yaml` and merge them with entries in `projects.yaml` file in `<GPM-ROOT>` folder.
 
 You can also use a local file path and/or pipe from `STDIN` as well.
 
@@ -497,7 +497,7 @@ With
 gpm remove alias yaml
 ```
 
-you will remove the `yaml` alias from `aliases.yaml` file, which is stored in `$HOME/.gpm` folder.
+you will remove the `yaml` alias from `aliases.yaml` file, which is stored in `<GPM-ROOT>` folder.
 
 #### Remove project [<a href="#commands-">↑</a>]
 
@@ -507,7 +507,7 @@ With
 gpm remove project yaml
 ```
 
-you will remove the `yaml` alias from `projects.yaml` file, which is stored in `$HOME/.gpm` folder.
+you will remove the `yaml` alias from `projects.yaml` file, which is stored in `<GPM-ROOT>` folder.
 
 #### Remove executable [<a href="#commands-">↑</a>]
 
@@ -517,7 +517,7 @@ If you installed a binary with [make command](#build-and-install-executable-) li
 gpm make https://github.com/gopasspw/gopass
 ```
 
-you can simply remove it with `gpm remove binary gopass` if the binary is stored as `gopass` in `$HOME/.gpm/bin` folder.
+you can simply remove it with `gpm remove binary gopass` if the binary is stored as `gopass` in `<GPM-ROOT>/bin` folder.
 
 #### Run script [<a href="#commands-">↑</a>]
 
@@ -651,7 +651,7 @@ in your terminal.
 
 ### Files [<a href="#gpmyaml-">↑</a>]
 
-The `files` section contains a list of regular expressions of files which is used by [pack command](#pack-project-):
+The `files` section contains a list of regular expressions that specify which files are included by the [pack command](#pack-project-):
 
 ```yaml
 # ...
@@ -664,18 +664,32 @@ files:
 # ...
 ```
 
-If the list is empty or not defined, the following default values are set:
+If the list is empty or not defined, the following default values are applied:
 
-- possible name of the executable file build with [build command](#build-project-)
+- the potential name of the executable file built with the [build command](#build-project-)
 - `^CHANGELOG.md$`
 - `^CONTRIBUTING.md$`
 - `^CONTRIBUTION.md$`
 - `^LICENSE$`
 - `^README.md$`
 
+You can also define environment-specific file lists to customize behavior for different environments:
+
+```yaml
+# ...
+
+"files:dev":
+  - my-dev-app
+  - README.dev.md
+  - ^commands/p
+# ...
+```
+
+When `files:dev` is defined, it takes precedence over the `files` list, allowing you to tailor the included files for specific environments.
+
 ### Scripts [<a href="#gpmyaml-">↑</a>]
 
-Create or update the `scripts` section with key/value pairs:
+To configure your scripts, add or update the `scripts` section with key/value pairs as shown below:
 
 ```yaml
 scripts:
@@ -683,7 +697,17 @@ scripts:
   test2: "echo Test2"
 ```
 
-From the project folder you will be able to execute `gpm run test1` or `gpm run test2` to run the defined shell/terminal commands.
+Once defined, you can run the commands directly from your project folder using `gpm run test1` or `gpm run test2`.
+
+You can also create environment-specific scripts to customize behavior for different environments:
+
+```yaml
+scripts:
+  test1: "echo Test1 runs in the default environment"
+  dev:test1: "echo Test1 runs in the 'dev' environment"
+```
+
+When executing `gpm run test1 --environment=dev`, the command will prioritize `dev:test1` over `test1`. This allows you to tailor scripts for specific environments easily.
 
 #### Predefined [<a href="#scripts-">↑</a>]
 
@@ -703,7 +727,7 @@ From the project folder you will be able to execute `gpm run test1` or `gpm run 
 
 Environment variables can be loaded from external files, which are handled in this order:
 
-- `$HOME/.gpm/.env<SUFFIX>` (if exist)
+- `<GPM-ROOT>/.env` (if exist)
 - `<PROJECT-DIR>/.env` (if exist)
 - `<PROJECT-DIR>/.env<SUFFIX>` (if exist)
 - `<PROJECT-DIR>/.env.local` (if exist)
@@ -721,10 +745,13 @@ Environment variables can be loaded from external files, which are handled in th
 | `GPM_AI_CHAT_TEMPERATURE` | Temperature value for an AI chat (operation)                                                                                                                   | `0`                                                                          |
 | `GPM_AI_PROMPT`           | Custom prompt for operations which are using chat completion operations, like [checkout command](#build-project-).                                             |                                                                              |
 | `GPM_AI_SYSTEM_PROMPT`    | Custom (initial) system prompt for AI chat operations.                                                                                                         | `You are a helpful AI assistant. You always answer in a very sarcastic way.` |
-| `GPM_BIN_PATH`            | Custom folder for binaries installed by [make command](#build-and-install-executable-). Default is `$HOME/.gpm/bin`.                                           | `/my/custom/bin/path`                                                        |
+| `GPM_ALIASES_FILE`        | Custom path to [aliases.yaml file](#add-alias-). Relative paths will be mapped to `<GPM-ROOT>`. Default is `<GPM-ROOT>/aliases.yaml`.                          | `/my/custom/aliases/file.yaml`                                               |
+| `GPM_BIN_PATH`            | Custom folder for binaries installed by [make command](#build-and-install-executable-). Default is `<GPM-ROOT>/bin`.                                           | `/my/custom/bin/path`                                                        |
 | `GPM_DOWN_COMMAND`        | Custom command for [docker compose down](#docker-shorthands-) shorthand.                                                                                       | `docker-compose down`                                                        |
 | `GPM_ENV`                 | ID of the current environment. This is especially used for the [.env files](#environment-variables-).                                                          | `prod`                                                                       |
 | `GPM_INSTALL_PATH`        | Custom installation path of global `gpm` binary.                                                                                                               | `/usr/bin`                                                                   |
+| `GPM_PROJECTS_FILE`       | Custom path to [projects.yaml file](#add-project-). Relative paths will be mapped to `<GPM-ROOT>`. Default is `<GPM-ROOT>/projects.yaml`.                      | `/my/custom/projects/file.yaml`                                              |
+| `GPM_ROOT_BASE_PATH`      | Custom root base folder for this application. Relative paths will be mapped to `$HOME`. Default is `$HOME/.gpm`.                                               | `.my-gpm-folder-inside-home`                                                 |
 | `GPM_TERMINAL_FORMATTER`  | Default formatter for syntax highlighting in terminal. See [chroma project](https://github.com/alecthomas/chroma/tree/master/formatters) for more information. | `terminal16m`                                                                |
 | `GPM_TERMINAL_STYLE`      | Default style for syntax highlighting in terminal. See [chroma project](https://github.com/alecthomas/chroma/tree/master/styles) for more information.         | `monokai`                                                                    |
 | `GPM_UP_COMMAND`          | Custom command for [docker compose up](#docker-shorthands-) shorthand.                                                                                         | `docker-compose up`                                                          |
