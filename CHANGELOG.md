@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.33.0
+
+- feat: enhance features of `gpm.yaml` file
+
 ## 0.32.0
 
 - **BREAKING CHANGE**: when an environment is defined, the root base path of the application changes from `${HOME}/.gpm` to the specified path

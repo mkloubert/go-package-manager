@@ -29,11 +29,34 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-// A GpmFile stores all data of a gpm.y(a)ml file.
+// GpmFile stores all data of a gpm.y(a)ml file.
 type GpmFile struct {
-	Files   []string          `yaml:"files,omitempty"`   // whitelist of file patterns which are used by pack command for example
-	Name    string            `yaml:"name,omitempty"`    // the name
-	Scripts map[string]string `yaml:"scripts,omitempty"` // one or more scripts
+	Contributors []GpmFileContributor `yaml:"contributors,omitempty"` // list of contributors
+	Description  string               `yaml:"description,omitempty"`  // the description
+	DisplayName  string               `yaml:"display_name,omitempty"` // the display name
+	Donations    map[string]string    `yaml:"donations,omitempty"`    // one or more donation links
+	Files        []string             `yaml:"files,omitempty"`        // whitelist of file patterns which are used by pack command for example
+	Homepage     string               `yaml:"homepage,omitempty"`     // the homepage
+	License      string               `yaml:"license,omitempty"`      // the license
+	Name         string               `yaml:"name,omitempty"`         // the name
+	Repositories []GpmFileRepository  `yaml:"repositories,omitempty"` // source code repository information
+	Scripts      map[string]string    `yaml:"scripts,omitempty"`      // one or more scripts
+}
+
+// GpmFileContributor is an item inside `Contributors` of a
+// `GpmFile` instance
+type GpmFileContributor struct {
+	Homepage string `yaml:"homepage,omitempty"` // the homepage url
+	Name     string `yaml:"name,omitempty"`     // the full name
+	Role     string `yaml:"role,omitempty"`     // the role
+}
+
+// GpmFileRepository is an item inside `Repositories` of a
+// `GpmFile` instance
+type GpmFileRepository struct {
+	Name string `yaml:"name,omitempty"` // the full name
+	Type string `yaml:"type,omitempty"` // the type
+	Url  string `yaml:"url,omitempty"`  // the url
 }
 
 // GetFilesSectionByEnvSafe() - will return environment specific `files` section in `gpm.yaml`
@@ -52,7 +75,7 @@ func (g *GpmFile) GetFilesSectionByEnvSafe(envName string) []string {
 				if ok && maybeArray != nil {
 					files, ok := maybeArray.([]string)
 					if ok && files != nil {
-						return files
+						return files // found existing, valid string array
 					}
 				}
 			}
@@ -65,8 +88,17 @@ func (g *GpmFile) GetFilesSectionByEnvSafe(envName string) []string {
 func LoadGpmFile(gpmFilePath string) (GpmFile, error) {
 	var gpm GpmFile
 	defer func() {
+		if gpm.Contributors == nil {
+			gpm.Contributors = []GpmFileContributor{}
+		}
+		if gpm.Donations == nil {
+			gpm.Donations = map[string]string{}
+		}
 		if gpm.Files == nil {
 			gpm.Files = []string{}
+		}
+		if gpm.Repositories == nil {
+			gpm.Repositories = []GpmFileRepository{}
 		}
 		if gpm.Scripts == nil {
 			gpm.Scripts = map[string]string{}
