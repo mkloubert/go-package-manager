@@ -601,7 +601,7 @@ func (app *AppContext) GetCurrentGitBranch() (string, error) {
 	p.Dir = app.Cwd
 
 	var output bytes.Buffer
-	p.Stdout = app.Out
+	p.Stdout = &output
 
 	err := p.Run()
 	if err != nil {
@@ -664,7 +664,7 @@ func (app *AppContext) GetGitBranches() ([]string, error) {
 	p.Dir = app.Cwd
 
 	var output bytes.Buffer
-	p.Stdout = app.Out
+	p.Stdout = &output
 
 	err := p.Run()
 	if err != nil {
@@ -698,7 +698,7 @@ func (app *AppContext) GetGitRemotes() ([]string, error) {
 	p.Dir = app.Cwd
 
 	var output bytes.Buffer
-	p.Stdout = app.Out
+	p.Stdout = &output
 
 	err := p.Run()
 	if err != nil {
@@ -729,7 +729,7 @@ func (app *AppContext) GetGitTags() ([]string, error) {
 	p.Dir = app.Cwd
 
 	var output bytes.Buffer
-	p.Stdout = app.Out
+	p.Stdout = &output
 
 	err := p.Run()
 	if err != nil {
