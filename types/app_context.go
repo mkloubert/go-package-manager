@@ -129,7 +129,10 @@ func (app *AppContext) ChatWithAI(prompt string, options ...ChatWithAIOption) (s
 }
 
 func (app *AppContext) chatWithOllama(prompt string, options ...ChatWithAIOption) (string, error) {
-	model := utils.GetDefaultAIChatModel()
+	model := strings.TrimSpace(app.Model)
+	if model == "" {
+		model = utils.GetDefaultAIChatModel() // no explicit => take default
+	}
 	if model == "" {
 		return "", fmt.Errorf("no ai model defined")
 	}
@@ -202,9 +205,13 @@ func (app *AppContext) chatWithOllama(prompt string, options ...ChatWithAIOption
 
 func (app *AppContext) chatWithOpenAI(prompt string, settings AIChatSettings, options ...ChatWithAIOption) (string, error) {
 	apiKey := *settings.ApiKey
-	model := utils.GetDefaultAIChatModel()
 	var systemPrompt *string
 	temperature := 0
+
+	model := strings.TrimSpace(app.Model)
+	if model == "" {
+		model = utils.GetDefaultAIChatModel()
+	}
 
 	for _, o := range options {
 		if o.Model != nil {
@@ -294,7 +301,7 @@ func (app *AppContext) CreateAIChat(options ...CreateAIChatOptions) (ChatAI, err
 		return nil, err
 	}
 
-	initialModel := ""
+	initialModel := strings.TrimSpace(app.Model)
 	systemPrompt := ""
 
 	for _, o := range options {
