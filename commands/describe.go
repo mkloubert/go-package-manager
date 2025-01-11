@@ -140,10 +140,17 @@ func Init_Describe_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 				outputData(yamlData, "yaml")
 			} else {
-				jsonData, err := json.MarshalIndent(&imageDescription, "", "  ")
-				utils.CheckForError(err)
+				if prettyOutput {
+					jsonData, err := json.MarshalIndent(&imageDescription, "", "  ")
+					utils.CheckForError(err)
 
-				outputData(jsonData, "json")
+					outputData(jsonData, "json")
+				} else {
+					jsonData, err := json.Marshal(&imageDescription)
+					utils.CheckForError(err)
+
+					outputData(jsonData, "json")
+				}
 			}
 		},
 	}
