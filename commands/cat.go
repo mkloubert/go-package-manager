@@ -24,56 +24,30 @@ package commands
 
 import (
 	"fmt"
-	"os/exec"
-	"strings"
-
-	"github.com/alecthomas/chroma/quick"
-	"github.com/hashicorp/go-version"
-	"github.com/spf13/cobra"
 
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
+	"github.com/spf13/cobra"
 )
 
-func Init_Diff_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var diffCmd = &cobra.Command{
-		Use:     "diff [resource]",
-		Aliases: []string{"df"},
-		Short:   "Diff resources",
-		Long:    `Compares two resources.`,
+func Init_Cat_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var catCmd = &cobra.Command{
+		Use:     "cat",
+		Aliases: []string{"meow"},
+		Short:   "Outputs input",
+		Long:    `Outputs input from STDIN and/or files to STDOUT.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			consoleFormatter := utils.GetBestChromaFormatterName()
-			consoleStyle := utils.GetBestChromaStyleName()
-
-			version1, err := version.NewVersion(strings.TrimSpace(args[0]))
+			written, err := app.WriteAllInputsTo(app.Out, args...)
 			utils.CheckForError(err)
 
-			tag1 := "v" + version1.String()
-			var tag2 string
-
-			if len(args) == 1 {
-				tag2 = "HEAD"
-			} else {
-				version2, err := version.NewVersion(strings.TrimSpace(args[1]))
-				utils.CheckForError(err)
-
-				tag2 = "v" + version2.String()
+			if app.Verbose {
+				fmt.Println()
 			}
-
-			p := exec.Command("git", "diff", tag1, tag2)
-			p.Dir = app.Cwd
-
-			diff, err := p.Output()
-			utils.CheckForError(err)
-
-			err = quick.Highlight(app.Out, string(diff), "diff", consoleFormatter, consoleStyle)
-			if err != nil {
-				fmt.Print(string(diff))
-			}
+			app.Debug(fmt.Sprintf("Bytes written: %v", written))
 		},
 	}
 
 	parentCmd.AddCommand(
-		diffCmd,
+		catCmd,
 	)
 }

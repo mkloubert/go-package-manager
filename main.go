@@ -51,7 +51,10 @@ func main() {
 	var app types.AppContext
 	app.L = log.Default()
 	app.Cwd = cwd
+	app.ErrorOut = os.Stderr
+	app.In = os.Stdin
 	app.IsCI = strings.TrimSpace(strings.ToLower(os.Getenv("CI"))) == "true"
+	app.Out = os.Stdout
 
 	// use "aliases-file flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.AliasesFilePath, "aliases-file", "", "", "custom aliases file")
@@ -61,6 +64,8 @@ func main() {
 	rootCmd.PersistentFlags().StringArrayVarP(&app.EnvFiles, "env-file", "e", []string{}, "one or more environment files")
 	// use "gpm-root flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.GpmRootPath, "gpm-root", "", "", "custom root directory for this app")
+	// use custom AI model
+	rootCmd.Flags().StringVarP(&app.Model, "model", "", "", "custom AI model")
 	// use "no-system-prompt flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.NoSystemPrompt, "no-system-prompt", "", false, "do not use system prompt")
 	// use "ollama flag" everywhere
@@ -81,10 +86,13 @@ func main() {
 
 	// initialize commands
 	commands.Init_Add_Command(rootCmd, &app)
+	commands.Init_Base64_Command(rootCmd, &app)
 	commands.Init_Build_Command(rootCmd, &app)
 	commands.Init_Bump_Command(rootCmd, &app)
+	commands.Init_Cat_Command(rootCmd, &app)
 	commands.Init_Chat_Command(rootCmd, &app)
 	commands.Init_Checkout_Command(rootCmd, &app)
+	commands.Init_Describe_Command(rootCmd, &app)
 	commands.Init_Diff_Command(rootCmd, &app)
 	commands.Init_Doctor_Command(rootCmd, &app)
 	commands.Init_Down_Command(rootCmd, &app)
@@ -97,6 +105,7 @@ func main() {
 	commands.Init_Make_Command(rootCmd, &app)
 	commands.Init_Monitor_Command(rootCmd, &app)
 	commands.Init_New_Command(rootCmd, &app)
+	commands.Init_Now_Command(rootCmd, &app)
 	commands.Init_Open_Command(rootCmd, &app)
 	commands.Init_Pack_Command(rootCmd, &app)
 	commands.Init_Prompt_Command(rootCmd, &app)

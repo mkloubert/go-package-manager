@@ -24,6 +24,7 @@ package utils
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	mathRand "math/rand"
@@ -48,6 +49,21 @@ type SpliTextOptions struct {
 	MaxChunkSize     *int // default 3000
 	MaxOverheadWords *int // default 15
 	MaxOverheadChars *int // default 100
+}
+
+// Base64FromDataURI() - extracts Base64 part from data URI
+func Base64FromDataURI(dataURI string) (string, error) {
+	dataURI = strings.TrimSpace(dataURI)
+	if !strings.HasPrefix(dataURI, "data:") {
+		return "", fmt.Errorf("no data URI")
+	}
+
+	parts := strings.Split(dataURI, ",")
+	if len(parts) != 2 {
+		return "", fmt.Errorf("invalid data URI format")
+	}
+
+	return strings.TrimSpace(parts[1]), nil
 }
 
 // CheckForError() - exits with code 1 and output an error (if there is an error)
@@ -138,22 +154,25 @@ func CreateShellCommandByArgs(c string, args ...string) *exec.Cmd {
 
 // DownloadFromUrl() - downloads data from URL
 func DownloadFromUrl(url string) ([]byte, error) {
-	if !strings.HasPrefix(url, "http:") && !strings.HasPrefix(url, "https:") {
+	buffer := bytes.Buffer{}
+	_, err := DownloadFromUrlTo(&buffer, url)
+
+	return buffer.Bytes(), err
+}
+
+// DownloadFromUrlTo() - downloads data from URL to an io.Writer
+func DownloadFromUrlTo(w io.Writer, url string) (int64, error) {
+	if !IsDownloadUrl(url) {
 		url = "https://" + url
 	}
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return []byte{}, err
+		return 0, err
 	}
 	defer resp.Body.Close()
 
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return data, nil
+	return io.Copy(w, resp.Body)
 }
 
 // EnsureMaxSliceLength() - ensures that the length of an array is
@@ -361,6 +380,14 @@ func IsDirExisting(dp string) (bool, error) {
 	}
 
 	return info.IsDir(), nil
+}
+
+// IsDownloadUrl() - checks if url is a valid URL to a resource
+// that can be downloaded
+func IsDownloadUrl(url string) bool {
+	url = strings.TrimSpace(url)
+
+	return strings.HasPrefix(url, "http:") || strings.HasPrefix(url, "https:")
 }
 
 // IsFileExisting() - checks if path is an existing file

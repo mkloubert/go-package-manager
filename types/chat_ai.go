@@ -22,11 +22,18 @@
 
 package types
 
+import (
+	"encoding/json"
+	"strings"
+)
+
 // ChatAI describes an object that provides abstract
 // methods to interaction with a chat API
 type ChatAI interface {
 	// ChatAI.ClearHistory() - clears chat history
 	ClearHistory()
+	// ChatAI.DescribeImage() - describes an image without adding using history
+	DescribeImage(message string, dataURI string) (DescribeImageResponse, error)
 	// ChatAI.GetModel() - get the name of the chat model
 	GetModel() string
 	// ChatAI.GetMoreInfo() - returns additional information, if available
@@ -52,3 +59,37 @@ type ChatAI interface {
 }
 
 type ChatAIMessageChunkReceiver = func(messageChunk string) error
+
+func get_ai_image_description_from_json(jsonStr string) (DescribeImageResponse, error) {
+	var imageDescription DescribeImageResponse
+
+	data := map[string]interface{}{}
+	err := json.Unmarshal([]byte(strings.TrimSpace(jsonStr)), &data)
+	if err != nil {
+		return imageDescription, err
+	}
+
+	aria_attributes, ok := data["aria_attributes"]
+	if ok {
+		attributes, ok := aria_attributes.(map[string]interface{})
+		if ok {
+			aria_description, ok := attributes["aria_description"]
+			if ok {
+				description, ok := aria_description.(string)
+				if ok {
+					imageDescription.Description = strings.TrimSpace(description)
+				}
+			}
+
+			aria_label, ok := attributes["aria_label"]
+			if ok {
+				label, ok := aria_label.(string)
+				if ok {
+					imageDescription.Label = strings.TrimSpace(label)
+				}
+			}
+		}
+	}
+
+	return imageDescription, nil
+}

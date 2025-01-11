@@ -56,13 +56,16 @@ type AppContext struct {
 	Cwd              string       // current working directory
 	EnvFiles         []string     // one or more env files
 	Environment      string       // the name of the environment
+	ErrorOut         io.Writer    // error output
 	GpmFile          GpmFile      // the gpm.y(a)ml file
 	GpmRootPath      string       // custom app root path from CLI flags
+	In               io.Reader    // the input stream
 	IsCI             bool         // indicates if app runs in CI environment like GitHub action or GitLab runner
 	L                *log.Logger  // the logger to use
+	Model            string       // custom model from CLI flags
 	NoSystemPrompt   bool         // do not use system prompt
 	Ollama           bool         // use Ollama
-	Out              *io.Writer   // the output stream
+	Out              io.Writer    // the output stream
 	ProjectsFile     ProjectsFile // projects.yaml file in home folder
 	ProjectsFilePath string       // custom file path of the `projects.yaml` file from CLI flags
 	Prompt           string       // custom (AI) prompt
@@ -591,7 +594,7 @@ func (app *AppContext) GetCurrentGitBranch() (string, error) {
 	p.Dir = app.Cwd
 
 	var output bytes.Buffer
-	p.Stdout = &output
+	p.Stdout = app.Out
 
 	err := p.Run()
 	if err != nil {
@@ -654,7 +657,7 @@ func (app *AppContext) GetGitBranches() ([]string, error) {
 	p.Dir = app.Cwd
 
 	var output bytes.Buffer
-	p.Stdout = &output
+	p.Stdout = app.Out
 
 	err := p.Run()
 	if err != nil {
@@ -688,7 +691,7 @@ func (app *AppContext) GetGitRemotes() ([]string, error) {
 	p.Dir = app.Cwd
 
 	var output bytes.Buffer
-	p.Stdout = &output
+	p.Stdout = app.Out
 
 	err := p.Run()
 	if err != nil {
@@ -719,7 +722,7 @@ func (app *AppContext) GetGitTags() ([]string, error) {
 	p.Dir = app.Cwd
 
 	var output bytes.Buffer
-	p.Stdout = &output
+	p.Stdout = app.Out
 
 	err := p.Run()
 	if err != nil {
@@ -1080,6 +1083,24 @@ func (app *AppContext) NewVersionManager() *ProjectVersionManager {
 	return pvm
 }
 
+// app.Read() - implementation for an io.Reader
+func (app *AppContext) Read(p []byte) (int, error) {
+	if app.In == nil {
+		return 0, nil // deactivated
+	}
+
+	return app.In.Read(p)
+}
+
+// app.ReadAllInputs() - reads from all inputs (STDIN and files, in that order)
+// and returns binary data
+func (app *AppContext) ReadAllInputs(files ...string) ([]byte, error) {
+	buffer := bytes.Buffer{}
+	_, err := app.WriteAllInputsTo(&buffer, files...)
+
+	return buffer.Bytes(), err
+}
+
 // app.RunCurrentProject() - runs the current go project
 func (app *AppContext) RunCurrentProject(additionalArgs ...string) {
 	p := utils.CreateShellCommandByArgs("go", "run", ".")
@@ -1213,4 +1234,73 @@ func (app *AppContext) UpdateProjectsFile() error {
 
 	app.Debug(fmt.Sprintf("Updating project file '%v' ...", projectsFilePath))
 	return os.WriteFile(projectsFilePath, yamlData, constants.DefaultFileMode)
+}
+
+// app.Write() - implementation for an io.Writer
+func (app *AppContext) Write(p []byte) (int, error) {
+	if app.Out == nil {
+		return len(p), nil // deactivated
+	}
+
+	return app.Out.Write(p)
+}
+
+// app.Write() - implementation for an io.Writer
+func (app *AppContext) WriteError(p []byte) (int, error) {
+	if app.ErrorOut == nil {
+		return len(p), nil // deactivated
+	}
+
+	return app.ErrorOut.Write(p)
+}
+
+// app.WriteAllInputsTo() - reads from all inputs (STDIN and files, in that order) to an io.Writer
+func (app *AppContext) WriteAllInputsTo(w io.Writer, files ...string) (int64, error) {
+	var totalWritten int64 = 0
+
+	// first check STDIN
+	if stat, _ := os.Stdin.Stat(); (stat.Mode() & os.ModeCharDevice) == 0 {
+		written, err := io.Copy(w, os.Stdin)
+		if err != nil {
+			return written, err
+		}
+
+		totalWritten += written
+	}
+
+	// now from files
+	for _, f := range files {
+		filePathOrUrl := strings.TrimSpace(f)
+		if filePathOrUrl == "" {
+			continue
+		}
+
+		var readData func() (int64, error)
+		if utils.IsDownloadUrl(filePathOrUrl) {
+			// in this case `filePath` is a downloadable URL
+
+			readData = func() (int64, error) {
+				return utils.DownloadFromUrlTo(app.Out, filePathOrUrl)
+			}
+		} else {
+			filePath := app.GetFullPathOrDefault(filePathOrUrl, "")
+
+			readData = func() (int64, error) {
+				file, err := os.Open(filePath)
+				utils.CheckForError(err)
+				defer file.Close()
+
+				return io.Copy(app.Out, file)
+			}
+		}
+
+		written, err := readData()
+
+		if err != nil {
+			return totalWritten, err
+		}
+		totalWritten += written
+	}
+
+	return totalWritten, nil
 }

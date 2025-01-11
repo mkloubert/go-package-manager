@@ -24,56 +24,43 @@ package commands
 
 import (
 	"fmt"
-	"os/exec"
-	"strings"
-
-	"github.com/alecthomas/chroma/quick"
-	"github.com/hashicorp/go-version"
-	"github.com/spf13/cobra"
+	"time"
 
 	"github.com/mkloubert/go-package-manager/types"
-	"github.com/mkloubert/go-package-manager/utils"
+	"github.com/spf13/cobra"
 )
 
-func Init_Diff_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var diffCmd = &cobra.Command{
-		Use:     "diff [resource]",
-		Aliases: []string{"df"},
-		Short:   "Diff resources",
-		Long:    `Compares two resources.`,
+func Init_Now_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var format string
+	var local bool
+
+	var nowCmd = &cobra.Command{
+		Use:   "now",
+		Short: "Output time",
+		Long:  `Outputs current time.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			consoleFormatter := utils.GetBestChromaFormatterName()
-			consoleStyle := utils.GetBestChromaStyleName()
-
-			version1, err := version.NewVersion(strings.TrimSpace(args[0]))
-			utils.CheckForError(err)
-
-			tag1 := "v" + version1.String()
-			var tag2 string
-
-			if len(args) == 1 {
-				tag2 = "HEAD"
-			} else {
-				version2, err := version.NewVersion(strings.TrimSpace(args[1]))
-				utils.CheckForError(err)
-
-				tag2 = "v" + version2.String()
+			now := time.Now()
+			if !local {
+				now = now.UTC()
 			}
 
-			p := exec.Command("git", "diff", tag1, tag2)
-			p.Dir = app.Cwd
-
-			diff, err := p.Output()
-			utils.CheckForError(err)
-
-			err = quick.Highlight(app.Out, string(diff), "diff", consoleFormatter, consoleStyle)
-			if err != nil {
-				fmt.Print(string(diff))
+			outputFormat := format
+			if outputFormat == "" {
+				if local {
+					outputFormat = "2006-01-02T15:04:05.000"
+				} else {
+					outputFormat = "2006-01-02T15:04:05.000Z"
+				}
 			}
+
+			fmt.Print(now.Format(outputFormat))
 		},
 	}
 
+	nowCmd.Flags().StringVarP(&format, "format", "", "", "custom output format")
+	nowCmd.Flags().BoolVarP(&local, "local", "", false, "use local time")
+
 	parentCmd.AddCommand(
-		diffCmd,
+		nowCmd,
 	)
 }

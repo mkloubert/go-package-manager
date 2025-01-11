@@ -23,57 +23,36 @@
 package commands
 
 import (
+	"encoding/base64"
 	"fmt"
-	"os/exec"
-	"strings"
-
-	"github.com/alecthomas/chroma/quick"
-	"github.com/hashicorp/go-version"
-	"github.com/spf13/cobra"
+	"io"
 
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
+	"github.com/spf13/cobra"
 )
 
-func Init_Diff_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var diffCmd = &cobra.Command{
-		Use:     "diff [resource]",
-		Aliases: []string{"df"},
-		Short:   "Diff resources",
-		Long:    `Compares two resources.`,
+func Init_Base64_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var base64Cmd = &cobra.Command{
+		Use:     "base64",
+		Aliases: []string{"b64"},
+		Short:   "Encode Base64",
+		Long:    `Encode data from STDIN to STDOUT as Base64 encoded data.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			consoleFormatter := utils.GetBestChromaFormatterName()
-			consoleStyle := utils.GetBestChromaStyleName()
+			encoder := base64.NewEncoder(base64.StdEncoding, app.Out)
+			defer encoder.Close()
 
-			version1, err := version.NewVersion(strings.TrimSpace(args[0]))
+			written, err := io.Copy(encoder, app.In)
 			utils.CheckForError(err)
 
-			tag1 := "v" + version1.String()
-			var tag2 string
-
-			if len(args) == 1 {
-				tag2 = "HEAD"
-			} else {
-				version2, err := version.NewVersion(strings.TrimSpace(args[1]))
-				utils.CheckForError(err)
-
-				tag2 = "v" + version2.String()
+			if app.Verbose {
+				fmt.Println()
 			}
-
-			p := exec.Command("git", "diff", tag1, tag2)
-			p.Dir = app.Cwd
-
-			diff, err := p.Output()
-			utils.CheckForError(err)
-
-			err = quick.Highlight(app.Out, string(diff), "diff", consoleFormatter, consoleStyle)
-			if err != nil {
-				fmt.Print(string(diff))
-			}
+			app.Debug(fmt.Sprintf("Bytes written: %v", written))
 		},
 	}
 
 	parentCmd.AddCommand(
-		diffCmd,
+		base64Cmd,
 	)
 }

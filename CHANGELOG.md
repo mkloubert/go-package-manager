@@ -1,5 +1,13 @@
 # Change Log (go-package-manager)
 
+## 0.34.0
+
+- feat: `base64` command that outputs binary input data base Base64 string
+- feat: `cat` command that outputs binary input data combined to STDOUT
+- feat: `describe` command that describes images
+- feat: `now` command that outputs current time
+- refactor: `--model` flag is now global
+
 ## 0.33.0
 
 - feat: enhance features of `gpm.yaml` file

@@ -29,6 +29,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/mkloubert/go-package-manager/utils"
 )
 
 // OllamaAIChat is an implementation of ChatAI interface
@@ -55,6 +57,94 @@ type OllamaApiChatCompletionResponse struct {
 
 func (c *OllamaAIChat) ClearHistory() {
 	c.Conversation = []OllamaAIChatMessage{}
+}
+
+func (c *OllamaAIChat) DescribeImage(message string, dataURI string) (DescribeImageResponse, error) {
+	var imageDescription DescribeImageResponse
+
+	base64Content, err := utils.Base64FromDataURI(dataURI)
+	if err != nil {
+		return imageDescription, err
+	}
+
+	url := "http://localhost:11434/api/chat"
+
+	messages := []map[string]interface{}{}
+
+	messages = append(messages, map[string]interface{}{
+		"role":    "user",
+		"content": message,
+		"images":  []string{base64Content},
+	})
+
+	body := map[string]interface{}{
+		"model":  c.GetModel(),
+		"stream": false,
+		"format": map[string]interface{}{
+			"type":     "object",
+			"required": []string{"aria_attributes"},
+			"properties": map[string]interface{}{
+				"aria_attributes": map[string]interface{}{
+					"description": "HTML accessibility attributes which describe the image.",
+					"type":        "object",
+					"required":    []string{"aria_description", "aria_label"},
+					"properties": map[string]interface{}{
+						"aria_description": map[string]interface{}{
+							"description": "Defines a string value that describes or annotates the image in detail.",
+							"type":        "string",
+						},
+						"aria_label": map[string]interface{}{
+							"description": "Defines a string value that can be used to name the image.",
+							"type":        "string",
+						},
+					},
+				},
+			},
+		},
+		"messages": messages,
+	}
+
+	if c.SystemPrompt != "" {
+		body["system"] = c.SystemPrompt
+	}
+
+	jsonData, err := json.Marshal(&body)
+	if err != nil {
+		return imageDescription, err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonData)))
+	if err != nil {
+		return imageDescription, err
+	}
+
+	// setup ...
+	req.Header.Set("Content-Type", "application/json")
+	// ... and finally send the JSON data
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return imageDescription, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return imageDescription, fmt.Errorf("unexpected response: %v", resp.StatusCode)
+	}
+
+	// load the response
+	responseData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return imageDescription, err
+	}
+
+	var completionResponse OllamaApiChatCompletionResponse
+	err = json.Unmarshal(responseData, &completionResponse)
+	if err != nil {
+		return imageDescription, err
+	}
+
+	return get_ai_image_description_from_json(completionResponse.Message.Content)
 }
 
 func (c *OllamaAIChat) GetModel() string {

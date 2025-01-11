@@ -17,6 +17,7 @@
     - [Add alias](#add-alias-)
     - [Add project](#add-project-)
     - [AI chat](#ai-chat-)
+    - [AI image description](#ai-image-description-)
     - [AI prompt](#ai-prompt-)
     - [Build and install executable](#build-and-install-executable-)
     - [Build project](#build-project-)
@@ -167,6 +168,10 @@ the repository will be cloned to `react-spa-template` subfolder, then its `.git`
 #### AI chat [<a href="#commands-">↑</a>]
 
 ![AI Chat Demo 1](./img/demos/ai-chat-demo-1.gif)
+
+#### AI image description [<a href="#commands-">↑</a>]
+
+![AI Image Description Demo 1](./img/demos/ai-image-description-demo-1.gif)
 
 #### AI prompt [<a href="#commands-">↑</a>]
 

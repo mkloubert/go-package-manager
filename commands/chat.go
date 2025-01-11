@@ -26,7 +26,6 @@ package commands
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -266,7 +265,7 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				if err == nil {
 					addInputToHistory(userInput)
 
-					err := quick.Highlight(os.Stdout, answer, "markdown", consoleFormatter, consoleStyle)
+					err := quick.Highlight(app.Out, answer, "markdown", consoleFormatter, consoleStyle)
 					if err != nil {
 						fmt.Print(answer)
 					}

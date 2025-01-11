@@ -165,9 +165,9 @@ Your shell command without Markdown which can directly executed (if multiple ste
 			executeCommand := func() {
 				p := utils.CreateShellCommand(answer)
 				p.Dir = app.Cwd
-				p.Stdout = os.Stdout
-				p.Stderr = os.Stderr
-				p.Stdin = os.Stdin
+				p.Stdout = app.Out
+				p.Stderr = app.ErrorOut
+				p.Stdin = app.In
 
 				err := p.Run()
 
@@ -200,7 +200,7 @@ Your shell command without Markdown which can directly executed (if multiple ste
 				for {
 					fmt.Print("> ")
 
-					reader := bufio.NewReader(os.Stdin)
+					reader := bufio.NewReader(app.In)
 					input, err := reader.ReadString('\n')
 
 					if err != nil {
@@ -224,7 +224,7 @@ Your shell command without Markdown which can directly executed (if multiple ste
 					} else if input == "t" {
 						fmt.Print("Reason (can be blank): ")
 
-						reader := bufio.NewReader(os.Stdin)
+						reader := bufio.NewReader(app.In)
 						reason, err := reader.ReadString('\n')
 						utils.CheckForError(err)
 

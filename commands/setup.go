@@ -159,7 +159,7 @@ func init_setup_updater_command(parentCmd *cobra.Command, app *types.AppContext)
 						fmt.Sprintln(), fmt.Sprintln(),
 					)
 
-					err = quick.Highlight(os.Stdout, bashScript, "shell", consoleFormatter, consoleStyle)
+					err = quick.Highlight(app.Out, bashScript, "shell", consoleFormatter, consoleStyle)
 					if err != nil {
 						fmt.Print(bashScript)
 					}

@@ -261,7 +261,6 @@ func init_generate_password_command(parentCmd *cobra.Command, app *types.AppCont
 
 func init_generate_project_command(parentCmd *cobra.Command, app *types.AppContext) {
 	var alwaysYes bool
-	var customModel string
 	var force bool
 	var noGitInit bool
 	var origin string
@@ -328,8 +327,8 @@ Always return the current and complete state based on our current conversation.`
 			api, err := app.CreateAIChat(apiOptions)
 			utils.CheckForError(err)
 
-			model := customModel
-			if strings.TrimSpace(model) == "" {
+			model := strings.TrimSpace(app.Model)
+			if model == "" {
 				app.Debug("Setting up default model ...")
 
 				if api.GetProvider() == "openai" {
@@ -437,7 +436,7 @@ require (
 
 				askUser := func(question string) bool {
 					if !alwaysYes {
-						reader := bufio.NewReader(os.Stdin)
+						reader := bufio.NewReader(app.In)
 
 						for {
 							fmt.Printf("%s Do you want to do this (Y/n)?: ", question)
@@ -707,7 +706,6 @@ require (
 	}
 
 	projectCmd.Flags().BoolVarP(&force, "force", "f", false, "remove existing output directory before start")
-	projectCmd.Flags().StringVarP(&customModel, "model", "", "", "custom AI model")
 	projectCmd.Flags().BoolVarP(&noGitInit, "no-git-init", "", false, "do not initialize git directory")
 	projectCmd.Flags().StringVarP(&origin, "origin", "", "", "custom git origin url")
 	projectCmd.Flags().StringVarP(&output, "output", "o", "", "custom output directory")

@@ -118,8 +118,8 @@ func run_self_update_command(
 		executeScript := func() {
 			p := exec.Command(customPowerShellBin, "-NoProfile", "-Command", "-")
 			p.Dir = app.Cwd
-			p.Stderr = os.Stderr
-			p.Stdout = os.Stdout
+			p.Stderr = app.ErrorOut
+			p.Stdout = app.Out
 
 			stdinPipe, err := p.StdinPipe()
 			utils.CheckForError(err)
@@ -144,7 +144,7 @@ func run_self_update_command(
 		} else {
 			// ask the user first
 
-			err = quick.Highlight(os.Stdout, string(pwshScript), "powershell", consoleFormatter, consoleStyle)
+			err = quick.Highlight(app.Out, string(pwshScript), "powershell", consoleFormatter, consoleStyle)
 			if err != nil {
 				fmt.Print(string(pwshScript))
 			}
@@ -152,7 +152,7 @@ func run_self_update_command(
 			fmt.Println()
 			fmt.Println()
 
-			reader := bufio.NewReader(os.Stdin)
+			reader := bufio.NewReader(app.In)
 
 			for {
 				fmt.Print("Do you really want to run this PowerShell script (Y/n)? ")
@@ -187,8 +187,8 @@ func run_self_update_command(
 		executeScript := func() {
 			p := exec.Command("sh")
 			p.Dir = app.Cwd
-			p.Stderr = os.Stderr
-			p.Stdout = os.Stdout
+			p.Stderr = app.ErrorOut
+			p.Stdout = app.Out
 
 			stdinPipe, err := p.StdinPipe()
 			utils.CheckForError(err)
@@ -213,7 +213,7 @@ func run_self_update_command(
 		} else {
 			// ask the user first
 
-			err = quick.Highlight(os.Stdout, string(bashScript), "shell", consoleFormatter, consoleStyle)
+			err = quick.Highlight(app.Out, string(bashScript), "shell", consoleFormatter, consoleStyle)
 			if err != nil {
 				fmt.Print(string(bashScript))
 			}
@@ -221,7 +221,7 @@ func run_self_update_command(
 			fmt.Println()
 			fmt.Println()
 
-			reader := bufio.NewReader(os.Stdin)
+			reader := bufio.NewReader(app.In)
 
 			for {
 				fmt.Print("Do you really want to run this bash script (Y/n)? ")
