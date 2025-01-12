@@ -1,6 +1,6 @@
 # Change Log (go-package-manager)
 
-## 0.34.2
+## 0.34.3
 
 - feat: `base64` command that outputs binary input data base Base64 string
 - feat: `cat` command that outputs binary input data combined to STDOUT

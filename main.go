@@ -65,7 +65,7 @@ func main() {
 	// use "gpm-root flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.GpmRootPath, "gpm-root", "", "", "custom root directory for this app")
 	// use custom AI model
-	rootCmd.Flags().StringVarP(&app.Model, "model", "", "", "custom AI model")
+	rootCmd.PersistentFlags().StringVarP(&app.Model, "model", "", "", "custom AI model")
 	// use "no-system-prompt flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.NoSystemPrompt, "no-system-prompt", "", false, "do not use system prompt")
 	// use "ollama flag" everywhere
