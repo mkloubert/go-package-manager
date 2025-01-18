@@ -1,6 +1,6 @@
 # Change Log (go-package-manager)
 
-## 0.35.0
+## 0.35.1
 
 - **BREAKING CHANGE**: `generate guid` => `guid`/`uuid`
 - **BREAKING CHANGE**: `generate password` => `password`
