@@ -18,6 +18,7 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.6.5
 	github.com/joho/godotenv v1.5.1
 	github.com/rivo/tview v0.0.0-20241227133733-17b7edb88c57
+	github.com/robfig/cron v1.2.0
 	github.com/schollz/progressbar/v3 v3.17.1
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/spf13/cobra v1.8.1

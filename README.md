@@ -1,8 +1,16 @@
-# gpm - A package manager in and for Go
+# gpm - A swiss army knife written in and for Go
+
+<p align="center">
+  <img src="./img/gpm_logo_by_marcel_joachim_kloubert.png" alt="GPM logo" width="512"/>
+</p>
+
+<p align="center">
+  Copyright by <a href="https://marcel.coffee" target="_blank">Marcel Joachim Kloubert</a>, created with <a href="https://www.midjourney.com/" target="_blank">Midjourney</a>
+</p>
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/mkloubert/go-package-manager.svg)](https://pkg.go.dev/github.com/mkloubert/go-package-manager) [![Go Report Card](https://goreportcard.com/badge/github.com/mkloubert/go-package-manager)](https://goreportcard.com/report/github.com/mkloubert/go-package-manager)
 
-[![Share via Facebook](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Facebook.png)](https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&quote=gpm%20-%20Go%20Package%20Manager) [![Share via X](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/X.png)](https://x.com/intent/tweet?source=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&text=gpm%20-%20Go%20Package%20Manager) [![Share via Pinterest](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Pinterest.png)](https://pinterest.com/pin/create/button/?url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&description=gpm%20-%20Go%20Package%20Manager) [![Share via Reddit](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Reddit.png)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&title=gpm%20-%20Go%20Package%20Manager) [![Share via LinkedIn](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/LinkedIn.png)](https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&title=gpm%20-%20Go%20Package%20Manager) [![Share via Wordpress](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Wordpress.png)](https://wordpress.com/press-this.php?u=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&s=gpm%20-%20Go%20Package%20Manager) [![Share via Email](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Email.png)](mailto:?subject=gpm%20-%20Go%20Package%20Manager&body=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager)
+[![Share via Pinterest](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Pinterest.png)](https://pinterest.com/pin/create/button/?url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&description=gpm%20-%20Go%20Package%20Manager) [![Share via Reddit](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Reddit.png)](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&title=gpm%20-%20Go%20Package%20Manager) [![Share via LinkedIn](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/LinkedIn.png)](https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&title=gpm%20-%20Go%20Package%20Manager) [![Share via Wordpress](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Wordpress.png)](https://wordpress.com/press-this.php?u=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager&s=gpm%20-%20Go%20Package%20Manager) [![Share via Email](https://raw.githubusercontent.com/mkloubert/go-package-manager/master/img/share/Email.png)](mailto:?subject=gpm%20-%20Go%20Package%20Manager&body=https%3A%2F%2Fgithub.com%2Fmkloubert%2Fgo-package-manager)
 
 ## Table of contents
 
@@ -27,7 +35,10 @@
     - [Checkup project](#checkup-project-)
     - [Cleanup project](#cleanup-project-)
     - [Compare code changes](#compare-code-changes-)
+    - [Compression](#compression-)
+    - [Cron jobs](#cron-jobs-)
     - [Docker shorthands](#docker-shorthands-)
+    - [Encoding](#encoding-)
     - [Execute shell command](#execute-shell-command-)
     - [Generate documentation](#generate-documentation-)
     - [Generate passwords or UUIDs](#generate-passwords-or-uuids-)
@@ -43,6 +54,7 @@
     - [Open alias](#open-alias-)
     - [Open project](#open-project-)
     - [Pack project](#pack-project-)
+    - [Passwords and unique IDs](#passwords-and-unique-ids-)
     - [Publish new version](#publish-new-version-)
     - [Pull from Git remotes](#pull-from-git-remotes-)
     - [Push to Git remotes](#push-to-git-remotes-)
@@ -273,12 +285,41 @@ is a short form of `go mod tidy`.
 
 ![Diff demo 1](./img/demos/diff-demo-1.gif)
 
+#### Compression [<a href="#commands-">↑</a>]
+
+```bash
+# compress LICENSE with gzip
+gpm compress ./LICENSE > ./LICENSE.gz
+
+# decompress LICENSE.gz with gzip
+gpm uncompress ./LICENSE.gz > ./LICENSE_unzipped
+```
+
+#### Cron jobs [<a href="#commands-">↑</a>]
+
+```bash
+# run `date` every second
+gpm cron "@every 1s" date
+
+# run `date` every 2 minutes at :30
+gpm cron "30 */2 * * * *" date
+```
+
+For more information about the cron syntax, you can visit [documentation page of the underlying module](https://pkg.go.dev/github.com/robfig/cron).
+
 #### Docker shorthands [<a href="#commands-">↑</a>]
 
 | Shorthand  | Final command               |
 | ---------- | --------------------------- |
 | `gpm down` | `docker compose down`       |
 | `gpm up`   | `docker compose up --build` |
+
+#### Encoding [<a href="#commands-">↑</a>]
+
+```bash
+# encode HTTP resource with Base64
+gpm cat "https://avatars.githubusercontent.com/u/4951215?v=4" | gpm base64 --data-uri > gitfather_avatar.base64.txt
+```
 
 #### Execute shell command [<a href="#commands-">↑</a>]
 
@@ -462,6 +503,16 @@ will open this URL usually in the browser.
 
 ![AI Chat Demo 1](./img/demos/pack-demo-1.gif)
 
+#### Passwords and unique IDs [<a href="#commands-">↑</a>]
+
+```bash
+# directly generate password and copy to clipboard
+gpm password --no-output --copy
+
+# generate and output UUID
+gpm uuid
+```
+
 #### Publish new version [<a href="#commands-">↑</a>]
 
 Running
@@ -560,6 +611,14 @@ gpm show dependencies
 will create and open a temporary HTML file which will display a dependency graph of all installed modules:
 
 ![Show dependency graph demo 1](./img/demos/show-dependencies-1.png)
+
+#### Sleep [<a href="#commands-">↑</a>]
+
+```bash
+gpm sleep 10s
+```
+
+The command uses [build-in duration format](https://pkg.go.dev/time#Duration).
 
 #### Start project [<a href="#commands-">↑</a>]
 
@@ -785,6 +844,8 @@ The project is licensed under the [MIT](./LICENSE).
 - [Babel.js](https://babeljs.io) by [Babel team](https://opencollective.com/babel)
 - [chroma](https://github.com/alecthomas/chroma) by [Alec Thomas](https://github.com/sponsors/alecthomas)
 - [cobra](https://github.com/spf13/cobra) by [Steve Francia](https://github.com/spf13)
+- [cobra](https://github.com/spf13/cobra) by [Steve Francia](https://github.com/spf13)
+- [cron](https://github.com/robfig/cron) by [Rob Figueiredo](https://github.com/robfig)
 - [Glamour](https://github.com/charmbracelet/glamour) by [Charm](https://github.com/charmbracelet)
 - [go-prompt](https://github.com/c-bata/go-prompt) by [c-bata](https://github.com/sponsors/c-bata)
 - [go-version](https://github.com/hashicorp/go-version) by [HashiCorp](https://github.com/hashicorp)

@@ -5,6 +5,8 @@ aliases:
     - https://github.com/spf13/cobra
   color:
     - https://github.com/fatih/color
+  cron:
+    - https://github.com/robfig/cron
   dotenv:
     - https://github.com/joho/godotenv
   fake-useragent:

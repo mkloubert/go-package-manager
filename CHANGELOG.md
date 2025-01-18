@@ -1,5 +1,15 @@
 # Change Log (go-package-manager)
 
+## 0.35.0
+
+- **BREAKING CHANGE**: `generate guid` => `guid`/`uuid`
+- **BREAKING CHANGE**: `generate password` => `password`
+- feat: `base64` command also supports input files and `--data-uri` flag now
+- feat: `compress` command which compresses data with GZIP
+- feat: `cron` command that runs any kind of "executables" periodically
+- feat: `sleep` command that waits for a specific number of time
+- feat: `uncompress` command which uncompresses GZIP data
+
 ## 0.34.3
 
 - feat: `base64` command that outputs binary input data base Base64 string

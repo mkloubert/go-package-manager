@@ -23,65 +23,34 @@
 package commands
 
 import (
-	"bytes"
-	"encoding/base64"
+	"compress/gzip"
 	"fmt"
-	"net/http"
 
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 	"github.com/spf13/cobra"
 )
 
-func Init_Base64_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var dataURI bool
-
-	var base64Cmd = &cobra.Command{
-		Use:     "base64 [files]",
-		Aliases: []string{"b64"},
-		Short:   "Encode Base64",
-		Long:    `Encode data from STDIN to STDOUT as Base64 encoded data.`,
+func Init_Compress_Command(parentCmd *cobra.Command, app *types.AppContext) {
+	var compressCmd = &cobra.Command{
+		Use:   "compress",
+		Short: "Compress data",
+		Long:  `Compresses input data with gzip.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			debugWrittenValue := func(written int64) {
-				if app.Verbose {
-					fmt.Println()
-				}
-				app.Debug(fmt.Sprintf("Bytes written: %v", written))
+			writer := gzip.NewWriter(app.Out)
+			defer writer.Close()
+
+			written, err := app.WriteAllInputsTo(writer, args...)
+			utils.CheckForError(err)
+
+			if app.Verbose {
+				fmt.Println()
 			}
-
-			if dataURI {
-				var buffer bytes.Buffer
-
-				written, err := app.WriteAllInputsTo(&buffer, args...)
-				utils.CheckForError(err)
-
-				data := buffer.Bytes()
-				defer buffer.Reset()
-
-				encoder := base64.NewEncoder(base64.StdEncoding, app.Out)
-				defer encoder.Close()
-
-				mimeType := http.DetectContentType(data)
-				base64Data := base64.StdEncoding.EncodeToString(data)
-
-				app.Write([]byte(fmt.Sprintf("data:%s;base64,%s", mimeType, base64Data)))
-
-				debugWrittenValue(written)
-			} else {
-				encoder := base64.NewEncoder(base64.StdEncoding, app.Out)
-				defer encoder.Close()
-
-				written, err := app.WriteAllInputsTo(encoder, args...)
-				utils.CheckForError(err)
-
-				debugWrittenValue(written)
-			}
+			app.Debug(fmt.Sprintf("Bytes written: %v", written))
 		},
 	}
 
-	base64Cmd.Flags().BoolVarP(&dataURI, "data-uri", "", false, "output as data URI")
-
 	parentCmd.AddCommand(
-		base64Cmd,
+		compressCmd,
 	)
 }
