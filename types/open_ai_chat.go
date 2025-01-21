@@ -50,6 +50,13 @@ type OpenAIChatMessage struct {
 	Role    string `json:"role,omitempty"`    // the role like user, assistant or system
 }
 
+func (c *OpenAIChat) AddToHistory(role string, content string) {
+	c.Conversation = append(c.Conversation, OpenAIChatMessage{
+		Content: content,
+		Role:    role,
+	})
+}
+
 func (c *OpenAIChat) ClearHistory() {
 	c.Conversation = []OpenAIChatMessage{}
 }

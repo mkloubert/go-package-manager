@@ -32,6 +32,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -59,7 +60,7 @@ type AppContext struct {
 	ErrorOut         io.Writer    // error output
 	GpmFile          GpmFile      // the gpm.y(a)ml file
 	GpmRootPath      string       // custom app root path from CLI flags
-	In               io.Reader    // the input stream
+	In               *os.File     // the input stream
 	IsCI             bool         // indicates if app runs in CI environment like GitHub action or GitLab runner
 	L                *log.Logger  // the logger to use
 	Model            string       // custom model from CLI flags
@@ -302,7 +303,7 @@ func (app *AppContext) CreateAIChat(options ...CreateAIChatOptions) (ChatAI, err
 	}
 
 	initialModel := strings.TrimSpace(app.Model)
-	systemPrompt := ""
+	systemPrompt := strings.TrimSpace(app.SystemPrompt)
 
 	for _, o := range options {
 		if o.Model != nil {
@@ -406,6 +407,51 @@ func (app *AppContext) EnsureRootFolder() (string, error) {
 		return app.EnsureFolder(rootDir)
 	}
 	return "", err
+}
+
+// app.FindSourceFiles() - returns list of sources files by using patterns or URLs
+func (app *AppContext) FindSourceFiles(patterns ...string) ([]string, error) {
+	matchingSources := make([]string, 0)
+
+	for _, p := range patterns {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue // nothing defined
+		}
+
+		if strings.HasPrefix(p, "http:") || strings.HasPrefix(p, "https:") {
+			// supported URL
+			matchingSources = append(matchingSources, p)
+			continue
+		}
+
+		// now use patterns
+		err := filepath.WalkDir(app.Cwd, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			relativePath, err := filepath.Rel(app.Cwd, path)
+			if err != nil {
+				return err
+			}
+
+			if !d.IsDir() {
+				if matched, err := filepath.Match(p, relativePath); err != nil {
+					return err
+				} else if matched {
+					matchingSources = append(matchingSources, path)
+				}
+			}
+
+			return nil
+		})
+		if err != nil {
+			return matchingSources, err
+		}
+	}
+
+	return utils.RemoveDuplicatesInStringList(matchingSources), nil
 }
 
 // app.GetAIChatSettings() - returns AI chat settings based on this app

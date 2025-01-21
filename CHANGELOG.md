@@ -1,5 +1,11 @@
 # Change Log (go-package-manager)
 
+## 0.36.0
+
+- **BREAKING CHANGE**: `AppContext.CreateAIChat()` now uses initial value from `--system-prompt` flag
+- feat: `generate powerpoint` command, which generates PowerPoint `.pptx` file from files using AI
+- refactor: code cleanups and improvements
+
 ## 0.35.1
 
 - **BREAKING CHANGE**: `generate guid` => `guid`/`uuid`

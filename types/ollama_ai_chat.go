@@ -55,6 +55,13 @@ type OllamaApiChatCompletionResponse struct {
 	Message OllamaAIChatMessage `json:"message,omitempty"` // the message
 }
 
+func (c *OllamaAIChat) AddToHistory(role string, content string) {
+	c.Conversation = append(c.Conversation, OllamaAIChatMessage{
+		Content: content,
+		Role:    role,
+	})
+}
+
 func (c *OllamaAIChat) ClearHistory() {
 	c.Conversation = []OllamaAIChatMessage{}
 }

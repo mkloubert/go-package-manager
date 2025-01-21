@@ -30,6 +30,8 @@ import (
 // ChatAI describes an object that provides abstract
 // methods to interaction with a chat API
 type ChatAI interface {
+	// ChatAI.AddToHistory() - adds an entry to history
+	AddToHistory(role string, content string)
 	// ChatAI.ClearHistory() - clears chat history
 	ClearHistory()
 	// ChatAI.DescribeImage() - describes an image without adding using history
