@@ -1,5 +1,13 @@
 # Change Log (go-package-manager)
 
+## 0.37.0
+
+- **BREAKING CHANGE**: `generate powerpoint` command now uses [.gitignore-like glob patterns](https://github.com/sabhiram/go-gitignore)
+- **BREAKING CHANGE**: `import aliases` and `import projects` commands now uses default sources if no one is defined in the arguments ... both defaults can be customized by `GPM_DEFAULT_ALIAS_SOURCE` and/or `GPM_DEFAULT_PROJECT_SOURCE` environment variables
+- feat: add `--max-slides`, `--min-slides` and `--temperature` flags for `generate powerpoint` command
+- refactor: can use custom standard input now and removed `LoadFromSTDINIfAvailable()` function for this
+- refactor: code cleanups
+
 ## 0.36.0
 
 - **BREAKING CHANGE**: `AppContext.CreateAIChat()` now uses initial value from `--system-prompt` flag

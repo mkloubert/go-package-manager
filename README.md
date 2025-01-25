@@ -809,6 +809,8 @@ Environment variables can be loaded from external files, which are handled in th
 | `GPM_AI_SYSTEM_PROMPT`              | Custom (initial) system prompt for AI chat operations.                                                                                                         | `You are a helpful AI assistant. You always answer in a very sarcastic way.` |
 | `GPM_ALIASES_FILE`                  | Custom path to [aliases.yaml file](#add-alias-). Relative paths will be mapped to `<GPM-ROOT>`. Default is `<GPM-ROOT>/aliases.yaml`.                          | `/my/custom/aliases/file.yaml`                                               |
 | `GPM_BIN_PATH`                      | Custom folder for binaries installed by [make command](#build-and-install-executable-). Default is `<GPM-ROOT>/bin`.                                           | `/my/custom/bin/path`                                                        |
+| `GPM_DEFAULT_ALIAS_SOURCE`          | Custom source for source of [alias imports](#import-aliases-). Multiple sources can be separated by lines.                                                     | `https://example.com/gpm-aliases.yaml`                                       |
+| `GPM_DEFAULT_PROJECT_SOURCE`        | Custom source for source of [project imports](#import-projects-). Multiple sources can be separated by lines.                                                  | `https://example.com/gpm-projects.yaml`                                      |
 | `GPM_DOWN_COMMAND`                  | Custom command for [docker compose down](#docker-shorthands-) shorthand.                                                                                       | `docker-compose down`                                                        |
 | `GPM_ENV`                           | ID of the current environment. This is especially used for the [.env files](#environment-variables-).                                                          | `prod`                                                                       |
 | `GPM_GENERATE_PPTX_FROM_MD_COMMAND` | Template for a command that generates a PowerPoint presentation from a Markdown file.                                                                          | `pandoc -t pptx -o "{{.OutputFile}}" "{{.InputFile}}`                        |
@@ -845,6 +847,7 @@ The project is licensed under the [MIT](./LICENSE).
 - [cobra](https://github.com/spf13/cobra) by [Steve Francia](https://github.com/spf13)
 - [cobra](https://github.com/spf13/cobra) by [Steve Francia](https://github.com/spf13)
 - [cron](https://github.com/robfig/cron) by [Rob Figueiredo](https://github.com/robfig)
+- [gitignore](https://github.com/sabhiram/go-gitignore) by [Shaba Abhiram](https://github.com/sabhiram)
 - [Glamour](https://github.com/charmbracelet/glamour) by [Charm](https://github.com/charmbracelet)
 - [go-prompt](https://github.com/c-bata/go-prompt) by [c-bata](https://github.com/sponsors/c-bata)
 - [go-version](https://github.com/hashicorp/go-version) by [HashiCorp](https://github.com/hashicorp)

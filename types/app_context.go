@@ -32,7 +32,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -425,30 +424,13 @@ func (app *AppContext) FindSourceFiles(patterns ...string) ([]string, error) {
 			continue
 		}
 
-		// now use patterns
-		err := filepath.WalkDir(app.Cwd, func(path string, d os.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-
-			relativePath, err := filepath.Rel(app.Cwd, path)
-			if err != nil {
-				return err
-			}
-
-			if !d.IsDir() {
-				if matched, err := filepath.Match(p, relativePath); err != nil {
-					return err
-				} else if matched {
-					matchingSources = append(matchingSources, path)
-				}
-			}
-
-			return nil
-		})
+		// handle `p` as glob pattern
+		localFiles, err := utils.FindFiles(app.Cwd, p)
 		if err != nil {
 			return matchingSources, err
 		}
+
+		matchingSources = append(matchingSources, localFiles...)
 	}
 
 	return utils.RemoveDuplicatesInStringList(matchingSources), nil
@@ -1069,6 +1051,19 @@ func (app *AppContext) LoadEnvFilesIfExist() {
 	for _, envFilePath := range app.EnvFiles {
 		app.loadEnvFile(envFilePath)
 	}
+}
+
+// app.LoadFromInputIfAvailable() - loads data from input stream of this app if available
+func (app *AppContext) LoadFromInputIfAvailable() (*[]byte, error) {
+	if stat, _ := app.In.Stat(); (stat.Mode() & os.ModeCharDevice) == 0 {
+		data, err := io.ReadAll(app.In)
+		if err == nil {
+			return &data, nil
+		}
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 // app.LoadGpmFileIfExist() - Loads a gpm.y(a)ml file if it exists

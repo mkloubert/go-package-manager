@@ -59,7 +59,7 @@ func Init_Exec_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			)
 
 			if !noStdin {
-				stdin, err := utils.LoadFromSTDINIfAvailable()
+				stdin, err := app.LoadFromInputIfAvailable()
 				utils.CheckForError(err)
 
 				if stdin != nil {

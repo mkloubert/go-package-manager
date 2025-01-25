@@ -64,7 +64,7 @@ func Init_Prompt_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				model = utils.GetDefaultAIChatModel()
 			}
 
-			stdin, err := utils.LoadFromSTDINIfAvailable()
+			stdin, err := app.LoadFromInputIfAvailable()
 			utils.CheckForError(err)
 
 			newUserMessage := strings.Join(args, " ")

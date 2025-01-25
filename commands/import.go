@@ -23,137 +23,10 @@
 package commands
 
 import (
-	"fmt"
-	"strings"
-
-	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 
 	"github.com/mkloubert/go-package-manager/types"
-	"github.com/mkloubert/go-package-manager/utils"
 )
-
-func init_import_alias_command(parentCmd *cobra.Command, app *types.AppContext) {
-	var reset bool
-
-	var importAliasCmd = &cobra.Command{
-		Use:     "aliases [source]",
-		Aliases: []string{"a", "al", "alias"},
-		Short:   "Import alias",
-		Long:    `Downloads alias files from external resources and merge them with local one.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			importFromYaml := func(yamlData []byte) {
-				var aliasFile types.AliasesFile
-				err := yaml.Unmarshal(yamlData, &aliasFile)
-				utils.CheckForError(err)
-
-				if aliasFile.Aliases == nil {
-					return
-				}
-
-				for alias, urls := range aliasFile.Aliases {
-					app.Debug(fmt.Sprintf("Updating alias '%v' with '%v' ...", alias, urls))
-					app.AliasesFile.Aliases[alias] = urls
-				}
-			}
-
-			if reset {
-				app.AliasesFile.Aliases = map[string][]string{}
-			}
-
-			// collect data ...
-			for _, a := range args {
-				alias := strings.TrimSpace(a)
-				if alias == "" {
-					continue
-				}
-
-				yamlData, err := app.LoadDataFrom(alias)
-				utils.CheckForError(err)
-
-				importFromYaml(yamlData)
-			}
-
-			stdin, err := utils.LoadFromSTDINIfAvailable()
-			utils.CheckForError(err)
-			if stdin != nil {
-				app.Debug("Updating projects from STDIN ...")
-				importFromYaml(*stdin)
-			}
-
-			// ... finally update aliases file
-			err = app.UpdateAliasesFile()
-			utils.CheckForError(err)
-		},
-	}
-
-	importAliasCmd.Flags().BoolVarP(&reset, "reset", "", false, "reset before import entries")
-
-	parentCmd.AddCommand(
-		importAliasCmd,
-	)
-}
-
-func init_import_project_command(parentCmd *cobra.Command, app *types.AppContext) {
-	var reset bool
-
-	var importProjectCmd = &cobra.Command{
-		Use:     "projects [source]",
-		Aliases: []string{"p", "pr", "prj", "prjs", "project"},
-		Short:   "Import project",
-		Long:    `Downloads project files from external resources and merge them with local one.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			importFromYaml := func(yamlData []byte) {
-				var projectFile types.ProjectsFile
-				err := yaml.Unmarshal(yamlData, &projectFile)
-				utils.CheckForError(err)
-
-				if projectFile.Projects == nil {
-					return
-				}
-
-				for alias, url := range projectFile.Projects {
-					app.Debug(fmt.Sprintf("Updating project '%v' with '%v' ...", alias, url))
-					app.ProjectsFile.Projects[alias] = url
-				}
-			}
-
-			if reset {
-				app.ProjectsFile.Projects = map[string]string{}
-			}
-
-			// collect data ...
-			for _, a := range args {
-				source := strings.TrimSpace(a)
-				if source == "" {
-					continue
-				}
-
-				yamlData, err := app.LoadDataFrom(source)
-				utils.CheckForError(err)
-
-				importFromYaml(yamlData)
-			}
-
-			stdin, err := utils.LoadFromSTDINIfAvailable()
-			utils.CheckForError(err)
-			if stdin != nil {
-				app.Debug("Updating projects from STDIN ...")
-				importFromYaml(*stdin)
-			}
-
-			// ... finally update projects file
-			err = app.UpdateProjectsFile()
-			utils.CheckForError(err)
-		},
-	}
-
-	importProjectCmd.Flags().BoolVarP(&reset, "reset", "", false, "reset before import entries")
-
-	parentCmd.AddCommand(
-		importProjectCmd,
-	)
-}
 
 func Init_Import_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var importCmd = &cobra.Command{
@@ -166,8 +39,8 @@ func Init_Import_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
-	init_import_alias_command(importCmd, app)
-	init_import_project_command(importCmd, app)
+	init_import_aliases_command(importCmd, app)
+	init_import_projects_command(importCmd, app)
 
 	parentCmd.AddCommand(
 		importCmd,

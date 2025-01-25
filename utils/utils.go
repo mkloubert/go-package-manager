@@ -404,19 +404,6 @@ func IsFileExisting(fp string) (bool, error) {
 	return !info.IsDir(), nil
 }
 
-// LoadFromSTDINIfAvailable() - loads data from STDIN if available
-func LoadFromSTDINIfAvailable() (*[]byte, error) {
-	if stat, _ := os.Stdin.Stat(); (stat.Mode() & os.ModeCharDevice) == 0 {
-		data, err := io.ReadAll(os.Stdin)
-		if err == nil {
-			return &data, nil
-		}
-		return nil, err
-	}
-
-	return nil, nil
-}
-
 // ListFiles() - checks if current operating system is Microsoft Windows or not
 func ListFiles(dir string, pattern string) ([]string, error) {
 	var matchingFiles []string

@@ -11,6 +11,8 @@ aliases:
     - https://github.com/joho/godotenv
   fake-useragent:
     - https://github.com/eddycjy/fake-useragent
+  gitignore:
+    - https://github.com/sabhiram/go-gitignore
   glamour:
     - github.com/charmbracelet/glamour
   mongo:

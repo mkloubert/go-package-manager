@@ -25,12 +25,46 @@
 package utils
 
 import (
+	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
+
+	ignore "github.com/sabhiram/go-gitignore"
 )
 
 // SanitizeFilenameOptions stores options for `SanitizeFilename()` function
 type SanitizeFilenameOptions struct {
 	Replacement *string // character to replace unsafe characters with
+}
+
+// FindFiles() - searches for files in a directory by using glob patterns
+// known from .gitignore files
+func FindFiles(dir string, patterns ...string) ([]string, error) {
+	gitignore := ignore.CompileIgnoreLines(patterns...)
+
+	files := make([]string, 0)
+
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			relativePath, _ := filepath.Rel(dir, path)
+
+			relativePath = strings.ReplaceAll(relativePath, string(filepath.Separator), "/")
+			relativePath = "/" + relativePath
+
+			if gitignore.MatchesPath(relativePath) {
+				files = append(files, path)
+			}
+		}
+
+		return nil
+	})
+
+	return RemoveDuplicatesInStringList(files), err
 }
 
 // SanitizeFilename() - cleans up an input string to one which can be used in a filename

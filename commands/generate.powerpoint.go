@@ -15,7 +15,7 @@ import (
 )
 
 type generatePowerpointMarkdownResponse struct {
-	MarkdownCode string `json:"markdown_code,omitempty"`
+	MarkdownCodeForPandoc string `json:"markdown_code_for_pandoc,omitempty"`
 }
 
 func init_generate_powerpoint_command(parentCmd *cobra.Command, app *types.AppContext) {
@@ -23,6 +23,10 @@ func init_generate_powerpoint_command(parentCmd *cobra.Command, app *types.AppCo
 	var customCwd string
 	var customLanguage string
 	var customTemplate string
+	var focusOn string
+	var minSlides int
+	var maxSlides int
+	var temperature float32
 
 	var powerpointCmd = &cobra.Command{
 		Use:     "powerpoint [output file] [resources]",
@@ -51,6 +55,8 @@ func init_generate_powerpoint_command(parentCmd *cobra.Command, app *types.AppCo
 
 			chat, err := app.CreateAIChat()
 			utils.CheckForError(err)
+
+			chat.UpdateTemperature(temperature)
 
 			systemPrompt := strings.TrimSpace(app.SystemPrompt)
 			if systemPrompt == "" {
@@ -120,14 +126,28 @@ During this process, you have to respond with 'OK' until I give you further inst
 				"type":     "object",
 				"required": []string{"markdown_code"},
 				"properties": map[string]interface{}{
-					"markdown_code": map[string]interface{}{
-						"description": "The markdown code.",
+					"markdown_code_for_pandoc": map[string]interface{}{
+						"description": "The markdown code which can be used with Pandoc tool to create PowerPoint files.",
 						"type":        "string",
 					},
 				},
 			}
 
 			jsonStr := ""
+
+			slideCountInfo := ""
+			if minSlides > -1 && maxSlides > -1 {
+				slideCountInfo = fmt.Sprintf("Produce between %v and %v slides.", minSlides, maxSlides)
+			} else if minSlides > -1 {
+				slideCountInfo = fmt.Sprintf("Produce a minimum of %v slides.", minSlides)
+			} else if maxSlides > -1 {
+				slideCountInfo = fmt.Sprintf("Produce a maximum of %v slides.", maxSlides)
+			}
+
+			focusInfo := strings.TrimSpace(focusOn)
+			if focusInfo != "" {
+				focusInfo = fmt.Sprintf("Focus in particular on the following: %v", focusInfo)
+			}
 
 			app.Debug("Starting AI chat ...")
 			chat.WithJsonSchema(
@@ -153,8 +173,14 @@ Here is an example:
 
 %s
 
-Your final markdown in %s language (today is %s):`,
+%s
+
+%s
+
+Your final Pandoc compatible markdown in %s language (today is %s):`,
 					moreContext,
+					focusInfo,
+					slideCountInfo,
 					language,
 					now.Format("January 02, 2006"),
 				),
@@ -180,7 +206,7 @@ Your final markdown in %s language (today is %s):`,
 			}()
 
 			app.Debug(fmt.Sprintf("Output markdown to '%s' ...", inFile.Name()))
-			bytesWritten, err := inFile.WriteString(response.MarkdownCode)
+			bytesWritten, err := inFile.WriteString(response.MarkdownCodeForPandoc)
 			utils.CheckForError(err)
 			app.Debug(fmt.Sprintf("%v bytes written", bytesWritten))
 
@@ -234,6 +260,10 @@ Your final markdown in %s language (today is %s):`,
 	powerpointCmd.Flags().StringVarP(&customCwd, "cwd", "", "", "custom working directory for command that generates PowerPoint")
 	powerpointCmd.Flags().StringVarP(&customLanguage, "language", "", "", "custom response language")
 	powerpointCmd.Flags().StringVarP(&customTemplate, "template", "", "", "custom template for command that generates PowerPoint")
+	powerpointCmd.Flags().StringVarP(&focusOn, "focus-on", "", "", "additional information about the focus")
+	powerpointCmd.Flags().IntVarP(&maxSlides, "max-slides", "", -1, "tell AI number of maximum slides")
+	powerpointCmd.Flags().IntVarP(&minSlides, "min-slides", "", -1, "tell AI number of minimum slides")
+	powerpointCmd.Flags().Float32VarP(&temperature, "temperature", "", utils.GetAIChatTemperature(0.3), "custom temperature value")
 
 	parentCmd.AddCommand(
 		powerpointCmd,
