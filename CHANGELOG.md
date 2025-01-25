@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.38.0
+
+- **BREAKING CHANGE**: `generate powerpoint` command now uses regular expressions now
+
 ## 0.37.0
 
 - **BREAKING CHANGE**: `generate powerpoint` command now uses [.gitignore-like glob patterns](https://github.com/sabhiram/go-gitignore)

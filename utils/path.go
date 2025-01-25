@@ -29,8 +29,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	ignore "github.com/sabhiram/go-gitignore"
 )
 
 // SanitizeFilenameOptions stores options for `SanitizeFilename()` function
@@ -38,12 +36,24 @@ type SanitizeFilenameOptions struct {
 	Replacement *string // character to replace unsafe characters with
 }
 
-// FindFiles() - searches for files in a directory by using glob patterns
-// known from .gitignore files
+// FindFiles() - searches for files in a directory by using regulat expressions
 func FindFiles(dir string, patterns ...string) ([]string, error) {
-	gitignore := ignore.CompileIgnoreLines(patterns...)
-
 	files := make([]string, 0)
+
+	matchesPath := func(fp string) (bool, error) {
+		for _, p := range patterns {
+			r, err := regexp.Compile(p)
+			if err != nil {
+				return false, err
+			}
+
+			if r.Match([]byte(fp)) {
+				return true, nil
+			}
+		}
+
+		return false, nil
+	}
 
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -56,7 +66,12 @@ func FindFiles(dir string, patterns ...string) ([]string, error) {
 			relativePath = strings.ReplaceAll(relativePath, string(filepath.Separator), "/")
 			relativePath = "/" + relativePath
 
-			if gitignore.MatchesPath(relativePath) {
+			doesMatch, err := matchesPath(relativePath)
+			if err != nil {
+				return err
+			}
+
+			if doesMatch {
 				files = append(files, path)
 			}
 		}

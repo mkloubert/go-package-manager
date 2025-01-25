@@ -408,7 +408,7 @@ func (app *AppContext) EnsureRootFolder() (string, error) {
 	return "", err
 }
 
-// app.FindSourceFiles() - returns list of sources files by using patterns or URLs
+// app.FindSourceFiles() - returns list of sources files by using regex patterns or URLs
 func (app *AppContext) FindSourceFiles(patterns ...string) ([]string, error) {
 	matchingSources := make([]string, 0)
 
