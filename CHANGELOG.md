@@ -1,6 +1,6 @@
 # Change Log (go-package-manager)
 
-## 0.41.0
+## 0.41.2
 
 - **BREAKING CHANGE**: implement feature of settings in `settings.yaml` and `gpm.yaml` files and refactored many settings to it
 - refactor: code cleanups and improvements

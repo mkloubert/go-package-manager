@@ -2,11 +2,9 @@ package types
 
 import (
 	"fmt"
-	"math/rand/v2"
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/mkloubert/go-package-manager/utils"
 )
@@ -59,12 +57,7 @@ func (sf *SettingsFile) getValue(
 	convertValue func(interface{}, interface{}) interface{},
 	options ...GetSettingOptions,
 ) interface{} {
-	defaultValuePlaceholder := fmt.Sprintf(
-		"%v::%v::%v",
-		rand.Int64(),
-		"69800cbc-1bb4-447f-b072-1433b44ac562",
-		time.Now().UnixNano(),
-	)
+	symbolValue := &struct{}{}
 
 	name = strings.TrimSpace(
 		strings.ToLower(name),
@@ -102,15 +95,15 @@ func (sf *SettingsFile) getValue(
 				sf.app.GetEnvironment(),
 			)
 
-			settingsValue, err := utils.GetValueFromMap(gpmFileSettings, name, defaultValuePlaceholder)
-			if err == nil && settingsValue != defaultValuePlaceholder {
+			settingsValue, err := utils.GetValueFromMap(gpmFileSettings, name, symbolValue)
+			if err == nil && settingsValue != symbolValue {
 				// yes
 				value = settingsValue
 			} else {
 				// no => now finally try global settings.yaml file
 
 				globalSettingsValue, err := utils.GetValueFromMap(sf.data, name, defaultValue)
-				if err == nil && settingsValue != defaultValuePlaceholder {
+				if err == nil && settingsValue != symbolValue {
 					value = globalSettingsValue
 				}
 			}
