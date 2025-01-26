@@ -50,8 +50,6 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var noChecksum bool
 	var noComment bool
 	var noOs bool
-	var noPostScript bool
-	var noPreScript bool
 	var noTag bool
 	var version string
 
@@ -63,7 +61,8 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Run: func(cmd *cobra.Command, args []string) {
 			pvm := app.NewVersionManager()
 
-			if !noPreScript {
+			if !app.NoPreScript {
+				// prepack defined?
 				_, ok := app.GpmFile.Scripts[constants.PrePackScriptName]
 				if ok {
 					app.RunScript(constants.PrePackScriptName)
@@ -288,7 +287,8 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				}()
 			}
 
-			if !noPostScript {
+			if !app.NoPostScript {
+				// postpack defined?
 				_, ok := app.GpmFile.Scripts[constants.PostPackScriptName]
 				if ok {
 					app.RunScript(constants.PostPackScriptName)
@@ -303,8 +303,6 @@ func Init_Pack_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	packCmd.Flags().BoolVarP(&noArch, "no-comment", "", false, "do not add global comment to zip file")
 	packCmd.Flags().BoolVarP(&noChecksum, "no-checksum", "", false, "do not create checksum file")
 	packCmd.Flags().BoolVarP(&noOs, "no-os", "", false, "do not add operating system to output filename")
-	packCmd.Flags().BoolVarP(&noPostScript, "no-post-script", "", false, "do not handle '"+constants.PostPackScriptName+"' script")
-	packCmd.Flags().BoolVarP(&noPreScript, "no-pre-script", "", false, "do not handle '"+constants.PrePackScriptName+"' script")
 	packCmd.Flags().BoolVarP(&noTag, "no-tag", "", false, "do not add tag to output file")
 	packCmd.Flags().StringVarP(&version, "version", "", "", "custom version number")
 

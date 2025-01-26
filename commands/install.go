@@ -30,8 +30,6 @@ import (
 )
 
 func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var noPostScript bool
-	var noPreScript bool
 	var noTidyScript bool
 	var noUpdate bool
 	var tidy bool
@@ -44,7 +42,8 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Long:    `Gets and installs one or more modules by a short name or a valid URL to a git repository.`,
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			if !noPreScript {
+			if !app.NoPreScript {
+				// preinstall defined?
 				_, ok := app.GpmFile.Scripts[constants.PreInstallScriptName]
 				if ok {
 					app.RunScript(constants.PreInstallScriptName)
@@ -63,7 +62,8 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				}
 			}
 
-			if !noPostScript {
+			if !app.NoPostScript {
+				// postinstall defined?
 				_, ok := app.GpmFile.Scripts[constants.PostInstallScriptName]
 				if ok {
 					app.RunScript(constants.PostInstallScriptName)
@@ -79,9 +79,7 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
-	installCmd.Flags().BoolVarP(&noPostScript, "no-post-script", "", false, "do not handle '"+constants.PostInstallScriptName+"' script")
-	installCmd.Flags().BoolVarP(&noPreScript, "no-pre-script", "", false, "do not handle '"+constants.PreInstallScriptName+"' script")
-	installCmd.Flags().BoolVarP(&noPreScript, "no-tidy-script", "", false, "do not handle '"+constants.TidyScriptName+"' script")
+	installCmd.Flags().BoolVarP(&noTidyScript, "no-tidy-script", "", false, "do not handle '"+constants.TidyScriptName+"' script")
 	installCmd.Flags().BoolVarP(&noUpdate, "no-update", "n", false, "do not update modules")
 	installCmd.Flags().BoolVarP(&tidy, "tidy", "", false, "tidy up project after install")
 	installCmd.Flags().StringArrayVarP(&tidyArgs, "tidy-arg", "", []string{}, "arguments for tidy command")

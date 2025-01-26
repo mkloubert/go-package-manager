@@ -103,6 +103,7 @@ type OllamaGenerateResponse struct {
 // TidyUpOptions - options for app.TidyUp() method
 type TidyUpOptions struct {
 	Arguments *[]string // additional command line argumuments
+	NoScript  *bool     // explicit value that indicates if no `tidy` script should be run
 }
 
 // ChatWithAI() - does a simple AI chat based on the current app settings
@@ -1233,11 +1234,15 @@ func (app *AppContext) RunShellCommandByArgs(c string, a ...string) {
 // app.TidyUp() - runs 'go mod tidy' for the current project (folder)
 func (app *AppContext) TidyUp(options ...TidyUpOptions) {
 	args := []string{}
+	noScript := app.NoScript
 
 	// collect and overwrite options if needed
 	for _, o := range options {
 		if o.Arguments != nil {
 			args = *o.Arguments
+		}
+		if o.NoScript != nil {
+			noScript = *o.NoScript
 		}
 	}
 
@@ -1250,7 +1255,7 @@ func (app *AppContext) TidyUp(options ...TidyUpOptions) {
 	}
 
 	_, ok := app.GpmFile.Scripts[constants.TidyScriptName]
-	if !app.NoScript && ok {
+	if !noScript && ok {
 		app.RunScript(constants.TidyScriptName, args...)
 	} else {
 		cmdArgs := []string{"go", "mod", "tidy"}
