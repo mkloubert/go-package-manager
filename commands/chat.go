@@ -261,7 +261,7 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				if err == nil {
 					addInputToHistory(userInput)
 
-					chromaSettings.Highlight(answer, "markdown")
+					chromaSettings.HighlightMarkdown(answer)
 				} else {
 					fmt.Printf("[AI ERROR]: %v", err)
 				}

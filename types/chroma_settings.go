@@ -18,3 +18,8 @@ func (cs *ChromaSettings) Highlight(s string, language string) {
 		cs.app.Write([]byte(s))
 	}
 }
+
+// app.HighlightMarkdown() - tries to output a string highlighted in Markdown
+func (cs *ChromaSettings) HighlightMarkdown(s string) {
+	cs.Highlight(s, "markdown")
+}
