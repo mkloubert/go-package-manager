@@ -1,6 +1,6 @@
 # Change Log (go-package-manager)
 
-## 0.42.0
+## 0.42.1
 
 - **BREAKING CHANGE**: non-empty strings are now handled as `true` value for `CI` environment variable
 - feat: `environment` section for `gpm.yaml` files

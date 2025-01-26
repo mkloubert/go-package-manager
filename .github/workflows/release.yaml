@@ -51,14 +51,14 @@ jobs:
       - uses: actions/checkout@v4.2.2
       - name: "Update build.go"
         run: |
-          echo "package main" > ./build.go &&
-          echo "" >> ./build.go &&
-          echo "import \"runtime\"" >> ./build.go &&
-          echo "" >> ./build.go &&
-          echo "const AppVersion = \"$(echo ${GITHUB_REF#refs/tags/} | cut -c 2-)\"" >> ./build.go &&
-          echo "const BuildArch = runtime.GOARCH" >> ./build.go &&
-          echo "const BuildOS = runtime.GOOS" >> ./build.go
-          echo "const BuildCompiler = \"${{ vars.GO_VERSION }}\"" >> ./build.go
+          echo "package main" > ./constants/build.go &&
+          echo "" >> ./constants/build.go &&
+          echo "import \"runtime\"" >> ./constants/build.go &&
+          echo "" >> ./constants/build.go &&
+          echo "const AppVersion = \"$(echo ${GITHUB_REF#refs/tags/} | cut -c 2-)\"" >> ./constants/build.go &&
+          echo "const BuildArch = runtime.GOARCH" >> ./constants/build.go &&
+          echo "const BuildOS = runtime.GOOS" >> ./constants/build.go
+          echo "const BuildCompiler = \"${{ vars.GO_VERSION }}\"" >> ./constants/build.go
       - uses: wangyoucao577/go-release-action@v1
         with:
           retry: 10

@@ -30,6 +30,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/mkloubert/go-package-manager/commands"
+	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 )
@@ -38,7 +39,7 @@ var rootCmd = &cobra.Command{
 	Use:     "gpm",
 	Short:   "Package manager for Go",
 	Long:    `A package manager for Go projects which simplifies the way of installing dependencies and setting up projects.`,
-	Version: AppVersion,
+	Version: constants.AppVersion,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -48,7 +49,7 @@ func main() {
 	cwd, err := os.Getwd()
 	utils.CheckForError(err)
 
-	var app types.AppContext
+	app := &types.AppContext{}
 	app.L = log.Default()
 	app.Cwd = cwd
 	app.ErrorOut = os.Stderr
@@ -97,50 +98,50 @@ func main() {
 	app.IsCI = strings.TrimSpace(app.GetEnvValue("CI")) != ""
 
 	// initialize commands
-	commands.Init_Add_Command(rootCmd, &app)
-	commands.Init_Base64_Command(rootCmd, &app)
-	commands.Init_Build_Command(rootCmd, &app)
-	commands.Init_Bump_Command(rootCmd, &app)
-	commands.Init_Cat_Command(rootCmd, &app)
-	commands.Init_Chat_Command(rootCmd, &app)
-	commands.Init_Checkout_Command(rootCmd, &app)
-	commands.Init_Compress_Command(rootCmd, &app)
-	commands.Init_Cron_Command(rootCmd, &app)
-	commands.Init_Describe_Command(rootCmd, &app)
-	commands.Init_Diff_Command(rootCmd, &app)
-	commands.Init_Doctor_Command(rootCmd, &app)
-	commands.Init_Down_Command(rootCmd, &app)
-	commands.Init_Exec_Command(rootCmd, &app)
-	commands.Init_Generate_Command(rootCmd, &app)
-	commands.Init_GUID_Command(rootCmd, &app)
-	commands.Init_Import_Command(rootCmd, &app)
-	commands.Init_Init_Command(rootCmd, &app)
-	commands.Init_Install_Command(rootCmd, &app)
-	commands.Init_List_Command(rootCmd, &app)
-	commands.Init_Make_Command(rootCmd, &app)
-	commands.Init_Monitor_Command(rootCmd, &app)
-	commands.Init_New_Command(rootCmd, &app)
-	commands.Init_Now_Command(rootCmd, &app)
-	commands.Init_Open_Command(rootCmd, &app)
-	commands.Init_Pack_Command(rootCmd, &app)
-	commands.Init_Password_Command(rootCmd, &app)
-	commands.Init_Prompt_Command(rootCmd, &app)
-	commands.Init_Publish_Command(rootCmd, &app)
-	commands.Init_Pull_Command(rootCmd, &app)
-	commands.Init_Push_Command(rootCmd, &app)
-	commands.Init_Remove_Command(rootCmd, &app)
-	commands.Init_Run_Command(rootCmd, &app)
-	commands.Init_Setup_Command(rootCmd, &app)
-	commands.Init_Show_Command(rootCmd, &app)
-	commands.Init_Sleep_Command(rootCmd, &app)
-	commands.Init_Start_Command(rootCmd, &app)
-	commands.Init_Sync_Command(rootCmd, &app)
-	commands.Init_Test_Command(rootCmd, &app)
-	commands.Init_Tidy_Command(rootCmd, &app)
-	commands.Init_Uncompress_Command(rootCmd, &app)
-	commands.Init_Uninstall_Command(rootCmd, &app)
-	commands.Init_Up_Command(rootCmd, &app)
-	commands.Init_Update_Command(rootCmd, &app)
+	commands.Init_Add_Command(rootCmd, app)
+	commands.Init_Base64_Command(rootCmd, app)
+	commands.Init_Build_Command(rootCmd, app)
+	commands.Init_Bump_Command(rootCmd, app)
+	commands.Init_Cat_Command(rootCmd, app)
+	commands.Init_Chat_Command(rootCmd, app)
+	commands.Init_Checkout_Command(rootCmd, app)
+	commands.Init_Compress_Command(rootCmd, app)
+	commands.Init_Cron_Command(rootCmd, app)
+	commands.Init_Describe_Command(rootCmd, app)
+	commands.Init_Diff_Command(rootCmd, app)
+	commands.Init_Doctor_Command(rootCmd, app)
+	commands.Init_Down_Command(rootCmd, app)
+	commands.Init_Exec_Command(rootCmd, app)
+	commands.Init_Generate_Command(rootCmd, app)
+	commands.Init_GUID_Command(rootCmd, app)
+	commands.Init_Import_Command(rootCmd, app)
+	commands.Init_Init_Command(rootCmd, app)
+	commands.Init_Install_Command(rootCmd, app)
+	commands.Init_List_Command(rootCmd, app)
+	commands.Init_Make_Command(rootCmd, app)
+	commands.Init_Monitor_Command(rootCmd, app)
+	commands.Init_New_Command(rootCmd, app)
+	commands.Init_Now_Command(rootCmd, app)
+	commands.Init_Open_Command(rootCmd, app)
+	commands.Init_Pack_Command(rootCmd, app)
+	commands.Init_Password_Command(rootCmd, app)
+	commands.Init_Prompt_Command(rootCmd, app)
+	commands.Init_Publish_Command(rootCmd, app)
+	commands.Init_Pull_Command(rootCmd, app)
+	commands.Init_Push_Command(rootCmd, app)
+	commands.Init_Remove_Command(rootCmd, app)
+	commands.Init_Run_Command(rootCmd, app)
+	commands.Init_Setup_Command(rootCmd, app)
+	commands.Init_Show_Command(rootCmd, app)
+	commands.Init_Sleep_Command(rootCmd, app)
+	commands.Init_Start_Command(rootCmd, app)
+	commands.Init_Sync_Command(rootCmd, app)
+	commands.Init_Test_Command(rootCmd, app)
+	commands.Init_Tidy_Command(rootCmd, app)
+	commands.Init_Uncompress_Command(rootCmd, app)
+	commands.Init_Uninstall_Command(rootCmd, app)
+	commands.Init_Up_Command(rootCmd, app)
+	commands.Init_Update_Command(rootCmd, app)
 
 	// execute
 	if err := rootCmd.Execute(); err != nil {
