@@ -23,7 +23,6 @@
 package commands
 
 import (
-	"os"
 	"strings"
 
 	"github.com/mkloubert/go-package-manager/types"
@@ -38,9 +37,10 @@ func Init_Up_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short: "Run docker up",
 		Long:  `Runs docker compose up command.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			GPM_UP_COMMAND := strings.TrimSpace(os.Getenv("GPM_UP_COMMAND"))
-
-			if GPM_UP_COMMAND == "" {
+			customUpCommand := strings.TrimSpace(
+				app.SettingsFile.GetString("up.command", "", ""),
+			)
+			if customUpCommand == "" {
 				baseArgs := []string{"docker", "compose", "up"}
 				if !noBuild {
 					baseArgs = append(baseArgs, "--build")
@@ -50,7 +50,7 @@ func Init_Up_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 				app.RunShellCommandByArgs(shellArgs[0], shellArgs[1:]...)
 			} else {
-				app.RunShellCommand(GPM_UP_COMMAND)
+				app.RunShellCommand(customUpCommand)
 			}
 		},
 	}

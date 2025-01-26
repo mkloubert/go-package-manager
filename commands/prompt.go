@@ -60,7 +60,7 @@ func Init_Prompt_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 			model := strings.TrimSpace(app.Model)
 			if model == "" {
-				model = utils.GetDefaultAIChatModel()
+				model = app.GetDefaultAIChatModel()
 			}
 
 			stdin, err := app.LoadFromInputIfAvailable()

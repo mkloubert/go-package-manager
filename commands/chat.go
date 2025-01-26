@@ -30,7 +30,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alecthomas/chroma/quick"
 	"github.com/briandowns/spinner"
 	"github.com/c-bata/go-prompt"
 	"github.com/fatih/color"
@@ -46,8 +45,7 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short:   "AI chat",
 		Long:    `Chats with an AI model.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			consoleFormatter := utils.GetBestChromaFormatterName()
-			consoleStyle := utils.GetBestChromaStyleName()
+			chromaSettings := app.GetChromaSettings()
 
 			systemPrompt := ""
 			if !app.NoSystemPrompt {
@@ -177,7 +175,7 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					if newFormatter == "" {
 						fmt.Printf("[INPUT ERROR] Please define a formatter%v", fmt.Sprintln())
 					} else {
-						consoleFormatter = newFormatter
+						chromaSettings.Formatter = newFormatter
 					}
 
 					continue
@@ -208,7 +206,7 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 					if newStyle == "" {
 						fmt.Printf("[INPUT ERROR] Please define a style%v", fmt.Sprintln())
 					} else {
-						consoleStyle = newStyle
+						chromaSettings.Style = newStyle
 					}
 
 					continue
@@ -263,10 +261,7 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				if err == nil {
 					addInputToHistory(userInput)
 
-					err := quick.Highlight(app.Out, answer, "markdown", consoleFormatter, consoleStyle)
-					if err != nil {
-						fmt.Print(answer)
-					}
+					chromaSettings.Highlight(answer, "markdown")
 				} else {
 					fmt.Printf("[AI ERROR]: %v", err)
 				}

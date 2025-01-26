@@ -39,9 +39,9 @@ func Init_Init_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var force bool
 
 	var initCmd = &cobra.Command{
-		Use:   "init [resource]",
-		Short: "Init project or resource",
-		Long:  `Inits if no argument is defined the gpm.yaml, file otherwise a resource like a workflow.`,
+		Use:   "init",
+		Short: "Init project",
+		Long:  `Inits if no argument is defined the gpm.yaml.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			gpmFilePath := path.Join(app.Cwd, "gpm.yaml")
 			gpmDirPath := path.Dir(gpmFilePath)
@@ -80,7 +80,9 @@ func Init_Init_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		},
 	}
 
-	initCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "overwrite existing resource")
+	initCmd.PersistentFlags().BoolVarP(&force, "force", "f", false, "overwrite existing file")
+
+	init_init_settings_command(initCmd, app)
 
 	parentCmd.AddCommand(
 		initCmd,

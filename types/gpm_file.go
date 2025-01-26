@@ -31,16 +31,18 @@ import (
 
 // GpmFile stores all data of a gpm.y(a)ml file.
 type GpmFile struct {
-	Contributors []GpmFileContributor `yaml:"contributors,omitempty"` // list of contributors
-	Description  string               `yaml:"description,omitempty"`  // the description
-	DisplayName  string               `yaml:"display_name,omitempty"` // the display name
-	Donations    map[string]string    `yaml:"donations,omitempty"`    // one or more donation links
-	Files        []string             `yaml:"files,omitempty"`        // whitelist of file patterns which are used by pack command for example
-	Homepage     string               `yaml:"homepage,omitempty"`     // the homepage
-	License      string               `yaml:"license,omitempty"`      // the license
-	Name         string               `yaml:"name,omitempty"`         // the name
-	Repositories []GpmFileRepository  `yaml:"repositories,omitempty"` // source code repository information
-	Scripts      map[string]string    `yaml:"scripts,omitempty"`      // one or more scripts
+	Contributors []GpmFileContributor   `yaml:"contributors,omitempty"` // list of contributors
+	Description  string                 `yaml:"description,omitempty"`  // the description
+	DisplayName  string                 `yaml:"display_name,omitempty"` // the display name
+	Donations    map[string]string      `yaml:"donations,omitempty"`    // one or more donation links
+	Files        []string               `yaml:"files,omitempty"`        // whitelist of file patterns which are used by pack command for example
+	Homepage     string                 `yaml:"homepage,omitempty"`     // the homepage
+	License      string                 `yaml:"license,omitempty"`      // the license
+	Name         string                 `yaml:"name,omitempty"`         // the name
+	Repositories []GpmFileRepository    `yaml:"repositories,omitempty"` // source code repository information
+	Scripts      map[string]string      `yaml:"scripts,omitempty"`      // one or more scripts
+	Settings     map[string]interface{} `yaml:"settings,omitempty"`     // custom settings
+	yamlData     []byte
 }
 
 // GpmFileContributor is an item inside `Contributors` of a
@@ -63,25 +65,44 @@ type GpmFileRepository struct {
 // file, if exists, otherwise the default one
 func (g *GpmFile) GetFilesSectionByEnvSafe(envName string) []string {
 	if envName != "" {
-		data, err := yaml.Marshal(g)
-		if err == nil {
-			var gpmFileAsMap map[string]interface{}
-			err := yaml.Unmarshal(data, &gpmFileAsMap)
+		var gpmFileAsMap map[string]interface{}
+		err := yaml.Unmarshal(g.yamlData, &gpmFileAsMap)
 
-			if err == nil && gpmFileAsMap != nil {
-				key := fmt.Sprintf("files:%s", envName)
+		if err == nil && gpmFileAsMap != nil {
+			key := fmt.Sprintf("files:%s", envName)
 
-				maybeArray, ok := gpmFileAsMap[key]
-				if ok && maybeArray != nil {
-					files, ok := maybeArray.([]string)
-					if ok && files != nil {
-						return files // found existing, valid string array
-					}
+			maybeArray, ok := gpmFileAsMap[key]
+			if ok && maybeArray != nil {
+				files, ok := maybeArray.([]string)
+				if ok && files != nil {
+					return files // found existing, valid string array
 				}
 			}
 		}
 	}
 	return g.Files
+}
+
+// GetSettingsSectionByEnvSafe() - will return environment specific `settings` section in `gpm.yaml`
+// file, if exists, otherwise the default one
+func (g *GpmFile) GetSettingsSectionByEnvSafe(envName string) map[string]interface{} {
+	if envName != "" {
+		var gpmFileAsMap map[string]interface{}
+		err := yaml.Unmarshal(g.yamlData, &gpmFileAsMap)
+
+		if err == nil && gpmFileAsMap != nil {
+			key := fmt.Sprintf("settings:%s", envName)
+
+			maybeMap, ok := gpmFileAsMap[key]
+			if ok && maybeMap != nil {
+				settings, ok := maybeMap.(map[string]interface{})
+				if ok && settings != nil {
+					return settings // found existing, valid map
+				}
+			}
+		}
+	}
+	return g.Settings
 }
 
 // LoadGpmFile() - Loads a gpm.yaml file via a file path
@@ -103,6 +124,9 @@ func LoadGpmFile(gpmFilePath string) (GpmFile, error) {
 		if gpm.Scripts == nil {
 			gpm.Scripts = map[string]string{}
 		}
+		if gpm.Settings == nil {
+			gpm.Settings = map[string]interface{}{}
+		}
 	}()
 
 	yamlData, err := os.ReadFile(gpmFilePath)
@@ -111,6 +135,7 @@ func LoadGpmFile(gpmFilePath string) (GpmFile, error) {
 	}
 
 	err = yaml.Unmarshal(yamlData, &gpm)
+	gpm.yamlData = yamlData
 
 	return gpm, err
 }

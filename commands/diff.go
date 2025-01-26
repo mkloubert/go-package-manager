@@ -23,11 +23,9 @@
 package commands
 
 import (
-	"fmt"
 	"os/exec"
 	"strings"
 
-	"github.com/alecthomas/chroma/quick"
 	"github.com/hashicorp/go-version"
 	"github.com/spf13/cobra"
 
@@ -42,8 +40,7 @@ func Init_Diff_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short:   "Diff resources",
 		Long:    `Compares two resources.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			consoleFormatter := utils.GetBestChromaFormatterName()
-			consoleStyle := utils.GetBestChromaStyleName()
+			chromaSettings := app.GetChromaSettings()
 
 			version1, err := version.NewVersion(strings.TrimSpace(args[0]))
 			utils.CheckForError(err)
@@ -66,10 +63,7 @@ func Init_Diff_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			diff, err := p.Output()
 			utils.CheckForError(err)
 
-			err = quick.Highlight(app.Out, string(diff), "diff", consoleFormatter, consoleStyle)
-			if err != nil {
-				fmt.Print(string(diff))
-			}
+			chromaSettings.Highlight(string(diff), "diff")
 		},
 	}
 

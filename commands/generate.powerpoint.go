@@ -214,7 +214,7 @@ Your final Pandoc compatible markdown in %s language (today is %s):`,
 				// now try from environment variable
 
 				cmdTplCode = strings.TrimSpace(
-					os.Getenv("GPM_GENERATE_PPTX_FROM_MD_COMMAND"),
+					app.SettingsFile.GetString("generate.pptx.from.md.command", "", ""),
 				)
 			}
 			if cmdTplCode == "" {

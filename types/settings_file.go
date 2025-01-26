@@ -1,0 +1,121 @@
+package types
+
+import (
+	"fmt"
+	"math/rand/v2"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/mkloubert/go-package-manager/utils"
+)
+
+// SettingsFile handles a settings.yaml file
+type SettingsFile struct {
+	app  *AppContext
+	data map[string]interface{}
+}
+
+// sf.GetFloat32() - returns a string value from settings via dot-notation
+func (sf *SettingsFile) GetFloat32(name string, flagValue float32, defaultValue float32, options ...GetSettingOptions) float32 {
+	return sf.getValue(
+		name,
+		flagValue, defaultValue,
+		func(input interface{}, defaultValue interface{}) interface{} {
+			s := strings.TrimSpace(
+				fmt.Sprintf("%v", input),
+			)
+
+			f, err := strconv.ParseFloat(s, 32)
+			if err == nil {
+				return float32(f)
+			}
+			return defaultValue
+		},
+		options...,
+	).(float32)
+}
+
+// sf.GetString() - returns a string value from settings via dot-notation
+func (sf *SettingsFile) GetString(name string, flagValue string, defaultValue string, options ...GetSettingOptions) string {
+	return sf.getValue(
+		name,
+		flagValue, defaultValue,
+		func(input interface{}, defaultValue interface{}) interface{} {
+			s := input.(string)
+			if s == "" {
+				return defaultValue
+			}
+			return s
+		},
+		options...,
+	).(string)
+}
+
+func (sf *SettingsFile) getValue(
+	name string,
+	flagValue interface{}, defaultValue interface{},
+	convertValue func(interface{}, interface{}) interface{},
+	options ...GetSettingOptions,
+) interface{} {
+	defaultValuePlaceholder := fmt.Sprintf(
+		"%v::%v::%v",
+		rand.Int64(),
+		"69800cbc-1bb4-447f-b072-1433b44ac562",
+		time.Now().UnixNano(),
+	)
+
+	name = strings.TrimSpace(
+		strings.ToLower(name),
+	)
+
+	// collect options
+	doNotTrimEnvValues := false
+	for _, o := range options {
+		if o.DoNotTrimEnvValues != nil {
+			doNotTrimEnvValues = *o.DoNotTrimEnvValues
+		}
+	}
+
+	var value interface{} = flagValue
+
+	// first try flag value
+	if value == defaultValue {
+		// no => try environment variable
+		// foo.bar => GPM_FOO_BAR
+		envName := "GPM_" + strings.TrimSpace(
+			strings.ToUpper(
+				strings.ReplaceAll(name, ".", "_"),
+			),
+		)
+
+		envValue := os.Getenv(envName)
+		if !doNotTrimEnvValues {
+			envValue = strings.TrimSpace(envValue)
+		}
+
+		value = convertValue(envValue, defaultValue)
+		if value == defaultValue {
+			// now try if there is a setting in "sections" of gpm.yaml file
+			gpmFileSettings := sf.app.GpmFile.GetSettingsSectionByEnvSafe(
+				sf.app.GetEnvironment(),
+			)
+
+			settingsValue, err := utils.GetValueFromMap(gpmFileSettings, name, defaultValuePlaceholder)
+			if err == nil && settingsValue != defaultValuePlaceholder {
+				// yes
+				value = settingsValue
+			} else {
+				// no => now finally try global settings.yaml file
+
+				globalSettingsValue, err := utils.GetValueFromMap(sf.data, name, defaultValue)
+				if err == nil && settingsValue != defaultValuePlaceholder {
+					value = globalSettingsValue
+				}
+			}
+		}
+	}
+
+	return convertValue(value, defaultValue)
+}

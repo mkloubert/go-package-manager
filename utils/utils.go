@@ -190,37 +190,6 @@ func GenerateRandomUint16() uint16 {
 	return uint16(mathRand.Intn(1 << 16)) // 1 << 16 is 65536, the range of uint16
 }
 
-// GetBestChromaFormatterName() - returns the best syntax highlight formatter for the console
-func GetBestChromaFormatterName() string {
-	GPM_TERMINAL_FORMATTER := strings.TrimSpace(
-		strings.ToLower(os.Getenv("GPM_TERMINAL_FORMATTER")),
-	)
-	if GPM_TERMINAL_FORMATTER != "" {
-		return GPM_TERMINAL_FORMATTER
-	}
-
-	switch os := runtime.GOOS; os {
-	case "darwin", "linux":
-		return "terminal16m"
-	case "windows":
-		return "terminal256"
-	}
-
-	return "terminal"
-}
-
-// GetBestChromaStyleName() - returns the best syntax highlight style for the console
-func GetBestChromaStyleName() string {
-	GPM_TERMINAL_STYLE := strings.TrimSpace(
-		strings.ToLower(os.Getenv("GPM_TERMINAL_STYLE")),
-	)
-
-	if GPM_TERMINAL_STYLE != "" {
-		return GPM_TERMINAL_STYLE
-	}
-	return "dracula"
-}
-
 // GetBoolFlag() - returns a boolean command line flag value without error
 func GetBoolFlag(cmd *cobra.Command, name string, defaultValue bool) bool {
 	val, err := cmd.Flags().GetBool(name)
@@ -229,23 +198,6 @@ func GetBoolFlag(cmd *cobra.Command, name string, defaultValue bool) bool {
 	}
 
 	return defaultValue
-}
-
-// GetDefaultAIChatModel() - returns the name of the default AI chat model
-func GetDefaultAIChatModel() string {
-	return strings.TrimSpace(os.Getenv("GPM_AI_CHAT_MODEL"))
-}
-
-// GetDefaultAIChatTemperature() - returns the value of the default AI temperature value
-func GetDefaultAIChatTemperature() float32 {
-	GPM_AI_CHAT_TEMPERATURE := strings.TrimSpace(os.Getenv("GPM_AI_CHAT_TEMPERATURE"))
-
-	defaultValue, err := strconv.ParseFloat(GPM_AI_CHAT_TEMPERATURE, 32)
-	if err != nil {
-		return 0.3
-	}
-
-	return float32(defaultValue)
 }
 
 // GetEnvVar() - returns, if found, the value of an existing environment

@@ -32,7 +32,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/alecthomas/chroma/quick"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
@@ -105,8 +104,7 @@ func init_setup_updater_command(parentCmd *cobra.Command, app *types.AppContext)
 			binPath, err := app.GetBinFolderPath()
 			utils.CheckForError(err)
 
-			consoleFormatter := utils.GetBestChromaFormatterName()
-			consoleStyle := utils.GetBestChromaStyleName()
+			chromaSettings := app.GetChromaSettings()
 
 			goos := runtime.GOOS
 			goarch := runtime.GOARCH
@@ -159,10 +157,7 @@ func init_setup_updater_command(parentCmd *cobra.Command, app *types.AppContext)
 						fmt.Sprintln(), fmt.Sprintln(),
 					)
 
-					err = quick.Highlight(app.Out, bashScript, "shell", consoleFormatter, consoleStyle)
-					if err != nil {
-						fmt.Print(bashScript)
-					}
+					chromaSettings.Highlight(bashScript, "shell")
 				}
 			}
 

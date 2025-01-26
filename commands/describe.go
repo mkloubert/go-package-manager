@@ -29,7 +29,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/alecthomas/chroma/quick"
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 
@@ -53,8 +52,7 @@ func Init_Describe_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			allInputs, err := app.ReadAllInputs(args...)
 			utils.CheckForError(err)
 
-			consoleFormatter := utils.GetBestChromaFormatterName()
-			consoleStyle := utils.GetBestChromaStyleName()
+			chromaSettings := app.GetChromaSettings()
 
 			contentType := strings.ToLower(http.DetectContentType(allInputs))
 			if !strings.HasPrefix(contentType, "image/") {
@@ -124,10 +122,7 @@ func Init_Describe_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 			outputData := func(data []byte, syntax string) {
 				if prettyOutput {
-					err = quick.Highlight(app.Out, string(data), syntax, consoleFormatter, consoleStyle)
-					if err != nil {
-						fmt.Print(string(data))
-					}
+					chromaSettings.Highlight(string(data), syntax)
 				} else {
 					fmt.Print(string(data))
 				}

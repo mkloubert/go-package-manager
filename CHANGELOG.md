@@ -1,5 +1,10 @@
 # Change Log (go-package-manager)
 
+## 0.41.0
+
+- **BREAKING CHANGE**: implement feature of settings in `settings.yaml` and `gpm.yaml` files and refactored many settings to it
+- refactor: code cleanups and improvements
+
 ## 0.40.1
 
 - **BREAKING CHANGE**: `publish` command now supports `publish`, `prepublish` and `postpublish` scripts in `gpm.yaml` file

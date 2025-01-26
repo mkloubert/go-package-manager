@@ -72,6 +72,8 @@ type AppContext struct {
 	ProjectsFile     ProjectsFile // projects.yaml file in home folder
 	ProjectsFilePath string       // custom file path of the `projects.yaml` file from CLI flags
 	Prompt           string       // custom (AI) prompt
+	SettingsFile     SettingsFile // settings.yaml file
+	SettingsFilePath string       // custom settings file
 	SystemPrompt     string       // custom system prompt
 	Temperature      float32      // temperature value for AI chats from CLI flags
 	Verbose          bool         // output verbose information
@@ -91,6 +93,11 @@ type CreateAIChatOptions struct {
 	Model        *string // custom model
 	SystemPrompt *string // custom system prompt
 	Temperature  *int    // custom temperature
+}
+
+// GetSettingOptions provides additional options for app.GetSetting() method
+type GetSettingOptions struct {
+	DoNotTrimEnvValues *bool // `true` if not trimming env values
 }
 
 // OllamaGenerateResponse is the response of
@@ -137,7 +144,7 @@ func (app *AppContext) chatWithOllama(prompt string, options ...ChatWithAIOption
 
 	model := strings.TrimSpace(app.Model)
 	if model == "" {
-		model = utils.GetDefaultAIChatModel() // no explicit => take default
+		model = app.GetDefaultAIChatModel() // no explicit => take default
 	}
 	if model == "" {
 		return "", fmt.Errorf("no ai model defined")
@@ -145,7 +152,7 @@ func (app *AppContext) chatWithOllama(prompt string, options ...ChatWithAIOption
 
 	temperature := app.Temperature
 	if temperature < 0 {
-		temperature = utils.GetDefaultAIChatTemperature()
+		temperature = app.GetDefaultAIChatTemperature()
 	}
 	if temperature < 0 {
 		temperature = 0
@@ -221,7 +228,7 @@ func (app *AppContext) chatWithOpenAI(prompt string, settings AIChatSettings, op
 
 	model := strings.TrimSpace(app.Model)
 	if model == "" {
-		model = utils.GetDefaultAIChatModel()
+		model = app.GetDefaultAIChatModel()
 	}
 	if model == "" {
 		return "", fmt.Errorf("no ai model defined")
@@ -229,7 +236,7 @@ func (app *AppContext) chatWithOpenAI(prompt string, settings AIChatSettings, op
 
 	temperature := app.Temperature
 	if temperature < 0 {
-		temperature = utils.GetDefaultAIChatTemperature()
+		temperature = app.GetDefaultAIChatTemperature()
 	}
 	if temperature < 0 {
 		temperature = 0
@@ -336,7 +343,7 @@ func (app *AppContext) CreateAIChat(options ...CreateAIChatOptions) (ChatAI, err
 	}
 
 	if initialModel == "" {
-		initialModel = utils.GetDefaultAIChatModel()
+		initialModel = app.GetDefaultAIChatModel()
 	}
 
 	var api ChatAI = &OllamaAIChat{}
@@ -462,10 +469,19 @@ func (app *AppContext) FindSourceFiles(patterns ...string) ([]string, error) {
 func (app *AppContext) GetAIChatSettings() (AIChatSettings, error) {
 	var settings AIChatSettings
 
-	OPENAI_API_KEY := strings.TrimSpace(os.Getenv("OPENAI_API_KEY"))
+	flagValue := ""
+	if app.Ollama {
+		flagValue = constants.AIApiOllama
+	}
+
+	OPENAI_API_KEY := strings.TrimSpace(
+		app.SettingsFile.GetString("openai.api.key", "", ""),
+	)
 
 	GPM_AI_API := strings.TrimSpace(
-		strings.ToLower(os.Getenv("GPM_AI_API")),
+		strings.ToLower(
+			app.SettingsFile.GetString("ai.api", flagValue, ""),
+		),
 	)
 	if GPM_AI_API == "" {
 		if app.Ollama {
@@ -498,17 +514,7 @@ func (app *AppContext) GetAIChatSettings() (AIChatSettings, error) {
 
 // app.GetAIPrompt() - returns the AI prompt based on the current app settings
 func (app *AppContext) GetAIPrompt(defaultPrompt string) string {
-	prompt := app.Prompt // first from command line arguments
-
-	if prompt == "" {
-		prompt = os.Getenv("GPM_AI_PROMPT") // no from environment variable
-	}
-
-	if prompt == "" {
-		prompt = defaultPrompt // take the default
-	}
-
-	return prompt
+	return app.SettingsFile.GetString("ai.prompt", app.Prompt, defaultPrompt)
 }
 
 // app.GetAIPromptSettings() - returns AI prompt settings
@@ -536,16 +542,9 @@ func (app *AppContext) GetAITemperature(defaultTemperature float32) float32 {
 
 // app.GetAliasesFilePath() - returns the possible path of the aliases.yaml file
 func (app *AppContext) GetAliasesFilePath() (string, error) {
-	// first try from cli flag
 	customFile := strings.TrimSpace(
-		app.AliasesFilePath,
+		app.SettingsFile.GetString("aliases.file", app.AliasesFilePath, ""),
 	)
-	if customFile == "" {
-		// now from environment variable
-		customFile = strings.TrimSpace(
-			os.Getenv("GPM_ALIASES_FILE"),
-		)
-	}
 	if customFile != "" && path.IsAbs(customFile) {
 		return customFile, nil
 	}
@@ -560,6 +559,35 @@ func (app *AppContext) GetAliasesFilePath() (string, error) {
 		return path.Join(rootDir, "aliases.yaml"), nil
 	}
 	return "", err
+}
+
+func (app *AppContext) getBestChromaFormatterName() string {
+	GPM_TERMINAL_FORMATTER := strings.TrimSpace(
+		app.SettingsFile.GetString("terminal.formatter", "", ""),
+	)
+	if GPM_TERMINAL_FORMATTER != "" {
+		return GPM_TERMINAL_FORMATTER
+	}
+
+	switch os := runtime.GOOS; os {
+	case "darwin", "linux":
+		return "terminal16m"
+	case "windows":
+		return "terminal256"
+	}
+
+	return "terminal"
+}
+
+func (app *AppContext) getBestChromaStyleName() string {
+	GPM_TERMINAL_STYLE := strings.TrimSpace(
+		app.SettingsFile.GetString("terminal.style", "", ""),
+	)
+	if GPM_TERMINAL_STYLE != "" {
+		return GPM_TERMINAL_STYLE
+	}
+
+	return "dracula"
 }
 
 // app.GetBinFolderPath() - returns the possible path of a central bin folder
@@ -583,6 +611,15 @@ func (app *AppContext) GetBinFolderPath() (string, error) {
 	}
 
 	return binPath, nil
+}
+
+// app.GetChromaSettings() - returns settings for terminal syntax highlighter
+func (app *AppContext) GetChromaSettings() *ChromaSettings {
+	return &ChromaSettings{
+		app:       app,
+		Formatter: app.getBestChromaFormatterName(),
+		Style:     app.getBestChromaStyleName(),
+	}
 }
 
 // app.GetCurrentCompilerVersion() - tries to detect the current Go compiler
@@ -668,6 +705,31 @@ func (app *AppContext) GetCurrentGitBranch() (string, error) {
 	defer output.Reset()
 
 	return strings.TrimSpace(output.String()), nil
+}
+
+// app.GetDefaultAIChatModel() - returns the name of the default AI chat model
+func (app *AppContext) GetDefaultAIChatModel() string {
+	defaultValue := "gpt-4o-mini"
+	if app.Ollama {
+		defaultValue = "llama3.3"
+	}
+
+	return app.SettingsFile.GetString("ai.chat.model", app.Model, defaultValue)
+}
+
+// app.GetDefaultAIChatTemperature() - returns the value of the default AI temperature value
+func (app *AppContext) GetDefaultAIChatTemperature() float32 {
+	return app.SettingsFile.GetFloat32("ai.chat.temperature", app.Temperature, 0.3)
+}
+
+// app.GetDefaultSettingsFilePath() - returns the possible paths of global / default settings.yaml file
+func (app *AppContext) GetDefaultSettingsFilePath() (string, error) {
+	rootDir, err := app.GetRootPath()
+	if err != nil {
+		return "", err
+	}
+
+	return path.Join(rootDir, "settings.yaml"), nil
 }
 
 // app.GetEnvFilePaths() - returns possible paths of .env* files
@@ -878,16 +940,9 @@ func (app *AppContext) GetName() string {
 
 // app.GetProjectsFilePath() - returns the possible path of the projects.yaml file
 func (app *AppContext) GetProjectsFilePath() (string, error) {
-	// first try from cli flag
 	customFile := strings.TrimSpace(
-		app.ProjectsFilePath,
+		app.SettingsFile.GetString("projects.file", app.ProjectsFilePath, ""),
 	)
-	if customFile == "" {
-		// now from environment variable
-		customFile = strings.TrimSpace(
-			os.Getenv("GPM_PROJECTS_FILE"),
-		)
-	}
 	if customFile != "" && path.IsAbs(customFile) {
 		return customFile, nil
 	}
@@ -944,19 +999,61 @@ func (app *AppContext) GetRootPath() (string, error) {
 	return "", err
 }
 
+// app.GetSettingsFilePaths() - returns the possible paths of settings.yaml files
+func (app *AppContext) GetSettingsFilePaths() ([]string, bool, error) {
+	// first try from cli flag
+	customFile := strings.TrimSpace(
+		app.SettingsFilePath,
+	)
+	if customFile == "" {
+		// now from environment variable
+		customFile = strings.TrimSpace(
+			os.Getenv("GPM_SETTINGS_FILE"),
+		)
+	}
+	if customFile != "" && path.IsAbs(customFile) {
+		return []string{customFile}, false, nil
+	}
+
+	// now try from <GPM-ROOT> ...
+
+	rootDir, err := app.GetRootPath()
+	if err == nil {
+		if customFile != "" {
+			return []string{path.Join(rootDir, customFile)}, false, nil
+		}
+
+		files := make([]string, 0)
+
+		// check if environment defined
+		// if yes: add suffix
+		envName := app.GetEnvironment()
+		if envName != "" {
+			files = append(
+				files,
+				path.Join(
+					rootDir,
+					// settings.<ENV-NAME>.yaml
+					fmt.Sprintf("settings.%s.yaml", utils.SanitizeFilename(envName)),
+				),
+			)
+		}
+
+		defaultFile, err := app.GetDefaultSettingsFilePath()
+		if err != nil {
+			return files, true, err
+		}
+
+		files = append(files, defaultFile)
+
+		return files, true, nil
+	}
+	return []string{}, false, err
+}
+
 // app.GetSystemAIPrompt() - returns the AI system prompt based on the current app settings
 func (app *AppContext) GetSystemAIPrompt(defaultPrompt string) string {
-	prompt := app.SystemPrompt // first from command line arguments
-
-	if prompt == "" {
-		prompt = os.Getenv("GPM_AI_SYSTEM_PROMPT") // no from environment variable
-	}
-
-	if prompt == "" {
-		prompt = defaultPrompt // take the default
-	}
-
-	return prompt
+	return app.SettingsFile.GetString("ai.system.prompt", app.SystemPrompt, defaultPrompt)
 }
 
 // app.ListFiles() - Lists all files inside the current working directory
@@ -1149,6 +1246,47 @@ func (app *AppContext) LoadProjectsFileIfExist() bool {
 
 	app.ProjectsFile = projects
 	return true
+}
+
+func (app *AppContext) loadSettingsFileFrom(source string) {
+	app.Debug(fmt.Sprintf("Loading settings from '%s' ...", source))
+
+	data, err := os.ReadFile(source)
+	utils.CheckForError(err)
+
+	yaml.Unmarshal(data, &app.SettingsFile.data)
+
+	if app.SettingsFile.data == nil {
+		app.SettingsFile.data = map[string]interface{}{}
+	}
+}
+
+// app.LoadEnvFilesIfExist() - Loads .env* files if they exist
+// and return `true` if file has been loaded successfully.
+func (app *AppContext) LoadSettingsFileIfExist() {
+	app.SettingsFile = SettingsFile{}
+	app.SettingsFile.app = app
+	app.SettingsFile.data = map[string]interface{}{}
+
+	settingsFiles, isDefault, err := app.GetSettingsFilePaths()
+	utils.CheckForError(err)
+
+	mustExist := !isDefault
+
+	found := false
+	for _, fp := range settingsFiles {
+		doesExist, err := utils.IsFileExisting(fp)
+		utils.CheckForError(err)
+
+		if doesExist {
+			app.loadSettingsFileFrom(fp)
+			found = true
+		}
+	}
+
+	if mustExist && !found {
+		utils.CheckForError(fmt.Errorf("no required settings file found"))
+	}
 }
 
 // app.NewVersionManager() - creates a new `ProjectVersionManager` instance based on

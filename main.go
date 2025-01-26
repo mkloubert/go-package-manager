@@ -80,6 +80,8 @@ func main() {
 	rootCmd.PersistentFlags().StringVarP(&app.Prompt, "prompt", "", "", "custom (AI) prompt")
 	// use "projects-file flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.ProjectsFilePath, "projects-file", "", "", "custom projects file")
+	// use "settings file" everywhere
+	rootCmd.PersistentFlags().StringVarP(&app.SettingsFilePath, "settings", "", "", "custom settings file")
 	// use "system-prompt flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.SystemPrompt, "system-prompt", "", "", "custom (AI) system prompt")
 	// use "temperature flag" everywhere
@@ -88,6 +90,7 @@ func main() {
 	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
 
 	app.LoadEnvFilesIfExist()
+	app.LoadSettingsFileIfExist()
 	app.LoadAliasesFileIfExist()
 	app.LoadProjectsFileIfExist()
 	app.LoadGpmFileIfExist()

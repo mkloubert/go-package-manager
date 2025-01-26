@@ -34,7 +34,6 @@ import (
 	"strings"
 
 	browser "github.com/EDDYCJY/fake-useragent"
-	"github.com/alecthomas/chroma/quick"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 )
@@ -45,8 +44,7 @@ func run_self_update_command(
 ) {
 	app.Debug("Will start self-update ...")
 
-	consoleFormatter := utils.GetBestChromaFormatterName()
-	consoleStyle := utils.GetBestChromaStyleName()
+	chromaSettings := app.GetChromaSettings()
 
 	customUserAgent := strings.TrimSpace(userAgent)
 	if customUserAgent == "" {
@@ -144,10 +142,7 @@ func run_self_update_command(
 		} else {
 			// ask the user first
 
-			err = quick.Highlight(app.Out, string(pwshScript), "powershell", consoleFormatter, consoleStyle)
-			if err != nil {
-				fmt.Print(string(pwshScript))
-			}
+			chromaSettings.Highlight(string(pwshScript), "powershell")
 
 			fmt.Println()
 			fmt.Println()
@@ -213,10 +208,7 @@ func run_self_update_command(
 		} else {
 			// ask the user first
 
-			err = quick.Highlight(app.Out, string(bashScript), "shell", consoleFormatter, consoleStyle)
-			if err != nil {
-				fmt.Print(string(bashScript))
-			}
+			chromaSettings.Highlight(string(bashScript), "shell")
 
 			fmt.Println()
 			fmt.Println()
