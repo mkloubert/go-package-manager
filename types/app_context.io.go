@@ -20,19 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package main
+package types
 
-import (
-	"github.com/mkloubert/go-package-manager/app"
-	"github.com/mkloubert/go-package-manager/utils"
-)
-
-func main() {
-	_, rootCmd, err := app.New()
-	utils.CheckForError(err)
-
-	// execute
-	if err := rootCmd.Execute(); err != nil {
-		utils.CloseWithError(err)
+// app.Write() - implementation for an io.Writer
+func (app *AppContext) Write(p []byte) (int, error) {
+	out := app.Out
+	if out == nil {
+		return len(p), nil // deactivated
 	}
+
+	return out.Write(p)
+}
+
+// app.WriteError() - writes to error output
+func (app *AppContext) WriteError(p []byte) (int, error) {
+	errorOut := app.ErrorOut
+	if errorOut == nil {
+		return len(p), nil // deactivated
+	}
+
+	return errorOut.Write(p)
+}
+
+// app.WriteErrorString() - writes to error output
+func (app *AppContext) WriteErrorString(s string) (int, error) {
+	return app.WriteError([]byte(s))
+}
+
+// app.WriteString() - implementation for an io.StringWriter
+func (app *AppContext) WriteString(s string) (int, error) {
+	return app.Write([]byte(s))
 }

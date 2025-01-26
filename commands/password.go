@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/atotto/clipboard"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 	"github.com/spf13/cobra"
@@ -119,7 +118,7 @@ func Init_Password_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			if copyToClipboard {
 				app.Debug("Copy all to clipboard ...")
 
-				err := clipboard.WriteAll(clipboardContent)
+				err := app.Clipboard.WriteText(clipboardContent)
 				utils.CheckForError(err)
 			}
 		},

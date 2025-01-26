@@ -20,19 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package main
+package types
 
-import (
-	"github.com/mkloubert/go-package-manager/app"
-	"github.com/mkloubert/go-package-manager/utils"
-)
+// MemoryClipboard stores clipboard data in memory
+type MemoryClipboard struct {
+	data []byte
+}
 
-func main() {
-	_, rootCmd, err := app.New()
-	utils.CheckForError(err)
-
-	// execute
-	if err := rootCmd.Execute(); err != nil {
-		utils.CloseWithError(err)
+func (dc *MemoryClipboard) ReadText() (string, error) {
+	data := dc.data
+	if data == nil {
+		return "", nil
 	}
+
+	return string(data), nil
+}
+
+func (dc *MemoryClipboard) WriteText(s string) error {
+	dc.data = []byte(s)
+	return nil
 }

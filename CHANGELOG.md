@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.43.0
+
+- ci: implement first tests
+
 ## 0.42.2
 
 - **BREAKING CHANGE**: non-empty strings are now handled as `true` value for `CI` environment variable

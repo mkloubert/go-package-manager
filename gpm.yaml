@@ -31,6 +31,6 @@ scripts:
   docs: "go run . generate documentation ./docs"
   prebump: "go build ."
   prepublish: "go build ."
-  test: "go test -count=1 ./tests/..."
+  test: "go test ./tests/..."
   test1: "echo test1 runs on default environment"
   dev:test1: "echo test1 runs on 'dev' environment"

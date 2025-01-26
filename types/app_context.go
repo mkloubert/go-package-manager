@@ -53,6 +53,7 @@ type AIPrompts struct {
 type AppContext struct {
 	AliasesFile      AliasesFile  // aliases.yaml file in home folder
 	AliasesFilePath  string       // custom file path of the `aliases.yaml` file from CLI flags
+	Clipboard        Clipboard    // clipboard
 	Cwd              string       // current working directory
 	EnvFiles         []string     // one or more env files
 	Environment      string       // the name of the environment
@@ -1543,24 +1544,6 @@ func (app *AppContext) UpdateProjectsFile() error {
 
 	app.Debug(fmt.Sprintf("Updating project file '%v' ...", projectsFilePath))
 	return os.WriteFile(projectsFilePath, yamlData, constants.DefaultFileMode)
-}
-
-// app.Write() - implementation for an io.Writer
-func (app *AppContext) Write(p []byte) (int, error) {
-	if app.Out == nil {
-		return len(p), nil // deactivated
-	}
-
-	return app.Out.Write(p)
-}
-
-// app.Write() - implementation for an io.Writer
-func (app *AppContext) WriteError(p []byte) (int, error) {
-	if app.ErrorOut == nil {
-		return len(p), nil // deactivated
-	}
-
-	return app.ErrorOut.Write(p)
 }
 
 // app.WriteAllInputsTo() - reads from all inputs (STDIN and files, in that order) to an io.Writer

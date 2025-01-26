@@ -59,6 +59,9 @@ jobs:
           echo "const BuildArch = runtime.GOARCH" >> ./constants/build.go &&
           echo "const BuildOS = runtime.GOOS" >> ./constants/build.go
           echo "const BuildCompiler = \"${{ vars.GO_VERSION }}\"" >> ./constants/build.go
+      - name: "Run tests"
+        run: |
+          go test ./tests/...
       - uses: wangyoucao577/go-release-action@v1
         with:
           retry: 10

@@ -32,7 +32,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/atotto/clipboard"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 	"github.com/spf13/cobra"
@@ -215,7 +214,7 @@ Your shell command without Markdown which can directly executed (if multiple ste
 						break
 					} else if input == "c" {
 						app.Debug(fmt.Sprintf("Copying '%v' to clipboard ...", answer))
-						err := clipboard.WriteAll(answer)
+						err := app.Clipboard.WriteText(answer)
 						utils.CheckForError(err)
 
 						break

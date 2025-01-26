@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/atotto/clipboard"
 	"github.com/google/uuid"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
@@ -38,6 +37,12 @@ func Init_GUID_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				}
 			}
 
+			writeString := func(s string) {
+				if !noOutput {
+					app.WriteString(s)
+				}
+			}
+
 			var i uint16 = 0
 			for {
 				if i == count {
@@ -46,7 +51,7 @@ func Init_GUID_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 				i++
 				if i > 1 {
-					fmt.Println()
+					writeString(fmt.Sprintln())
 					addClipboardContent(fmt.Sprintln())
 
 					time.Sleep(time.Duration(waitTime) * time.Millisecond)
@@ -57,26 +62,23 @@ func Init_GUID_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				guid, err := uuid.NewRandom()
 				utils.CheckForError(err)
 
-				var passwordToOutput string
+				var dataToOutput string
 				if base64Output {
 					app.Debug("Base64 output ...")
 
-					passwordToOutput = base64.URLEncoding.EncodeToString(guid[:])
+					dataToOutput = base64.URLEncoding.EncodeToString(guid[:])
 				} else {
-					passwordToOutput = guid.String()
+					dataToOutput = guid.String()
 				}
 
-				if !noOutput {
-					fmt.Print(passwordToOutput)
-				}
-
-				addClipboardContent(passwordToOutput)
+				writeString(dataToOutput)
+				addClipboardContent(dataToOutput)
 			}
 
 			if copyToClipboard {
 				app.Debug("Copy all to clipboard ...")
 
-				err := clipboard.WriteAll(clipboardContent)
+				err := app.Clipboard.WriteText(clipboardContent)
 				utils.CheckForError(err)
 			}
 		},

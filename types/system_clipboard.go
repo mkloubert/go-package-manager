@@ -20,19 +20,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package main
+package types
 
-import (
-	"github.com/mkloubert/go-package-manager/app"
-	"github.com/mkloubert/go-package-manager/utils"
-)
+import "github.com/atotto/clipboard"
 
-func main() {
-	_, rootCmd, err := app.New()
-	utils.CheckForError(err)
+// DefaultClipboard implements access to system clipboard
+type SystemClipboard struct {
+}
 
-	// execute
-	if err := rootCmd.Execute(); err != nil {
-		utils.CloseWithError(err)
-	}
+func (dc *SystemClipboard) ReadText() (string, error) {
+	return clipboard.ReadAll()
+}
+
+func (dc *SystemClipboard) WriteText(s string) error {
+	return clipboard.WriteAll(s)
 }

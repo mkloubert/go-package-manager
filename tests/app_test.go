@@ -20,19 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package main
+package tests
 
 import (
-	"github.com/mkloubert/go-package-manager/app"
-	"github.com/mkloubert/go-package-manager/utils"
+	"testing"
 )
 
-func main() {
-	_, rootCmd, err := app.New()
-	utils.CheckForError(err)
+func TestApp(t *testing.T) {
+	WithApp(t, func(ctx *WithAppActionContext) error {
+		ctx.ExpectTrue(ctx.App != nil, "ctx.App is nil")
+		ctx.ExpectTrue(ctx.RootCommand != nil, "ctx.RootCommand is nil")
 
-	// execute
-	if err := rootCmd.Execute(); err != nil {
-		utils.CloseWithError(err)
-	}
+		return nil
+	})
 }

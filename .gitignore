@@ -4,3 +4,4 @@ node_modules/
 /sandbox.*
 /go-package-manager*
 /docs
+/coverage.out

@@ -20,19 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package main
+package types
 
-import (
-	"github.com/mkloubert/go-package-manager/app"
-	"github.com/mkloubert/go-package-manager/utils"
-)
+// Clipboard implements a minimal clipboard
+type Clipboard interface {
+	// ReadText() - reads text from clipboard
+	ReadText() (string, error)
 
-func main() {
-	_, rootCmd, err := app.New()
-	utils.CheckForError(err)
-
-	// execute
-	if err := rootCmd.Execute(); err != nil {
-		utils.CloseWithError(err)
-	}
+	// WriteText() - writes text to clipboard
+	WriteText(s string) error
 }
