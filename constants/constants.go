@@ -32,9 +32,18 @@ const DefaultFileMode = 0750
 const WindowsExecutableExt = ".exe"
 
 // scripts
+const BumpScriptName = "bump"
+const PostBumpScriptName = "postbump"
 const PostInstallScriptName = "postinstall"
 const PostPackScriptName = "postpack"
+const PostTestScriptName = "test"
+const PostTidyScriptName = "posttidy"
+const PreBumpScriptName = "prebump"
 const PreInstallScriptName = "preinstall"
 const PrePackScriptName = "prepack"
+const PreStartScriptName = "prestart"
+const PreTestScriptName = "test"
+const PreTidyScriptName = "pretidy"
 const StartScriptName = "start"
+const TestScriptName = "test"
 const TidyScriptName = "tidy"

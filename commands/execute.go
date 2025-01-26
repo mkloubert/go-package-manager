@@ -39,7 +39,6 @@ import (
 )
 
 func Init_Exec_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var customTemperature float32
 	var errorCode int
 	var force bool
 	var noStdin bool
@@ -97,10 +96,9 @@ You can always expect that the user has installed all required software.`,
 				chat.UpdateSystem(systemPrompt)
 			}
 
-			if customTemperature != -1 {
-				app.Debug(fmt.Sprintf("Temperature: %v", customTemperature))
-				chat.UpdateTemperature(customTemperature)
-			}
+			customTemperature := app.GetAITemperature(0.3)
+			chat.UpdateTemperature(customTemperature)
+			app.Debug(fmt.Sprintf("Temperature: %v", customTemperature))
 
 			userMessageJSONData, err := json.Marshal(userMessage)
 			utils.CheckForError(err)
@@ -248,7 +246,6 @@ Your shell command without Markdown which can directly executed (if multiple ste
 	execCmd.Flags().BoolVarP(&force, "force", "", false, "do not ask before execute")
 	execCmd.Flags().BoolVarP(&noStdin, "no-stdin", "", false, "do not load from STDIN")
 	execCmd.Flags().IntVarP(&successCode, "success-code", "", 0, "custom success code")
-	execCmd.Flags().Float32VarP(&customTemperature, "temperature", "", -1, "custom temperature value")
 	execCmd.Flags().BoolVarP(&withExitCode, "with-exit-code", "", false, "also exit with code from execution")
 
 	parentCmd.AddCommand(

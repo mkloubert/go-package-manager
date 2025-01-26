@@ -25,13 +25,10 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 )
 
 func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var noScript bool
-
 	var tidyCmd = &cobra.Command{
 		Use:     "tidy",
 		Aliases: []string{"td"},
@@ -40,12 +37,9 @@ func Init_Tidy_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Run: func(cmd *cobra.Command, args []string) {
 			app.TidyUp(types.TidyUpOptions{
 				Arguments: &args,
-				NoScript:  &noScript,
 			})
 		},
 	}
-
-	tidyCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+constants.TidyScriptName+"' script")
 
 	parentCmd.AddCommand(
 		tidyCmd,

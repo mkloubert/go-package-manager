@@ -29,24 +29,28 @@ import (
 )
 
 func Init_Start_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var noScript bool
-
 	var startCmd = &cobra.Command{
 		Use:     "start",
 		Aliases: []string{"s"},
 		Short:   "Runs current project",
 		Long:    `Runs the current project or 'start' script, if defined.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			if !app.NoPreScript {
+				// prestart defined?
+				_, ok := app.GpmFile.Scripts[constants.PreStartScriptName]
+				if ok {
+					app.RunScript(constants.PreStartScriptName)
+				}
+			}
+
 			_, ok := app.GpmFile.Scripts[constants.StartScriptName]
-			if !noScript && ok {
+			if !app.NoScript && ok {
 				app.RunScript(constants.StartScriptName, args...)
 			} else {
 				app.RunCurrentProject(args...)
 			}
 		},
 	}
-
-	startCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+constants.StartScriptName+"' script")
 
 	parentCmd.AddCommand(
 		startCmd,

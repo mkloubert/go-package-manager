@@ -25,7 +25,6 @@ func init_generate_project_command(parentCmd *cobra.Command, app *types.AppConte
 	var origin string
 	var output string
 	var sshUrl bool
-	var temperature float32
 
 	var projectCmd = &cobra.Command{
 		Use:     "project [module_name]",
@@ -77,7 +76,7 @@ Always return the current and complete state based on our current conversation.`
 
 			app.Debug(fmt.Sprintf("Output directory: %s", outDir))
 
-			currentTemperature := temperature
+			currentTemperature := app.GetAITemperature(0.3)
 
 			apiOptions := types.CreateAIChatOptions{
 				SystemPrompt: &systemPrompt,
@@ -469,7 +468,6 @@ require (
 	projectCmd.Flags().StringVarP(&origin, "origin", "", "", "custom git origin url")
 	projectCmd.Flags().StringVarP(&output, "output", "o", "", "custom output directory")
 	projectCmd.Flags().BoolVarP(&sshUrl, "ssh", "", false, "use SSH url for git repository instead HTTP")
-	projectCmd.Flags().Float32VarP(&temperature, "temperature", "", utils.GetAIChatTemperature(0.3), "custom temperature value")
 	projectCmd.Flags().BoolVarP(&alwaysYes, "y", "", false, "do not ask user to execute each step")
 
 	parentCmd.AddCommand(

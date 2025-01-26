@@ -63,6 +63,9 @@ type AppContext struct {
 	IsCI             bool         // indicates if app runs in CI environment like GitHub action or GitLab runner
 	L                *log.Logger  // the logger to use
 	Model            string       // custom model from CLI flags
+	NoPreScript      bool         // if the command supports "pre scripts" from gpm.yaml file, the flag indicates not to use it, if `true`
+	NoPostScript     bool         // if the command supports "post scripts" from gpm.yaml file, the flag indicates not to use it, if `true`
+	NoScript         bool         // if the command supports scripts from gpm.yaml file, the flag indicates not to use it, if `true`
 	NoSystemPrompt   bool         // do not use system prompt
 	Ollama           bool         // use Ollama
 	Out              io.Writer    // the output stream
@@ -70,15 +73,16 @@ type AppContext struct {
 	ProjectsFilePath string       // custom file path of the `projects.yaml` file from CLI flags
 	Prompt           string       // custom (AI) prompt
 	SystemPrompt     string       // custom system prompt
+	Temperature      float32      // temperature value for AI chats from CLI flags
 	Verbose          bool         // output verbose information
 }
 
 // ChatWithAIOption stores settings for
 // `ChatWithAI()` method
 type ChatWithAIOption struct {
-	Model        *string // custom model
-	SystemPrompt *string // custom system prompt
-	Temperature  *int    // custom temperature
+	Model        *string  // custom model
+	SystemPrompt *string  // custom system prompt
+	Temperature  *float32 // custom temperature
 }
 
 // CreateAIChatOptions stores settings for
@@ -98,8 +102,7 @@ type OllamaGenerateResponse struct {
 
 // TidyUpOptions - options for app.TidyUp() method
 type TidyUpOptions struct {
-	Arguments *[]string // command line argumuments
-	NoScript  *bool     // true if not running 'tidy' script from gpm.yaml file
+	Arguments *[]string // additional command line argumuments
 }
 
 // ChatWithAI() - does a simple AI chat based on the current app settings
@@ -129,6 +132,8 @@ func (app *AppContext) ChatWithAI(prompt string, options ...ChatWithAIOption) (s
 }
 
 func (app *AppContext) chatWithOllama(prompt string, options ...ChatWithAIOption) (string, error) {
+	var systemPrompt *string
+
 	model := strings.TrimSpace(app.Model)
 	if model == "" {
 		model = utils.GetDefaultAIChatModel() // no explicit => take default
@@ -136,8 +141,14 @@ func (app *AppContext) chatWithOllama(prompt string, options ...ChatWithAIOption
 	if model == "" {
 		return "", fmt.Errorf("no ai model defined")
 	}
-	var systemPrompt *string
-	temperature := 0
+
+	temperature := app.Temperature
+	if temperature < 0 {
+		temperature = utils.GetDefaultAIChatTemperature()
+	}
+	if temperature < 0 {
+		temperature = 0
+	}
 
 	for _, o := range options {
 		if o.Model != nil {
@@ -206,11 +217,21 @@ func (app *AppContext) chatWithOllama(prompt string, options ...ChatWithAIOption
 func (app *AppContext) chatWithOpenAI(prompt string, settings AIChatSettings, options ...ChatWithAIOption) (string, error) {
 	apiKey := *settings.ApiKey
 	var systemPrompt *string
-	temperature := 0
 
 	model := strings.TrimSpace(app.Model)
 	if model == "" {
 		model = utils.GetDefaultAIChatModel()
+	}
+	if model == "" {
+		return "", fmt.Errorf("no ai model defined")
+	}
+
+	temperature := app.Temperature
+	if temperature < 0 {
+		temperature = utils.GetDefaultAIChatTemperature()
+	}
+	if temperature < 0 {
+		temperature = 0
 	}
 
 	for _, o := range options {
@@ -502,6 +523,14 @@ func (app *AppContext) GetAIPromptSettings(defaultPrompt string, defaultSystemPr
 		Prompt:       app.GetAIPrompt(defaultPrompt),
 		SystemPrompt: systemPrompt,
 	}
+}
+
+// app.GetAITemperature() - returns AI temperature based on current settings
+func (app *AppContext) GetAITemperature(defaultTemperature float32) float32 {
+	if app.Temperature >= 0 {
+		return app.Temperature
+	}
+	return defaultTemperature
 }
 
 // app.GetAliasesFilePath() - returns the possible path of the aliases.yaml file
@@ -1204,23 +1233,38 @@ func (app *AppContext) RunShellCommandByArgs(c string, a ...string) {
 // app.TidyUp() - runs 'go mod tidy' for the current project (folder)
 func (app *AppContext) TidyUp(options ...TidyUpOptions) {
 	args := []string{}
-	noScript := false
 
 	// collect and overwrite options if needed
 	for _, o := range options {
 		if o.Arguments != nil {
 			args = *o.Arguments
 		}
-		if o.NoScript != nil {
-			noScript = *o.NoScript
+	}
+
+	if !app.NoPreScript {
+		// pretest defined?
+		_, ok := app.GpmFile.Scripts[constants.PreTidyScriptName]
+		if ok {
+			app.RunScript(constants.PreTestScriptName)
 		}
 	}
 
 	_, ok := app.GpmFile.Scripts[constants.TidyScriptName]
-	if !noScript && ok {
+	if !app.NoScript && ok {
 		app.RunScript(constants.TidyScriptName, args...)
 	} else {
-		app.RunShellCommandByArgs("go", "mod", "tidy")
+		cmdArgs := []string{"go", "mod", "tidy"}
+		cmdArgs = append(cmdArgs, args...)
+
+		app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
+	}
+
+	if !app.NoPostScript {
+		// pretest defined?
+		_, ok := app.GpmFile.Scripts[constants.PostTidyScriptName]
+		if ok {
+			app.RunScript(constants.PostTidyScriptName)
+		}
 	}
 }
 

@@ -33,7 +33,6 @@ import (
 
 func Init_Prompt_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var assistantMessages []string
-	var customTemperature float32
 	var isChat bool
 	var userMessages []string
 
@@ -81,14 +80,10 @@ func Init_Prompt_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			aiChat.UpdateSystem(systemPrompt)
 
 			var temperature float32
-			if customTemperature < 0 {
-				if isChatConversation {
-					temperature = utils.GetAIChatTemperature(0.3)
-				} else {
-					temperature = utils.GetAIChatTemperature(0)
-				}
+			if isChatConversation {
+				temperature = app.GetAITemperature(0.3)
 			} else {
-				temperature = customTemperature
+				temperature = app.GetAITemperature(0)
 			}
 			aiChat.UpdateTemperature(temperature)
 
@@ -128,7 +123,6 @@ func Init_Prompt_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 	promptCmd.Flags().StringArrayVarP(&assistantMessages, "assistant", "", []string{}, "assistant messages")
 	promptCmd.Flags().BoolVarP(&isChat, "chat", "", false, "is chat conversation and no completion operation")
-	promptCmd.Flags().Float32VarP(&customTemperature, "temperature", "", -1, "custom temperature value")
 	promptCmd.Flags().StringArrayVarP(&userMessages, "user", "", []string{}, "user messages")
 
 	parentCmd.AddCommand(

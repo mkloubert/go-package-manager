@@ -23,37 +23,46 @@
 package commands
 
 import (
+	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/spf13/cobra"
 )
 
-const postTestScriptName = "posttest"
-const preTestScriptName = "pretest"
-const testScriptName = "test"
-
 func Init_Test_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var noPostScript bool
-	var noPreScript bool
-	var noScript bool
-
 	var testCmd = &cobra.Command{
 		Use:     "test",
 		Aliases: []string{"t", "tst"},
 		Short:   "Runs tests",
 		Long:    `Runs tests or 'test' script, if defined.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			_, ok := app.GpmFile.Scripts[testScriptName]
-			if !noScript && ok {
-				app.RunScript(testScriptName, args...)
+			if !app.NoPreScript {
+				// pretest defined?
+				_, ok := app.GpmFile.Scripts[constants.PreTestScriptName]
+				if ok {
+					app.RunScript(constants.PreTestScriptName)
+				}
+			}
+
+			// custom test logic?
+			_, ok := app.GpmFile.Scripts[constants.TestScriptName]
+			if !app.NoScript && ok {
+				app.RunScript(constants.TestScriptName, args...)
 			} else {
-				app.RunShellCommandByArgs("go", "test", ".")
+				cmdArgs := []string{"go", "test", "."}
+				cmdArgs = append(cmdArgs, args...)
+
+				app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
+			}
+
+			if !app.NoPostScript {
+				// posttest defined?
+				_, ok = app.GpmFile.Scripts[constants.PostTestScriptName]
+				if ok {
+					app.RunScript(constants.PostTestScriptName)
+				}
 			}
 		},
 	}
-
-	testCmd.Flags().BoolVarP(&noPostScript, "no-post-script", "", false, "do not handle '"+postTestScriptName+"' script")
-	testCmd.Flags().BoolVarP(&noPreScript, "no-pre-script", "", false, "do not handle '"+preTestScriptName+"' script")
-	testCmd.Flags().BoolVarP(&noScript, "no-script", "n", false, "do not handle '"+testScriptName+"' script")
 
 	parentCmd.AddCommand(
 		testCmd,

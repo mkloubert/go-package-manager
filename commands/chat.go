@@ -40,8 +40,6 @@ import (
 )
 
 func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var temperature float32
-
 	var chatCmd = &cobra.Command{
 		Use:     "chat",
 		Aliases: []string{"ct"},
@@ -56,7 +54,7 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				systemPrompt = app.GetSystemAIPrompt("")
 			}
 
-			currentTemperature := temperature
+			currentTemperature := app.GetAITemperature(0.3)
 
 			apiOptions := types.CreateAIChatOptions{
 				SystemPrompt: &systemPrompt,
@@ -276,8 +274,6 @@ func Init_Chat_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			}
 		},
 	}
-
-	chatCmd.Flags().Float32VarP(&temperature, "temperature", "", utils.GetAIChatTemperature(0.3), "custom temperature value")
 
 	parentCmd.AddCommand(
 		chatCmd,

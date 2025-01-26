@@ -1,5 +1,15 @@
 # Change Log (go-package-manager)
 
+## 0.39.0
+
+- **BREAKING CHANGE**: `bump` command now supports `bump`, `prebump` and `postbump` scripts in `gpm.yaml` file
+- **BREAKING CHANGE**: `start` command now supports `prestart` script in `gpm.yaml` file
+- **BREAKING CHANGE**: `tidy` command now supports `pretidy` and `posttidy` scripts in `gpm.yaml` file
+- refactor: `--temperature` flag is now globally
+- refactor: `--no-pre-script`, `--no-post-script` and `--no-script` flags are now globally
+- fix: `test` command did not make use of `pretest` and `posttest` scripts
+- fix: more minor fixes
+
 ## 0.38.0
 
 - **BREAKING CHANGE**: `generate powerpoint` command now uses regular expressions now

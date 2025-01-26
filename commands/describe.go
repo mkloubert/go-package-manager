@@ -42,7 +42,6 @@ func Init_Describe_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var customMessage string
 	var prettyOutput bool
 	var simple bool
-	var temperature float32
 	var yamlOutput bool
 
 	var describeCmd = &cobra.Command{
@@ -86,7 +85,7 @@ func Init_Describe_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				}
 			}
 
-			currentTemperature := temperature
+			currentTemperature := app.GetAITemperature(0.3)
 
 			if model != "" {
 				api.UpdateModel(model)
@@ -159,7 +158,6 @@ func Init_Describe_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	describeCmd.Flags().StringVarP(&customMessage, "message", "", "", "custom AI model")
 	describeCmd.Flags().BoolVarP(&prettyOutput, "pretty", "", false, "pretty output")
 	describeCmd.Flags().BoolVarP(&simple, "simple", "", simple, "use simple language")
-	describeCmd.Flags().Float32VarP(&temperature, "temperature", "", utils.GetAIChatTemperature(0.3), "custom temperature value")
 	describeCmd.Flags().BoolVarP(&yamlOutput, "yaml", "", false, "use YAML instead of JSON")
 
 	parentCmd.AddCommand(

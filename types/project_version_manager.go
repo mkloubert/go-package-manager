@@ -39,14 +39,15 @@ type ProjectVersionManager struct {
 // BumpProjectVersionOptions stores options for `Bump()“ method
 // of `ProjectVersionManager“ instance
 type BumpProjectVersionOptions struct {
-	Breaking *bool   // increase major part
-	Feature  *bool   // increase minor part
-	Fix      *bool   // increase patch part
-	Force    *bool   // force bump even if latest version is newer
-	Major    *int64  // if defined, the initial value for new major part
-	Message  *string // the custom git message
-	Minor    *int64  // if defined, the initial value for minor part
-	Patch    *int64  // if defined, the initial value for patch part
+	Arguments *[]string // additional arguments for git command
+	Breaking  *bool     // increase major part
+	Feature   *bool     // increase minor part
+	Fix       *bool     // increase patch part
+	Force     *bool     // force bump even if latest version is newer
+	Major     *int64    // if defined, the initial value for new major part
+	Message   *string   // the custom git message
+	Minor     *int64    // if defined, the initial value for minor part
+	Patch     *int64    // if defined, the initial value for patch part
 }
 
 // pvm.Bump() - bumps the version of the current project, based on the current settings
@@ -57,6 +58,7 @@ func (pvm *ProjectVersionManager) Bump(options ...BumpProjectVersionOptions) (*v
 		return nil, err
 	}
 
+	args := make([]string, 0)
 	breaking := false
 	feature := false
 	fix := false
@@ -66,6 +68,9 @@ func (pvm *ProjectVersionManager) Bump(options ...BumpProjectVersionOptions) (*v
 	var minor int64 = -1
 	var patch int64 = -1
 	for _, o := range options {
+		if o.Arguments != nil {
+			args = *o.Arguments
+		}
 		if o.Breaking != nil {
 			breaking = *o.Breaking
 		}
@@ -161,7 +166,10 @@ func (pvm *ProjectVersionManager) Bump(options ...BumpProjectVersionOptions) (*v
 
 	tagName := fmt.Sprintf("v%v", nextVersion.String())
 
-	p := utils.CreateShellCommandByArgs("git", "tag", "-a", tagName, "-m", gitMessage)
+	cmdArgs := []string{"git", "tag", "-a", tagName, "-m", gitMessage}
+	cmdArgs = append(cmdArgs, args...)
+
+	p := utils.CreateShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
 	p.Dir = pvm.app.Cwd
 
 	err = p.Run()

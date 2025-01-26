@@ -26,7 +26,6 @@ func init_generate_powerpoint_command(parentCmd *cobra.Command, app *types.AppCo
 	var focusOn string
 	var minSlides int
 	var maxSlides int
-	var temperature float32
 
 	var powerpointCmd = &cobra.Command{
 		Use:     "powerpoint [output file] [resources]",
@@ -56,7 +55,7 @@ func init_generate_powerpoint_command(parentCmd *cobra.Command, app *types.AppCo
 			chat, err := app.CreateAIChat()
 			utils.CheckForError(err)
 
-			chat.UpdateTemperature(temperature)
+			chat.UpdateTemperature(app.GetAITemperature(0.3))
 
 			systemPrompt := strings.TrimSpace(app.SystemPrompt)
 			if systemPrompt == "" {
@@ -263,7 +262,6 @@ Your final Pandoc compatible markdown in %s language (today is %s):`,
 	powerpointCmd.Flags().StringVarP(&focusOn, "focus-on", "", "", "additional information about the focus")
 	powerpointCmd.Flags().IntVarP(&maxSlides, "max-slides", "", -1, "tell AI number of maximum slides")
 	powerpointCmd.Flags().IntVarP(&minSlides, "min-slides", "", -1, "tell AI number of minimum slides")
-	powerpointCmd.Flags().Float32VarP(&temperature, "temperature", "", utils.GetAIChatTemperature(0.3), "custom temperature value")
 
 	parentCmd.AddCommand(
 		powerpointCmd,

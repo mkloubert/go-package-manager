@@ -70,12 +70,20 @@ func main() {
 	rootCmd.PersistentFlags().BoolVarP(&app.NoSystemPrompt, "no-system-prompt", "", false, "do not use system prompt")
 	// use "ollama flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.Ollama, "ollama", "", false, "use Ollama")
+	// use no-post-script everywhere
+	rootCmd.PersistentFlags().BoolVarP(&app.NoPostScript, "no-post-script", "", false, "do not handle 'post script' in gpm.yaml")
+	// use no-pre-script everywhere
+	rootCmd.PersistentFlags().BoolVarP(&app.NoPreScript, "no-pre-script", "", false, "do not handle 'pre script' in gpm.yaml")
+	// use no-script everywhere
+	rootCmd.PersistentFlags().BoolVarP(&app.NoScript, "no-script", "", false, "do not handle script in gpm.yaml")
 	// use "prompt flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.Prompt, "prompt", "", "", "custom (AI) prompt")
 	// use "projects-file flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.ProjectsFilePath, "projects-file", "", "", "custom projects file")
 	// use "system-prompt flag" everywhere
 	rootCmd.PersistentFlags().StringVarP(&app.SystemPrompt, "system-prompt", "", "", "custom (AI) system prompt")
+	// use "temperature flag" everywhere
+	rootCmd.PersistentFlags().Float32VarP(&app.Temperature, "temperature", "", -1, "custom (AI) temperature")
 	// use "verbose flag" everywhere
 	rootCmd.PersistentFlags().BoolVarP(&app.Verbose, "verbose", "v", false, "verbose output")
 

@@ -25,6 +25,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 	"github.com/spf13/cobra"
@@ -41,29 +42,52 @@ func Init_Bump_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var patch int64
 
 	var bumpVersionCmd = &cobra.Command{
-		Use:     "bump",
+		Use:     "bump [args]",
 		Aliases: []string{"bp", "bmp"},
 		Short:   "Bump version",
 		Long:    `Bumps a version number.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			pvm := app.NewVersionManager()
-
-			bumpOptions := types.BumpProjectVersionOptions{
-				Breaking: &breaking,
-				Feature:  &feature,
-				Fix:      &fix,
-				Force:    &force,
-				Major:    &major,
-				Message:  &message,
-				Minor:    &minor,
-				Patch:    &patch,
+			// prebump defined?
+			if !app.NoPreScript {
+				_, ok := app.GpmFile.Scripts[constants.PreBumpScriptName]
+				if ok {
+					app.RunScript(constants.PreBumpScriptName)
+				}
 			}
 
-			newVersion, err := pvm.Bump(bumpOptions)
-			utils.CheckForError(err)
+			// custom bump logic?
+			_, ok := app.GpmFile.Scripts[constants.BumpScriptName]
+			if !app.NoScript && ok {
+				app.RunScript(constants.BumpScriptName, args...)
+			} else {
+				pvm := app.NewVersionManager()
 
-			if newVersion != nil {
-				fmt.Printf("v%s%s", newVersion.String(), fmt.Sprintln())
+				bumpOptions := types.BumpProjectVersionOptions{
+					Arguments: &args,
+					Breaking:  &breaking,
+					Feature:   &feature,
+					Fix:       &fix,
+					Force:     &force,
+					Major:     &major,
+					Message:   &message,
+					Minor:     &minor,
+					Patch:     &patch,
+				}
+
+				newVersion, err := pvm.Bump(bumpOptions)
+				utils.CheckForError(err)
+
+				if newVersion != nil {
+					fmt.Printf("v%s%s", newVersion.String(), fmt.Sprintln())
+				}
+			}
+
+			if !app.NoPostScript {
+				// postbump defined?
+				_, ok = app.GpmFile.Scripts[constants.PostBumpScriptName]
+				if ok {
+					app.RunScript(constants.PostBumpScriptName)
+				}
 			}
 		},
 	}
