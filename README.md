@@ -780,14 +780,17 @@ When executing `gpm run test1 --environment=dev`, the command will prioritize `d
 | `postbuild`   | Is executed after successful execution of [build command](#build-project-).                 |
 | `postinstall` | Is executed after successful execution of [install command](#install-dependencies-).        |
 | `postbump`    | Is executed after successful execution of [bump command](#bump-version-).                   |
+| `postpublish` | Is executed after successful execution of [publish command](#publish-new-version-).         |
 | `posttest`    | Is executed after successful execution of [test command](#run-tests-).                      |
 | `posttidy`    | Is executed after successful execution of [tidy command](#cleanup-project-).                |
 | `prebuild`    | Is executed before [build command](#build-project-) is executed.                            |
 | `prebump`     | Is executed before [bump command](#bump-version-) is executed.                              |
 | `preinstall`  | Is executed before [install command](#install-dependencies-) is executed.                   |
+| `prepublish`  | Is executed before [publish command](#publish-new-version-) is executed.                    |
 | `prestart`    | Is executed before [start command](#run-start-) is executed.                                |
 | `pretest`     | Is executed before [test command](#run-tests-) is executed.                                 |
 | `pretidy`     | Is executed before [tidy command](#cleanup-project-) is executed.                           |
+| `publish`     | Custom logic for [publish command](#publish-new-version-).                                  |
 | `start`       | Is executed by [start command](#start-project-). If not defined `go run .` is executed.     |
 | `test`        | Is executed by [test command](#run-tests-). If not defined `go test .` is executed.         |
 | `tidy`        | Is executed by [tidy command](#cleanup-project-). If not defined `go mod tidy` is executed. |

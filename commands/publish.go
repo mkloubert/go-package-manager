@@ -25,6 +25,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 	"github.com/spf13/cobra"
@@ -43,12 +44,18 @@ func Init_Publish_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var patch int64
 
 	var publishCmd = &cobra.Command{
-		Use:     "publish [remotes]",
+		Use:     "publish [remotes or script args]",
 		Aliases: []string{"pub"},
 		Short:   "Publish version",
 		Long:    `Bumps the version of the current project and pushes it to all remote repositories.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			currentBranchName, _ := app.GetCurrentGitBranch()
+			if !app.NoPreScript {
+				// prepublish defined?
+				_, ok := app.GpmFile.Scripts[constants.PrePublishScriptName]
+				if ok {
+					app.RunScript(constants.PrePublishScriptName)
+				}
+			}
 
 			if !noBump {
 				pvm := app.NewVersionManager()
@@ -72,38 +79,54 @@ func Init_Publish_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				}
 			}
 
-			var remotes []string
-			if len(args) == 0 {
-				listOfRemotes, err := app.GetGitRemotes()
-				utils.CheckForError(err)
-
-				remotes = append(remotes, listOfRemotes...)
+			// custom publish logic?
+			_, ok := app.GpmFile.Scripts[constants.PublishScriptName]
+			if !app.NoScript && ok {
+				app.RunScript(constants.BumpScriptName, args...)
 			} else {
-				remotes = append(remotes, args...)
-			}
+				currentBranchName, _ := app.GetCurrentGitBranch()
 
-			if len(remotes) == 0 {
-				utils.CloseWithError(fmt.Errorf("no remotes found"))
-			}
+				var remotes []string
+				if len(args) == 0 {
+					listOfRemotes, err := app.GetGitRemotes()
+					utils.CheckForError(err)
 
-			if defaultRemoteOnly {
-				// default only
-				remotes = []string{remotes[0]}
-			}
-
-			for _, r := range remotes {
-				// first push code
-				{
-					cmdArgs := []string{"git", "push", r, currentBranchName}
-
-					app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
+					remotes = append(remotes, listOfRemotes...)
+				} else {
+					remotes = append(remotes, args...)
 				}
 
-				// then push tags
-				{
-					cmdArgs := []string{"git", "push", r, "--tags"}
+				if len(remotes) == 0 {
+					utils.CloseWithError(fmt.Errorf("no remotes found"))
+				}
 
-					app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
+				if defaultRemoteOnly {
+					// default only
+					remotes = []string{remotes[0]}
+				}
+
+				for _, r := range remotes {
+					// first push code
+					{
+						cmdArgs := []string{"git", "push", r, currentBranchName}
+
+						app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
+					}
+
+					// then push tags
+					{
+						cmdArgs := []string{"git", "push", r, "--tags"}
+
+						app.RunShellCommandByArgs(cmdArgs[0], cmdArgs[1:]...)
+					}
+				}
+			}
+
+			if !app.NoPostScript {
+				// postpublish defined?
+				_, ok := app.GpmFile.Scripts[constants.PostPublishScriptName]
+				if ok {
+					app.RunScript(constants.PostPublishScriptName)
 				}
 			}
 		},

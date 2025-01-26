@@ -47,8 +47,8 @@ func Init_Bump_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Short:   "Bump version",
 		Long:    `Bumps a version number.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			// prebump defined?
 			if !app.NoPreScript {
+				// prebump defined?
 				_, ok := app.GpmFile.Scripts[constants.PreBumpScriptName]
 				if ok {
 					app.RunScript(constants.PreBumpScriptName)

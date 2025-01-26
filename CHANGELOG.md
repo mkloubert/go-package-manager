@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.40.0
+
+- **BREAKING CHANGE**: `publish` command now supports `publish`, `prepublish` and `postpublish` scripts in `gpm.yaml` file
+
 ## 0.39.0
 
 - **BREAKING CHANGE**: `bump` command now supports `bump`, `prebump` and `postbump` scripts in `gpm.yaml` file
