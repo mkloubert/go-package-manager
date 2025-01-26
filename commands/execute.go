@@ -68,7 +68,7 @@ func Init_Exec_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 			userMessage = strings.TrimSpace(userMessage)
 
-			shell := utils.GetShell()
+			shell := app.GetShell()
 			app.Debug(fmt.Sprintf("Shell: %v", shell))
 			operatingSystem := runtime.GOOS
 			app.Debug(fmt.Sprintf("Operating system: %v", operatingSystem))
