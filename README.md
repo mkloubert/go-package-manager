@@ -775,8 +775,8 @@ When executing `gpm run test1 --environment=dev`, the command will prioritize `d
 
 | Name          | Description                                                                                 |
 | ------------- | ------------------------------------------------------------------------------------------- |
-| `bump`        | Custom logic for [bump command](#bump-version-).                                            |
 | `build`       | Custom logic for [build command](#build-project-).                                          |
+| `bump`        | Custom logic for [bump command](#bump-version-).                                            |
 | `postbuild`   | Is executed after successful execution of [build command](#build-project-).                 |
 | `postinstall` | Is executed after successful execution of [install command](#install-dependencies-).        |
 | `postbump`    | Is executed after successful execution of [bump command](#bump-version-).                   |

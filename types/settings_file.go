@@ -2,7 +2,6 @@ package types
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
@@ -83,7 +82,7 @@ func (sf *SettingsFile) getValue(
 			),
 		)
 
-		envValue := os.Getenv(envName)
+		envValue := sf.app.GetEnvValue(envName)
 		if !doNotTrimEnvValues {
 			envValue = strings.TrimSpace(envValue)
 		}

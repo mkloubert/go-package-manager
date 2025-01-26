@@ -24,12 +24,12 @@ package commands
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 
+	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 )
@@ -70,10 +70,10 @@ func init_import_projects_command(parentCmd *cobra.Command, app *types.AppContex
 				// add default(s)
 
 				GPM_DEFAULT_PROJECT_SOURCE := strings.TrimSpace(
-					os.Getenv("GPM_DEFAULT_PROJECT_SOURCE"),
+					app.GetEnvValue("GPM_DEFAULT_PROJECT_SOURCE"),
 				)
 				if GPM_DEFAULT_PROJECT_SOURCE == "" {
-					GPM_DEFAULT_PROJECT_SOURCE = "https://raw.githubusercontent.com/mkloubert/go-package-manager/refs/heads/main/projects.yaml"
+					GPM_DEFAULT_PROJECT_SOURCE = constants.DefaultProjectSource
 				}
 
 				defaultSources := strings.Split(GPM_DEFAULT_PROJECT_SOURCE, "\n")

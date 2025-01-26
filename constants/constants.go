@@ -31,6 +31,10 @@ const DefaultDirMode = 0750
 const DefaultFileMode = 0750
 const WindowsExecutableExt = ".exe"
 
+// source
+const DefaultAliasSource = "https://raw.githubusercontent.com/mkloubert/go-package-manager/refs/heads/main/aliases.yaml"
+const DefaultProjectSource = "https://raw.githubusercontent.com/mkloubert/go-package-manager/refs/heads/main/projects.yaml"
+
 // scripts
 const BumpScriptName = "bump"
 const PostBumpScriptName = "postbump"

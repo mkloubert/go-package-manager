@@ -35,6 +35,7 @@ type GpmFile struct {
 	Description  string                 `yaml:"description,omitempty"`  // the description
 	DisplayName  string                 `yaml:"display_name,omitempty"` // the display name
 	Donations    map[string]string      `yaml:"donations,omitempty"`    // one or more donation links
+	Environment  map[string]string      `yaml:"environment,omitempty"`  // environment variables
 	Files        []string               `yaml:"files,omitempty"`        // whitelist of file patterns which are used by pack command for example
 	Homepage     string                 `yaml:"homepage,omitempty"`     // the homepage
 	License      string                 `yaml:"license,omitempty"`      // the license
@@ -59,6 +60,28 @@ type GpmFileRepository struct {
 	Name string `yaml:"name,omitempty"` // the full name
 	Type string `yaml:"type,omitempty"` // the type
 	Url  string `yaml:"url,omitempty"`  // the url
+}
+
+// GetEnvironmentSectionByEnvSafe() - will return environment specific `environment` section in `gpm.yaml`
+// file, if exists, otherwise the default one
+func (g *GpmFile) GetEnvironmentSectionByEnvSafe(envName string) map[string]string {
+	if envName != "" {
+		var gpmFileAsMap map[string]interface{}
+		err := yaml.Unmarshal(g.yamlData, &gpmFileAsMap)
+
+		if err == nil && gpmFileAsMap != nil {
+			key := fmt.Sprintf("environment:%s", envName)
+
+			maybeMap, ok := gpmFileAsMap[key]
+			if ok && maybeMap != nil {
+				settings, ok := maybeMap.(map[string]string)
+				if ok && settings != nil {
+					return settings // found existing, valid map
+				}
+			}
+		}
+	}
+	return g.Environment
 }
 
 // GetFilesSectionByEnvSafe() - will return environment specific `files` section in `gpm.yaml`
@@ -114,6 +137,9 @@ func LoadGpmFile(gpmFilePath string) (GpmFile, error) {
 		}
 		if gpm.Donations == nil {
 			gpm.Donations = map[string]string{}
+		}
+		if gpm.Environment == nil {
+			gpm.Environment = map[string]string{}
 		}
 		if gpm.Files == nil {
 			gpm.Files = []string{}

@@ -24,12 +24,12 @@ package commands
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/spf13/cobra"
 
+	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
 )
@@ -70,10 +70,10 @@ func init_import_aliases_command(parentCmd *cobra.Command, app *types.AppContext
 				// add default
 
 				GPM_DEFAULT_ALIAS_SOURCE := strings.TrimSpace(
-					os.Getenv("GPM_DEFAULT_ALIAS_SOURCE"),
+					app.GetEnvValue("GPM_DEFAULT_ALIAS_SOURCE"),
 				)
 				if GPM_DEFAULT_ALIAS_SOURCE == "" {
-					GPM_DEFAULT_ALIAS_SOURCE = "https://raw.githubusercontent.com/mkloubert/go-package-manager/refs/heads/main/aliases.yaml"
+					GPM_DEFAULT_ALIAS_SOURCE = constants.DefaultAliasSource
 				}
 
 				defaultSources := strings.Split(GPM_DEFAULT_ALIAS_SOURCE, "\n")

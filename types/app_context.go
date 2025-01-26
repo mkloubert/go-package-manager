@@ -599,7 +599,7 @@ func (app *AppContext) GetBinFolderPath() (string, error) {
 
 	var binPath string
 
-	GPM_BIN_PATH := strings.TrimSpace(os.Getenv("GPM_BIN_PATH"))
+	GPM_BIN_PATH := strings.TrimSpace(app.GetEnvValue("GPM_BIN_PATH"))
 	if GPM_BIN_PATH != "" {
 		binPath = GPM_BIN_PATH
 	} else {
@@ -756,12 +756,24 @@ func (app *AppContext) GetEnvFilePaths() ([]string, error) {
 func (app *AppContext) GetEnvironment() string {
 	environment := strings.TrimSpace(app.Environment) // first try --environment flag
 	if environment == "" {
+		// os.Getenv() must be used here!
 		environment = os.Getenv("GPM_ENV") // now try GPM_ENV
 	}
 
 	return strings.TrimSpace(
 		strings.ToLower(environment),
 	)
+}
+
+// app.GetEnvValue() - returns value from environment variable
+func (app *AppContext) GetEnvValue(name string) string {
+	environment := app.GpmFile.GetEnvironmentSectionByEnvSafe(app.GetEnvironment())
+
+	envValue, ok := environment[name]
+	if ok {
+		return envValue
+	}
+	return os.Getenv(name)
 }
 
 // app.GetFullPathOrDefault() - returns full version of a path or a default if
@@ -969,7 +981,7 @@ func (app *AppContext) GetRootPath() (string, error) {
 	if customDir == "" {
 		// now from environment variable
 		customDir = strings.TrimSpace(
-			os.Getenv("GPM_ROOT_BASE_PATH"),
+			app.GetEnvValue("GPM_ROOT_BASE_PATH"),
 		)
 	}
 	if customDir != "" && path.IsAbs(customDir) {
@@ -1008,7 +1020,7 @@ func (app *AppContext) GetSettingsFilePaths() ([]string, bool, error) {
 	if customFile == "" {
 		// now from environment variable
 		customFile = strings.TrimSpace(
-			os.Getenv("GPM_SETTINGS_FILE"),
+			app.GetEnvValue("GPM_SETTINGS_FILE"),
 		)
 	}
 	if customFile != "" && path.IsAbs(customFile) {
@@ -1049,6 +1061,42 @@ func (app *AppContext) GetSettingsFilePaths() ([]string, bool, error) {
 		return files, true, nil
 	}
 	return []string{}, false, err
+}
+
+// app.GetShell()- returns the name of the current shell
+func (app *AppContext) GetShell() string {
+	shellName := ""
+
+	if utils.IsWindows() {
+		comspec := app.tryFindEnvVar("COMSPEC")
+		if comspec != nil {
+			shellName = *comspec
+		} else {
+			powershell := app.tryFindEnvVar("PSModulePath")
+			if powershell != nil && *powershell != "" {
+				shellName = "PowerShell"
+			}
+		}
+	} else {
+		shellName = app.GetEnvValue("SHELL")
+	}
+
+	shellName = strings.TrimSpace(shellName)
+
+	if shellName == "" {
+		shellName = "unknown"
+	} else {
+		lowerShellName := strings.ToLower(shellName)
+		if strings.Contains(lowerShellName, "cmd.exe") {
+			shellName = "cmd.exe"
+		} else if strings.Contains(lowerShellName, "zsh") {
+			shellName = "Z shell"
+		} else if strings.Contains(lowerShellName, "bash") {
+			shellName = "Bash"
+		}
+	}
+
+	return shellName
 }
 
 // app.GetSystemAIPrompt() - returns the AI system prompt based on the current app settings
@@ -1409,6 +1457,32 @@ func (app *AppContext) TidyUp(options ...TidyUpOptions) {
 			app.RunScript(constants.PostTidyScriptName)
 		}
 	}
+}
+
+func (app *AppContext) tryFindEnvVar(name string) *string {
+	lowerName := strings.TrimSpace(strings.ToLower(name))
+
+	envSources := make([]map[string]string, 0)
+
+	// first system
+	envSources = append(envSources,
+		utils.GetEnvVars(),
+	)
+	// then from gpm.yaml
+	envSources = append(envSources, app.GpmFile.GetEnvironmentSectionByEnvSafe(
+		app.GetEnvironment(),
+	))
+
+	for _, es := range envSources {
+		for k, v := range es {
+			lowerKey := strings.TrimSpace(strings.ToLower(k))
+			if lowerKey == lowerName {
+				return &v // found
+			}
+		}
+	}
+
+	return nil
 }
 
 // app.UpdateAliasesFile() - Updates the aliases.yaml file in home folder.

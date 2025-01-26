@@ -53,7 +53,6 @@ func main() {
 	app.Cwd = cwd
 	app.ErrorOut = os.Stderr
 	app.In = os.Stdin
-	app.IsCI = strings.TrimSpace(strings.ToLower(os.Getenv("CI"))) == "true"
 	app.Out = os.Stdout
 
 	// use "aliases-file flag" everywhere
@@ -94,6 +93,8 @@ func main() {
 	app.LoadAliasesFileIfExist()
 	app.LoadProjectsFileIfExist()
 	app.LoadGpmFileIfExist()
+
+	app.IsCI = strings.TrimSpace(app.GetEnvValue("CI")) != ""
 
 	// initialize commands
 	commands.Init_Add_Command(rootCmd, &app)

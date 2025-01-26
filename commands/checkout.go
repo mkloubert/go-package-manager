@@ -114,7 +114,7 @@ Your full name for the branch without your explanation:`, string(jsonStr)),
 					branchAliasUpper := strings.ToUpper(branchAlias)
 
 					branchName = strings.TrimSpace(
-						os.Getenv(fmt.Sprintf("GPM_BRANCH_%v", branchAliasUpper)),
+						app.GetEnvValue(fmt.Sprintf("GPM_BRANCH_%v", branchAliasUpper)),
 					)
 					if branchName == "" {
 						branchName = branchAlias

@@ -200,12 +200,9 @@ func GetBoolFlag(cmd *cobra.Command, name string, defaultValue bool) bool {
 	return defaultValue
 }
 
-// GetEnvVar() - returns, if found, the value of an existing environment
-// variable by its name ignoring case sensitivity
-func GetEnvVar(name string) *string {
-	lowerName := strings.TrimSpace(strings.ToUpper(name))
-
-	var value *string = nil
+// GetEnvVars() - returns environment variables as map
+func GetEnvVars() map[string]string {
+	envVars := map[string]string{}
 
 	allVars := os.Environ()
 	for _, kv := range allVars {
@@ -220,13 +217,10 @@ func GetEnvVar(name string) *string {
 			n = kv
 		}
 
-		n = strings.TrimSpace(strings.ToLower(n))
-		if n == lowerName {
-			value = &v
-		}
+		envVars[n] = v
 	}
 
-	return value
+	return envVars
 }
 
 // GetNumberOfOpenFilesByPid() - returns the number of open files by pid
@@ -269,42 +263,6 @@ func GetNumberOfOpenFilesByPid(pid int32) (int64, error) {
 	}
 
 	return int64(len(files)), nil
-}
-
-// GetShell()- returns the name of the current shell
-func GetShell() string {
-	shellName := ""
-
-	if IsWindows() {
-		comspec := GetEnvVar("COMSPEC")
-		if comspec != nil {
-			shellName = *comspec
-		} else {
-			powershell := GetEnvVar("PSModulePath")
-			if powershell != nil && *powershell != "" {
-				shellName = "PowerShell"
-			}
-		}
-	} else {
-		shellName = os.Getenv("SHELL")
-	}
-
-	shellName = strings.TrimSpace(shellName)
-
-	if shellName == "" {
-		shellName = "unknown"
-	} else {
-		lowerShellName := strings.ToLower(shellName)
-		if strings.Contains(lowerShellName, "cmd.exe") {
-			shellName = "cmd.exe"
-		} else if strings.Contains(lowerShellName, "zsh") {
-			shellName = "Z shell"
-		} else if strings.Contains(lowerShellName, "bash") {
-			shellName = "Bash"
-		}
-	}
-
-	return shellName
 }
 
 // IndexOfString() - returns the zero-based index of a string in a string array

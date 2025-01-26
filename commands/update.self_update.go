@@ -58,7 +58,9 @@ func run_self_update_command(
 
 	customUpdateScript := strings.TrimSpace(updateScript)
 	if customUpdateScript == "" {
-		customUpdateScript = strings.TrimSpace(os.Getenv("GPM_UPDATE_SCRIPT"))
+		customUpdateScript = strings.TrimSpace(
+			app.GetEnvValue("GPM_UPDATE_SCRIPT"),
+		)
 	}
 
 	downloadScript := func(url string) ([]byte, error) {

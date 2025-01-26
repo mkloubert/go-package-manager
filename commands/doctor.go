@@ -28,7 +28,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"os/exec"
 	"sort"
 	"strings"
@@ -421,7 +420,7 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				vars = append(vars, "GOPATH", "GOROOT", "GOPROXY")
 
 				for _, varName := range vars {
-					varValue := os.Getenv(varName)
+					varValue := app.GetEnvValue(varName)
 					if varValue != "" {
 						fmt.Printf("\t[%s] %s is set: %s%s", green("✓"), varName, varValue, fmt.Sprintln())
 					} else {
