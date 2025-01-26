@@ -51,7 +51,7 @@ jobs:
       - uses: actions/checkout@v4.2.2
       - name: "Update build.go"
         run: |
-          echo "package main" > ./constants/build.go &&
+          echo "package constants" > ./constants/build.go &&
           echo "" >> ./constants/build.go &&
           echo "import \"runtime\"" >> ./constants/build.go &&
           echo "" >> ./constants/build.go &&
