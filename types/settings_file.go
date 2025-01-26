@@ -103,7 +103,7 @@ func (sf *SettingsFile) getValue(
 				// no => now finally try global settings.yaml file
 
 				globalSettingsValue, err := utils.GetValueFromMap(sf.data, name, symbolValue)
-				if err == nil && settingsValue != symbolValue {
+				if err == nil && globalSettingsValue != symbolValue {
 					value = globalSettingsValue
 				}
 			}
