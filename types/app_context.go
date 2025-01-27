@@ -1231,8 +1231,10 @@ func (app *AppContext) LoadEnvFilesIfExist() {
 
 // app.LoadFromInputIfAvailable() - loads data from input stream of this app if available
 func (app *AppContext) LoadFromInputIfAvailable() (*[]byte, error) {
-	if stat, _ := app.In.Stat(); (stat.Mode() & os.ModeCharDevice) == 0 {
-		data, err := io.ReadAll(app.In)
+	stdIn := app.In
+
+	if stat, _ := stdIn.Stat(); (stat.Mode() & os.ModeCharDevice) == 0 {
+		data, err := io.ReadAll(stdIn)
 		if err == nil {
 			return &data, nil
 		}
@@ -1550,14 +1552,18 @@ func (app *AppContext) UpdateProjectsFile() error {
 func (app *AppContext) WriteAllInputsTo(w io.Writer, files ...string) (int64, error) {
 	var totalWritten int64 = 0
 
-	// first check STDIN
-	if stat, _ := os.Stdin.Stat(); (stat.Mode() & os.ModeCharDevice) == 0 {
-		written, err := io.Copy(w, os.Stdin)
-		if err != nil {
-			return written, err
-		}
+	data, err := app.LoadFromInputIfAvailable()
+	if err != nil {
+		return totalWritten, err
+	}
 
-		totalWritten += written
+	if data != nil {
+		written, err := w.Write(*data)
+		totalWritten += int64(written)
+
+		if err != nil {
+			return totalWritten, err
+		}
 	}
 
 	// now from files
@@ -1572,7 +1578,7 @@ func (app *AppContext) WriteAllInputsTo(w io.Writer, files ...string) (int64, er
 			// in this case `filePath` is a downloadable URL
 
 			readData = func() (int64, error) {
-				return utils.DownloadFromUrlTo(app.Out, filePathOrUrl)
+				return utils.DownloadFromUrlTo(w, filePathOrUrl)
 			}
 		} else {
 			filePath := app.GetFullPathOrDefault(filePathOrUrl, "")
@@ -1582,7 +1588,7 @@ func (app *AppContext) WriteAllInputsTo(w io.Writer, files ...string) (int64, er
 				utils.CheckForError(err)
 				defer file.Close()
 
-				return io.Copy(app.Out, file)
+				return io.Copy(w, file)
 			}
 		}
 

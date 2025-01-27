@@ -27,6 +27,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
@@ -62,9 +63,22 @@ func Init_Base64_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				defer encoder.Close()
 
 				mimeType := http.DetectContentType(data)
+				if strings.Contains(mimeType, ";") {
+					// remove things right to mime type like charset
+					mimeType = strings.SplitN(mimeType, ";", 2)[0]
+				}
+
 				base64Data := base64.StdEncoding.EncodeToString(data)
 
-				app.Write([]byte(fmt.Sprintf("data:%s;base64,%s", mimeType, base64Data)))
+				app.Write([]byte(
+					fmt.Sprintf(
+						"data:%s;base64,%s",
+						strings.TrimSpace(
+							strings.ToLower(mimeType),
+						),
+						base64Data,
+					),
+				))
 
 				debugWrittenValue(written)
 			} else {

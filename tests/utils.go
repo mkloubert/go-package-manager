@@ -25,6 +25,7 @@ package tests
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"regexp"
 	"testing"
 
@@ -109,11 +110,42 @@ func (ctx *WithAppActionContext) ExpectValue(actual interface{}, expected interf
 	return ctx.ExpectTrue(actual == expected, errorMessage)
 }
 
+// ctx.OpenTempFile() - opens a new temp file
+func (ctx *WithAppActionContext) OpenTempFile() (*os.File, error) {
+	return os.CreateTemp("", "gpm-testing-file-*.bin")
+}
+
 // ctx.SetArgs() - sets the arguments for root command
 func (ctx *WithAppActionContext) SetArgs(args ...string) *WithAppActionContext {
 	ctx.RootCommand.SetArgs(args)
 
 	return ctx
+}
+
+// ctx.WithStdin() - prepares the context so it is using a temporary file as STDIN
+func (ctx *WithAppActionContext) WithStdin(action WithAppAction, p []byte) error {
+	stdin, err := ctx.OpenTempFile()
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		stdin.Close()
+		os.Remove(stdin.Name())
+	}()
+
+	if len(p) > 0 {
+		stdin.Write(p)
+
+		_, err := stdin.Seek(0, 0)
+		if err != nil {
+			return err
+		}
+	}
+
+	ctx.App.In = stdin
+
+	return action(ctx)
 }
 
 // WithApp() - runs a test action for an app session
