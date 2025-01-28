@@ -23,13 +23,10 @@
 package commands
 
 import (
+	"github.com/mkloubert/go-package-manager/constants"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/spf13/cobra"
 )
-
-const buildScriptName = "build"
-const postBuildScriptName = "postbuild"
-const preBuildScriptName = "prebuild"
 
 func Init_Build_Command(parentCmd *cobra.Command, app *types.AppContext) {
 	var buildCmd = &cobra.Command{
@@ -40,15 +37,15 @@ func Init_Build_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Run: func(cmd *cobra.Command, args []string) {
 			if !app.NoPreScript {
 				// prebuild defined?
-				_, ok := app.GpmFile.Scripts[preBuildScriptName]
+				_, ok := app.GpmFile.Scripts[constants.PreBuildScriptName]
 				if ok {
-					app.RunScript(preBuildScriptName)
+					app.RunScript(constants.PreBuildScriptName)
 				}
 			}
 
-			_, ok := app.GpmFile.Scripts[buildScriptName]
+			_, ok := app.GpmFile.Scripts[constants.BuildScriptName]
 			if !app.NoScript && ok {
-				app.RunScript(buildScriptName, args...)
+				app.RunScript(constants.BuildScriptName, args...)
 			} else {
 				cmdArgs := []string{"go", "build", "."}
 				cmdArgs = append(cmdArgs, args...)
@@ -58,9 +55,9 @@ func Init_Build_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 			if !app.NoPostScript {
 				// postbuild defined?
-				_, ok := app.GpmFile.Scripts[postBuildScriptName]
+				_, ok := app.GpmFile.Scripts[constants.PostBuildScriptName]
 				if ok {
-					app.RunScript(postBuildScriptName)
+					app.RunScript(constants.PostBuildScriptName)
 				}
 			}
 		},

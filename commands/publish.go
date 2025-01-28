@@ -82,7 +82,7 @@ func Init_Publish_Command(parentCmd *cobra.Command, app *types.AppContext) {
 			// custom publish logic?
 			_, ok := app.GpmFile.Scripts[constants.PublishScriptName]
 			if !app.NoScript && ok {
-				app.RunScript(constants.BumpScriptName, args...)
+				app.RunScript(constants.PublishScriptName, args...)
 			} else {
 				currentBranchName, _ := app.GetCurrentGitBranch()
 

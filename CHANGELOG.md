@@ -1,9 +1,11 @@
 # Change Log (go-package-manager)
 
-## 0.43.2
+## 0.43.3
 
 - ci: implement first tests
 - fix: `base64` command and write tests for it
+- fix: `list` command and write tests for it
+- fix: `publish` command
 - tests: add more tests
 
 ## 0.42.2

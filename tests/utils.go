@@ -26,6 +26,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"testing"
 
@@ -55,6 +56,12 @@ type WithAppActionContext struct {
 	Output      *bytes.Buffer     // is the default output for commands
 	RootCommand *cobra.Command    // the root command
 	T           *testing.T        // the testing context
+}
+
+// WithAppOptions stores additional options for `WithApp` function
+type WithAppOptions struct {
+	PostRun func(err error, ctx *WithAppActionContext) error // an optional callback that is executed AFTER the action has been executed
+	PreRun  func(ctx *WithAppActionContext) error            // an optional callback that is executed BEFORE the action is executed
 }
 
 // ctx.Execute() - executes the root command, logs an error on fail and a `false`
@@ -161,12 +168,26 @@ func (ctx *WithAppActionContext) WithStdin(action WithAppAction, p []byte) error
 }
 
 // WithApp() - runs a test action for an app session
-func WithApp(t *testing.T, action WithAppAction) {
+func WithApp(t *testing.T, action WithAppAction, options ...WithAppOptions) {
 	a, rc, err := app.New()
 	if err != nil {
 		t.Error(err)
 		return
 	}
+
+	// #region ********** current working directory **********
+	cwd, err := os.MkdirTemp("", "gpm-testing-cwd-*")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer func() {
+		os.RemoveAll(cwd)
+	}()
+
+	a.Cwd = cwd
+	// #endregion ********** current working directory **********
 
 	// #region ********** virtual projects.yaml file **********
 	projectsFile, err := os.CreateTemp("", "gpm-test-projects-file-*.yaml")
@@ -210,7 +231,7 @@ func WithApp(t *testing.T, action WithAppAction) {
 	a.AliasesFilePath = aliasesFile.Name()
 	// #endregion
 
-	// #region ********** virtual aliases.yaml file **********
+	// #region ********** virtual gpm.yaml file **********
 	var gpmFile types.GpmFile
 
 	err = yaml.Unmarshal([]byte(gpmYAML), &gpmFile)
@@ -219,7 +240,12 @@ func WithApp(t *testing.T, action WithAppAction) {
 		return
 	}
 
-	a.GpmFile = gpmFile
+	gpmFilePath := filepath.Join(cwd, "gpm.yaml")
+	err = os.WriteFile(gpmFilePath, []byte(gpmYAML), 0664)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	// #endregion
 
 	output := &bytes.Buffer{}
@@ -237,7 +263,34 @@ func WithApp(t *testing.T, action WithAppAction) {
 		T:           t,
 	}
 
+	// pre run
+	for _, o := range options {
+		if o.PreRun != nil {
+			err := o.PreRun(ctx)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+		}
+	}
+
+	a.LoadAliasesFileIfExist()
+	a.LoadProjectsFileIfExist()
+	a.LoadGpmFileIfExist()
+
 	err = action(ctx)
+
+	// post run
+	for _, o := range options {
+		if o.PostRun != nil {
+			err2 := o.PostRun(err, ctx)
+			if err2 != nil {
+				t.Error(err2)
+				return
+			}
+		}
+	}
+
 	if err != nil {
 		t.Error(err)
 		return

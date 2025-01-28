@@ -36,13 +36,16 @@ const DefaultAliasSource = "https://raw.githubusercontent.com/mkloubert/go-packa
 const DefaultProjectSource = "https://raw.githubusercontent.com/mkloubert/go-package-manager/refs/heads/main/projects.yaml"
 
 // scripts
+const BuildScriptName = "build"
 const BumpScriptName = "bump"
+const PostBuildScriptName = "postbuild"
 const PostBumpScriptName = "postbump"
 const PostInstallScriptName = "postinstall"
 const PostPackScriptName = "postpack"
 const PostPublishScriptName = "postpublish"
 const PostTestScriptName = "test"
 const PostTidyScriptName = "posttidy"
+const PreBuildScriptName = "prebuild"
 const PreBumpScriptName = "prebump"
 const PreInstallScriptName = "preinstall"
 const PrePackScriptName = "prepack"

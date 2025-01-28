@@ -41,10 +41,10 @@ func init_list_aliases_command(parentCmd *cobra.Command, app *types.AppContext) 
 		Long:    `Lists (all) aliases.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			for alias, sources := range app.AliasesFile.Aliases {
-				fmt.Printf("%v%v", alias, fmt.Sprintln())
+				app.WriteString(fmt.Sprintf("%v%v", alias, fmt.Sprintln()))
 
 				for _, s := range sources {
-					fmt.Printf("\t%v%v", s, fmt.Sprintln())
+					app.WriteString(fmt.Sprintf("\t%v%v", s, fmt.Sprintln()))
 				}
 			}
 		},
@@ -55,6 +55,7 @@ func init_list_aliases_command(parentCmd *cobra.Command, app *types.AppContext) 
 	)
 }
 
+// TODO: write tests
 func init_list_binaries_command(parentCmd *cobra.Command, app *types.AppContext) {
 	var listAliasesCmd = &cobra.Command{
 		Use:     "binaries",
@@ -79,14 +80,14 @@ func init_list_binaries_command(parentCmd *cobra.Command, app *types.AppContext)
 				return strings.ToLower(binEntries[indexX].Name()) < strings.ToLower(binEntries[indexY].Name())
 			})
 
-			fmt.Println(binPath)
+			app.WriteString(binPath)
 
 			for _, entry := range binEntries {
 				if entry.IsDir() {
 					continue
 				}
 
-				fmt.Printf("\t%v%v", entry.Name(), fmt.Sprintln())
+				app.WriteString(fmt.Sprintf("\t%v%v", entry.Name(), fmt.Sprintln()))
 			}
 		},
 	}
@@ -104,8 +105,8 @@ func init_list_projects_command(parentCmd *cobra.Command, app *types.AppContext)
 		Long:    `Lists (all) projects with their Git resources.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			for alias, gitResource := range app.ProjectsFile.Projects {
-				fmt.Printf("%v%v", alias, fmt.Sprintln())
-				fmt.Printf("\t%v%v", gitResource, fmt.Sprintln())
+				app.WriteString(fmt.Sprintf("%v%v", alias, fmt.Sprintln()))
+				app.WriteString(fmt.Sprintf("\t%v%v", gitResource, fmt.Sprintln()))
 			}
 		},
 	}
