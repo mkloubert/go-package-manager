@@ -32,22 +32,21 @@ import (
 	tests "github.com/mkloubert/go-package-manager/tests"
 )
 
-func TestAddCommand(t *testing.T) {
+func TestRemoveCommand(t *testing.T) {
 	tests.WithApp(t, func(ctx *tests.WithAppActionContext) error {
-		ctx.SetArgs("add").
+		ctx.SetArgs("remove").
 			ExecuteAndExpectHelp()
 
 		return nil
 	})
 }
 
-func TestAddAliasCommand(t *testing.T) {
+func TestRemoveAliasCommand(t *testing.T) {
 	tests.WithApp(t, func(ctx *tests.WithAppActionContext) error {
-		aliasName := "foobar"
-		aliasValue := "github.com/foo/bar"
-		updateArgs := func() {
-			ctx.SetArgs("add", "alias", aliasName, aliasValue)
-		}
+		aliasName := "yaml"
+
+		ctx.SetArgs("remove", "alias", aliasName)
+
 		checkContent := func() error {
 			yamlDataFromObject, err := yaml.Marshal(ctx.App.AliasesFile)
 			if err != nil {
@@ -65,8 +64,6 @@ func TestAddAliasCommand(t *testing.T) {
 			return nil
 		}
 
-		updateArgs()
-
 		if ctx.Execute() {
 			err := checkContent()
 			if err != nil {
@@ -75,39 +72,19 @@ func TestAddAliasCommand(t *testing.T) {
 
 			v, ok := ctx.App.AliasesFile.Aliases[aliasName]
 
-			ctx.ExpectTrue(ok, fmt.Sprintf("%v does not exist", aliasName))
-			ctx.ExpectTrue(len(v) == 1, fmt.Sprintf("number of items in %v is %v", aliasName, len(v)))
-			ctx.ExpectValue(v[0], aliasValue, "")
-
-			aliasValue = "github.com/foo/buzz"
-
-			updateArgs()
-
-			if ctx.Execute() {
-				err := checkContent()
-				if err != nil {
-					return err
-				}
-
-				v, ok := ctx.App.AliasesFile.Aliases[aliasName]
-
-				ctx.ExpectTrue(len(v) == 2, fmt.Sprintf("number of items in %v is %v", aliasName, len(v)))
-				ctx.ExpectValue(v[1], aliasValue, "")
-				ctx.ExpectTrue(ok, fmt.Sprintf("%v does not exist", aliasName))
-			}
+			ctx.ExpectTrue(!ok, fmt.Sprintf("%v does still exist", aliasName))
+			ctx.ExpectTrue(len(v) == 0, fmt.Sprintf("number of items in %v is %v", aliasName, len(v)))
 		}
 
 		return nil
 	})
 }
 
-func TestAddProjectsCommand(t *testing.T) {
+func TestRemoveProjectsCommand(t *testing.T) {
 	tests.WithApp(t, func(ctx *tests.WithAppActionContext) error {
-		projectName := "foobar"
-		projectValue := "github.com/foo/bar"
-		updateArgs := func() {
-			ctx.SetArgs("add", "project", projectName, projectValue)
-		}
+		projectName := "yaml"
+
+		ctx.SetArgs("remove", "project", projectName)
 
 		checkContent := func() error {
 			yamlDataFromObject, err := yaml.Marshal(ctx.App.ProjectsFile)
@@ -126,34 +103,15 @@ func TestAddProjectsCommand(t *testing.T) {
 			return nil
 		}
 
-		updateArgs()
-
 		if ctx.Execute() {
 			err := checkContent()
 			if err != nil {
 				return err
 			}
 
-			v, ok := ctx.App.ProjectsFile.Projects[projectName]
+			_, ok := ctx.App.ProjectsFile.Projects[projectName]
 
-			ctx.ExpectTrue(ok, fmt.Sprintf("%v does not exist", projectName))
-			ctx.ExpectValue(v, projectValue, "")
-
-			projectValue = "github.com/foo/buzz"
-
-			updateArgs()
-
-			if ctx.Execute() {
-				err := checkContent()
-				if err != nil {
-					return err
-				}
-
-				v, ok := ctx.App.ProjectsFile.Projects[projectName]
-
-				ctx.ExpectTrue(ok, fmt.Sprintf("%v does not exist", projectName))
-				ctx.ExpectValue(v, projectValue, "")
-			}
+			ctx.ExpectTrue(!ok, fmt.Sprintf("%v does still exist", projectName))
 		}
 
 		return nil

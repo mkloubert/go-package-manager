@@ -1,0 +1,36 @@
+name: "gpm"
+display_name: "Go Package Manager"
+description: "A centralized enhancement and improvement of the existing Go toolchain"
+homepage: "https://gpm.kloubert.dev"
+license: "MIT"
+
+contributors:
+  - name: "Marcel J. Kloubert"
+    homepage: "https://marcel.coffee"
+    role: "Maintainer"
+
+donations:
+  buy_me_a_coffee: "https://www.buymeacoffee.com/mkloubert"
+  patreon: "https://www.patreon.com/mkloubert"
+  paypal: "https://paypal.me/MarcelKloubert"
+
+repositories:
+  - name: "GitHub (HTTP)"
+    type: "git"
+    url: "https://github.com/mkloubert/go-package-manager.git"
+  - name: "GitHub (SSH)"
+    type: "git"
+    url: "git@github.com:mkloubert/go-package-manager.git"
+
+files:
+  - ^go-package-manager(\.exe)?$
+  - ^LICENSE$
+  - ^README.md$
+
+scripts:
+  docs: "go run . generate documentation ./docs"
+  prebump: "go build ."
+  prepublish: "go build ."
+  test: "go test ./tests/..."
+  test1: "echo test1 runs on default environment"
+  dev:test1: "echo test1 runs on 'dev' environment"

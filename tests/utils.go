@@ -29,10 +29,22 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/goccy/go-yaml"
 	"github.com/mkloubert/go-package-manager/app"
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/spf13/cobra"
+
+	_ "embed"
 )
+
+//go:embed aliases.yaml
+var aliasesYAML string
+
+//go:embed gpm.yaml
+var gpmYAML string
+
+//go:embed projects.yaml
+var projectsYAML string
 
 // WithAppAction is an action for `WithApp` function
 type WithAppAction = func(ctx *WithAppActionContext) error
@@ -156,8 +168,64 @@ func WithApp(t *testing.T, action WithAppAction) {
 		return
 	}
 
+	// #region ********** virtual projects.yaml file **********
+	projectsFile, err := os.CreateTemp("", "gpm-test-projects-file-*.yaml")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer func() {
+		projectsFile.Close()
+		os.Remove(projectsFile.Name())
+	}()
+
+	_, err = projectsFile.WriteString(projectsYAML)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	a.ProjectsFilePath = projectsFile.Name()
+	// #endregion
+
+	// #region ********** virtual aliases.yaml file **********
+	aliasesFile, err := os.CreateTemp("", "gpm-test-aliases-file-*.yaml")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	defer func() {
+		aliasesFile.Close()
+		os.Remove(aliasesFile.Name())
+	}()
+
+	_, err = aliasesFile.WriteString(aliasesYAML)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	a.AliasesFilePath = aliasesFile.Name()
+	// #endregion
+
+	// #region ********** virtual aliases.yaml file **********
+	var gpmFile types.GpmFile
+
+	err = yaml.Unmarshal([]byte(gpmYAML), &gpmFile)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	a.GpmFile = gpmFile
+	// #endregion
+
 	output := &bytes.Buffer{}
 	defer output.Reset()
+
+	// now start initializing the virtual app ...
 
 	a.Out = output
 	a.Clipboard = &types.MemoryClipboard{}
