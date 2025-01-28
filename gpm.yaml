@@ -32,5 +32,7 @@ scripts:
   prebump: "go build ."
   prepublish: "go build ."
   test: "go test ./tests/..."
+  test-cover: "go test -cover"
+  test-cover-html: "go test -coverprofile=coverage.out ./... && go tool cover -html=coverage.out"
   test1: "echo test1 runs on default environment"
   dev:test1: "echo test1 runs on 'dev' environment"
