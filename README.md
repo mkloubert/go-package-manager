@@ -34,6 +34,7 @@
       - [Branch aliases](#branch-aliases-)
     - [Checkup project](#checkup-project-)
     - [Cleanup project](#cleanup-project-)
+    - [Clone project](#clone-project-)
     - [Compare code changes](#compare-code-changes-)
     - [Compression](#compression-)
     - [Cron jobs](#cron-jobs-)
@@ -64,6 +65,7 @@
     - [Run script](#run-script-)
     - [Run tests](#run-tests-)
     - [Show dependency graph](#show-dependency-graph-)
+    - [Sleep](#sleep-)
     - [Start project](#start-project-)
     - [Synchronize with Git remotes](#synchronize-with-git-remotes-)
     - [Uninstall dependencies](#uninstall-dependencies-)
@@ -280,6 +282,28 @@ gpm tidy
 ```
 
 is a short form of `go mod tidy`.
+
+#### Clone project [<a href="#commands-">↑</a>]
+
+This command allows you to clone a [known project](#add-project-) using a shorter alias.
+
+For example, if you’ve added a project named `hugo` with
+
+```bash
+gpm add project https://github.com/gohugoio/hugo
+```
+
+you can later clone it with a simple
+
+```bash
+gpm clone hugo
+```
+
+which is a shorthand for `git clone https://github.com/gohugoio/hugo`, what means that you are able to add any [clone argument](https://git-scm.com/docs/git-clone) with your installed Git command version:
+
+```bash
+gpm clone hugo -o my-projects/the-great-hugo-project
+```
 
 #### Compare code changes [<a href="#commands-">↑</a>]
 

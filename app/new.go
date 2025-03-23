@@ -107,6 +107,7 @@ func New() (*types.AppContext, *cobra.Command, error) {
 	commands.Init_Cat_Command(rootCmd, app)
 	commands.Init_Chat_Command(rootCmd, app)
 	commands.Init_Checkout_Command(rootCmd, app)
+	commands.Init_Clone_Command(rootCmd, app)
 	commands.Init_Compress_Command(rootCmd, app)
 	commands.Init_Cron_Command(rootCmd, app)
 	commands.Init_Describe_Command(rootCmd, app)

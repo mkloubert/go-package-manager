@@ -1,5 +1,11 @@
 # Change Log (go-package-manager)
 
+## 0.44.0
+
+- feat: add `clone` command
+- fix: `password` command
+- tests: add more tests
+
 ## 0.43.5
 
 - ci: implement first tests

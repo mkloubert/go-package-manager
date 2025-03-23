@@ -56,7 +56,7 @@ func Init_Password_Command(parentCmd *cobra.Command, app *types.AppContext) {
 
 				i++
 				if i > 1 {
-					fmt.Println()
+					app.WriteString(fmt.Sprintln())
 					addClipboardContent(fmt.Sprintln())
 
 					time.Sleep(time.Duration(waitTime) * time.Millisecond)
@@ -109,7 +109,7 @@ func Init_Password_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				}
 
 				if !noOutput {
-					fmt.Print(passwordToOutput)
+					app.WriteString(passwordToOutput)
 				}
 
 				addClipboardContent(passwordToOutput)
