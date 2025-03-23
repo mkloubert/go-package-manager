@@ -1,5 +1,9 @@
 # Change Log (go-package-manager)
 
+## 0.45.0
+
+- refactor: update dependencies
+
 ## 0.44.0
 
 - feat: add `clone` command
