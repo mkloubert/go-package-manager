@@ -302,7 +302,9 @@ gpm clone hugo
 which is a shorthand for `git clone https://github.com/gohugoio/hugo`, what means that you are able to add any [clone argument](https://git-scm.com/docs/git-clone) with your installed Git command version:
 
 ```bash
-gpm clone hugo -o my-projects/the-great-hugo-project
+# clone to subfolder my-projects/the-great-hugo-project
+# and get only the last / head commit
+gpm clone hugo my-projects/the-great-hugo-project --depth 1
 ```
 
 #### Compare code changes [<a href="#commands-">↑</a>]

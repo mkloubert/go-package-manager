@@ -1,6 +1,6 @@
 # Change Log (go-package-manager)
 
-## 0.46.0
+## 0.46.1
 
 - **BREAKING CHANGE**: simple `gpm install` is now an alias for `go mod download`
 - fix: `now` command
