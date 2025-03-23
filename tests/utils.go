@@ -29,6 +29,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/goccy/go-yaml"
 	"github.com/mkloubert/go-package-manager/app"
@@ -255,6 +256,27 @@ func WithApp(t *testing.T, action WithAppAction, options ...WithAppOptions) {
 
 	a.Out = output
 	a.Clipboard = &types.MemoryClipboard{}
+
+	mockTimeStart, err := time.Parse(time.RFC3339, "1979-09-05T23:09:00.000Z")
+	if err != nil {
+		panic(err)
+	}
+
+	var lastNow *time.Time
+	a.Now = func() time.Time {
+		realNow := time.Now()
+		defer func() {
+			lastNow = &realNow
+		}()
+
+		if lastNow != nil {
+			diff := realNow.Sub(*lastNow)
+
+			return mockTimeStart.Add(diff)
+		}
+
+		return mockTimeStart
+	}
 
 	ctx := &WithAppActionContext{
 		App:         a,

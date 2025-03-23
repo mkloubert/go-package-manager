@@ -50,16 +50,21 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 				}
 			}
 
-			for _, moduleName := range args {
-				urls := app.GetModuleUrls(moduleName)
+			if len(args) > 0 {
+				for _, moduleName := range args {
+					urls := app.GetModuleUrls(moduleName)
 
-				for _, u := range urls {
-					if noUpdate {
-						app.RunShellCommandByArgs("go", "get", u)
-					} else {
-						app.RunShellCommandByArgs("go", "get", "-u", u)
+					for _, u := range urls {
+						if noUpdate {
+							app.RunShellCommandByArgs("go", "get", u)
+						} else {
+							app.RunShellCommandByArgs("go", "get", "-u", u)
+						}
 					}
 				}
+			} else {
+				// do a simple download only
+				app.RunShellCommandByArgs("go", "mod", "download")
 			}
 
 			if !app.NoPostScript {

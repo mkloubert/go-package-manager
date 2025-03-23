@@ -26,6 +26,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/mkloubert/go-package-manager/commands"
 	"github.com/mkloubert/go-package-manager/constants"
@@ -56,6 +57,9 @@ func New() (*types.AppContext, *cobra.Command, error) {
 	app.Cwd = cwd
 	app.ErrorOut = os.Stderr
 	app.In = os.Stdin
+	app.Now = func() time.Time {
+		return time.Now()
+	}
 	app.Out = os.Stdout
 
 	// use "aliases-file flag" everywhere

@@ -34,6 +34,7 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/goccy/go-yaml"
 	"github.com/hashicorp/go-version"
@@ -51,33 +52,34 @@ type AIPrompts struct {
 
 // An AppContext contains all information for running this app
 type AppContext struct {
-	AliasesFile      AliasesFile  // aliases.yaml file in home folder
-	AliasesFilePath  string       // custom file path of the `aliases.yaml` file from CLI flags
-	Clipboard        Clipboard    // clipboard
-	Cwd              string       // current working directory
-	EnvFiles         []string     // one or more env files
-	Environment      string       // the name of the environment
-	ErrorOut         io.Writer    // error output
-	GpmFile          GpmFile      // the gpm.y(a)ml file
-	GpmRootPath      string       // custom app root path from CLI flags
-	In               *os.File     // the input stream
-	IsCI             bool         // indicates if app runs in CI environment like GitHub action or GitLab runner
-	L                *log.Logger  // the logger to use
-	Model            string       // custom model from CLI flags
-	NoPreScript      bool         // if the command supports "pre scripts" from gpm.yaml file, the flag indicates not to use it, if `true`
-	NoPostScript     bool         // if the command supports "post scripts" from gpm.yaml file, the flag indicates not to use it, if `true`
-	NoScript         bool         // if the command supports scripts from gpm.yaml file, the flag indicates not to use it, if `true`
-	NoSystemPrompt   bool         // do not use system prompt
-	Ollama           bool         // use Ollama
-	Out              io.Writer    // the output stream
-	ProjectsFile     ProjectsFile // projects.yaml file in home folder
-	ProjectsFilePath string       // custom file path of the `projects.yaml` file from CLI flags
-	Prompt           string       // custom (AI) prompt
-	SettingsFile     SettingsFile // settings.yaml file
-	SettingsFilePath string       // custom settings file
-	SystemPrompt     string       // custom system prompt
-	Temperature      float32      // temperature value for AI chats from CLI flags
-	Verbose          bool         // output verbose information
+	AliasesFile      AliasesFile      // aliases.yaml file in home folder
+	AliasesFilePath  string           // custom file path of the `aliases.yaml` file from CLI flags
+	Clipboard        Clipboard        // clipboard
+	Cwd              string           // current working directory
+	EnvFiles         []string         // one or more env files
+	Environment      string           // the name of the environment
+	ErrorOut         io.Writer        // error output
+	GpmFile          GpmFile          // the gpm.y(a)ml file
+	GpmRootPath      string           // custom app root path from CLI flags
+	In               *os.File         // the input stream
+	IsCI             bool             // indicates if app runs in CI environment like GitHub action or GitLab runner
+	L                *log.Logger      // the logger to use
+	Model            string           // custom model from CLI flags
+	NoPreScript      bool             // if the command supports "pre scripts" from gpm.yaml file, the flag indicates not to use it, if `true`
+	NoPostScript     bool             // if the command supports "post scripts" from gpm.yaml file, the flag indicates not to use it, if `true`
+	NoScript         bool             // if the command supports scripts from gpm.yaml file, the flag indicates not to use it, if `true`
+	NoSystemPrompt   bool             // do not use system prompt
+	Now              func() time.Time // function that gets the current time
+	Ollama           bool             // use Ollama
+	Out              io.Writer        // the output stream
+	ProjectsFile     ProjectsFile     // projects.yaml file in home folder
+	ProjectsFilePath string           // custom file path of the `projects.yaml` file from CLI flags
+	Prompt           string           // custom (AI) prompt
+	SettingsFile     SettingsFile     // settings.yaml file
+	SettingsFilePath string           // custom settings file
+	SystemPrompt     string           // custom system prompt
+	Temperature      float32          // temperature value for AI chats from CLI flags
+	Verbose          bool             // output verbose information
 }
 
 // ChatWithAIOption stores settings for

@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/glamour"
 	"github.com/mkloubert/go-package-manager/types"
@@ -331,7 +330,7 @@ require (
 
 			var numberOfRequests uint64 = 0
 			editor.OnSendClick = func(userMessage string) error {
-				now := time.Now()
+				now := app.Now()
 				formattedNow := now.Format("2006-01-02 15:04:05")
 
 				var schema = map[string]interface{}{

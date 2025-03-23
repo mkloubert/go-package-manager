@@ -20,44 +20,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package commands
+package tests
 
 import (
-	"github.com/mkloubert/go-package-manager/types"
-	"github.com/spf13/cobra"
+	"testing"
+
+	tests "github.com/mkloubert/go-package-manager/tests"
 )
 
-func Init_Now_Command(parentCmd *cobra.Command, app *types.AppContext) {
-	var format string
-	var local bool
+func TestNowCommand(t *testing.T) {
+	tests.WithApp(t, func(ctx *tests.WithAppActionContext) error {
+		ctx.SetArgs("now")
 
-	var nowCmd = &cobra.Command{
-		Use:   "now",
-		Short: "Output time",
-		Long:  `Outputs current time.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			now := app.Now()
-			if !local {
-				now = now.UTC()
-			}
+		if ctx.Execute() {
+			output := ctx.Output.String()
 
-			outputFormat := format
-			if outputFormat == "" {
-				if local {
-					outputFormat = "2006-01-02T15:04:05.000"
-				} else {
-					outputFormat = "2006-01-02T15:04:05.000Z"
-				}
-			}
+			ctx.ExpectValue(output, "1979-09-05T23:09:00.000Z", "")
+		}
 
-			app.WriteString(now.Format(outputFormat))
-		},
-	}
-
-	nowCmd.Flags().StringVarP(&format, "format", "", "", "custom output format")
-	nowCmd.Flags().BoolVarP(&local, "local", "", false, "use local time")
-
-	parentCmd.AddCommand(
-		nowCmd,
-	)
+		return nil
+	})
 }

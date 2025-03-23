@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 	"text/template"
-	"time"
 
 	"github.com/mkloubert/go-package-manager/types"
 	"github.com/mkloubert/go-package-manager/utils"
@@ -34,7 +33,7 @@ func init_generate_powerpoint_command(parentCmd *cobra.Command, app *types.AppCo
 		Short:   "Generate PowerPoint",
 		Long:    `Generate PowerPoint presentation from sources like text files.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			now := time.Now()
+			now := app.Now()
 
 			outFile := app.GetFullPathOrDefault(args[0], "presentation.pptx")
 			if !strings.HasSuffix(outFile, ".pptx") {
