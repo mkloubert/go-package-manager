@@ -197,7 +197,7 @@ func Init_Doctor_Command(parentCmd *cobra.Command, app *types.AppContext) {
 									}
 									fmt.Println()
 
-									fmt.Println("Checking for unsed dependencies ...")
+									fmt.Println("Checking for unused dependencies ...")
 									for i, item := range allItems {
 										s := spinner.New(spinner.CharSets[24], 100*time.Millisecond)
 										s.Prefix = "\t["
