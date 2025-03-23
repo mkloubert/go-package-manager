@@ -40,7 +40,6 @@ func Init_Install_Command(parentCmd *cobra.Command, app *types.AppContext) {
 		Aliases: []string{"i", "inst"},
 		Short:   "Installs one or more modules",
 		Long:    `Gets and installs one or more modules by a short name or a valid URL to a git repository.`,
-		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			if !app.NoPreScript {
 				// preinstall defined?
